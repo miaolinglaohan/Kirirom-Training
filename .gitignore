@@ -1,0 +1,83 @@
+# ============================================
+# 操作系统
+# ============================================
+# Windows
+[Dd]esktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# 编辑器 / IDE
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.history/
+
+# ============================================
+# Node.js / 云函数依赖
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm
+.pnp
+.pnp.js
+
+# ============================================
+# 微信开发者工具
+# ============================================
+# 私有配置（含本机调试偏好），按团队约定决定是否提交
+# 当前选择提交，因为它里面有 compileHotReLoad 等需要同步的设置
+# project.private.config.json
+
+# 上传产物 / 编译缓存
+miniprogram_npm/
+.miniprogram-test/
+__report__/
+
+# ============================================
+# 日志 / 临时文件
+# ============================================
+*.log
+logs/
+tmp/
+.tmp/
+.cache/
+
+# ============================================
+# 测试 / 覆盖率
+# ============================================
+coverage/
+.nyc_output/
+
+# ============================================
+# 敏感文件 / 本地配置（防泄露）
+# ============================================
+*.local
+.env
+.env.*
+!.env.example
+secrets.json
+*.key
+*.pem
