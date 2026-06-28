@@ -27,9 +27,13 @@
           <text class="row-label">答题时长</text>
           <text class="row-value">{{item.duration}} 分钟</text>
         </view>
-        <view class="card-row" wx:if="{{item.questionCount}}">
+        <view class="card-row" wx:if="{{item.totalQuestions || item.questionCount}}">
           <text class="row-label">题目数量</text>
-          <text class="row-value">{{item.questionCount}} 题</text>
+          <text class="row-value">{{item.totalQuestions || item.questionCount}} 题</text>
+        </view>
+        <view class="card-row" wx:if="{{item.fullScore}}">
+          <text class="row-label">满分</text>
+          <text class="row-value">{{item.fullScore}} 分</text>
         </view>
         <view class="card-row" wx:if="{{item.remark}}">
           <text class="row-label">备注</text>

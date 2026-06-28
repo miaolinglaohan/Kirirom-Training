@@ -2,23 +2,31 @@
 //
 // 用途：员工进入考场。两种模式：
 //   1) 正式考试 (isMock=false): 必须传 assessmentId，云函数从 assessments 集合读规则
-//   2) 模拟考试 (isMock=true): 传 subjectId + 可选 questionCount + 可选 duration
+//   2) 模拟考试 (isMock=true): 传 subjectId + 可选 questionConfig / questionCount / duration
 //
 // 核心职责：
 //   ① 校验：员工已激活、考试可见、未停用、未过时、部门在 targetDepts 范围内
 //   ② 防重入：用 _id = "{assessmentId}_{openid}" 防止同一人重复创建多卷
-//   ③ 抽题：从 questions 集合按 subjectId 随机抽 N 题
+//   ③ 抽题：从 questions 集合按 subjectId + typecode 分桶随机抽题（Phase 3）
 //   ④ 剥离答案：写入 enrollment 前移除 options[].value，另存 answersOfficial
 //   ⑤ 固化 deadline：正式考 = assessment.startTime + duration（全员同一截止）
 //                      模考    = now + duration（每场独立计时）
 //
 // 入参：
 //   { assessmentId: string } 正式
-//   { isMock: true, subjectId: string, questionCount?: number, duration?: number } 模考
+//   { isMock: true, subjectId: string, questionConfig?: {...}, questionCount?: number, duration?: number } 模考
+//
+// Phase 3 questionConfig 结构：
+//   { single: {count, score}, multi: {count, score}, judge: {count, score} }
 //
 // 返回：
-//   { ok: true, enrollmentId, questions, deadline, total, durationMs, startedAt, isMock }
-//   { ok: false, code, message }
+//   { ok: true, enrollmentId, questions, deadline, total, fullScore, questionConfig, durationMs, startedAt, isMock }
+//   { ok: false, code, message, detail? }
+//
+// 可能的错误码：
+//   NO_OPENID / UNACTIVATED / DISABLED / MISSING_SUBJECT / MISSING_ASSESSMENT /
+//   ASSESSMENT_NOT_FOUND / NOT_VISIBLE / NOT_STARTED / EXPIRED / NOT_IN_SCOPE /
+//   ALREADY_SUBMITTED / NO_QUESTIONS / EMPTY_CONFIG / NOT_ENOUGH_QUESTIONS / DB_ERROR
 
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -58,6 +66,62 @@ function pickRandom(arr, n) {
   return a.slice(0, Math.min(n, a.length))
 }
 
+// Phase 3: 兼容旧 questionCount (一律视为单选 1 分/题)
+function deriveConfigFromCount(n) {
+  return {
+    single: { count: Number(n) || 0, score: 1 },
+    multi:  { count: 0, score: 0 },
+    judge:  { count: 0, score: 0 }
+  }
+}
+
+// Phase 3: 把可能不规范的 config 标准化（补全字段、转 number）
+function normalizeConfig(c) {
+  const pick = (o) => ({
+    count: Number((o && o.count) || 0) || 0,
+    score: Number((o && o.score) || 0) || 0
+  })
+  return {
+    single: pick(c && c.single),
+    multi:  pick(c && c.multi),
+    judge:  pick(c && c.judge)
+  }
+}
+
+// 类型键 -> typecode
+const TYPECODE_OF = { single: '01', multi: '02', judge: '03' }
+
+// Phase 3: 按 typecode 分桶抽题
+// 返回 { picked: Question[], shortages: [{typecode, need, have}] }
+function bucketPick(pool, config) {
+  const byType = { '01': [], '02': [], '03': [] }
+  pool.forEach(q => {
+    const tc = String(q.typecode || '01')
+    if (byType[tc]) byType[tc].push(q)
+  })
+  const picked = []
+  const shortages = []
+  ;['single', 'multi', 'judge'].forEach(k => {
+    const need = config[k].count
+    if (need <= 0) return
+    const tc = TYPECODE_OF[k]
+    const bucket = byType[tc]
+    if (bucket.length < need) {
+      shortages.push({ typecode: tc, need, have: bucket.length })
+      return
+    }
+    picked.push(...pickRandom(bucket, need))
+  })
+  return { picked, shortages }
+}
+
+// Phase 3: 总分 = Σ (count × score)
+function computeFullScore(config) {
+  return config.single.count * config.single.score
+       + config.multi.count  * config.multi.score
+       + config.judge.count  * config.judge.score
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext()
   if (!OPENID) return { ok: false, code: 'NO_OPENID', message: '无法获取微信身份' }
@@ -76,8 +140,8 @@ exports.main = async (event) => {
       return { ok: false, code: 'DISABLED', message: '账号已停用' }
     }
 
-    // ── 1) 解析考试规则（subjectId / duration / questionCount / startTime / enrollmentId）
-    let subjectId, durationMin, questionCount, startedAt, deadline, enrollmentId, assessmentId
+    // ── 1) 解析考试规则（subjectId / duration / questionConfig / startTime / enrollmentId）
+    let subjectId, durationMin, questionConfig, startedAt, deadline, enrollmentId, assessmentId
 
     const now = Date.now()
 
@@ -85,7 +149,13 @@ exports.main = async (event) => {
       subjectId = String(event.subjectId || '').trim()
       if (!subjectId) return { ok: false, code: 'MISSING_SUBJECT', message: '模考缺少题库参数' }
       durationMin = Number(event.duration) > 0 ? Number(event.duration) : DEFAULT_MOCK_DURATION_MIN
-      questionCount = Number(event.questionCount) > 0 ? Number(event.questionCount) : DEFAULT_MOCK_QUESTION_COUNT
+      // 模考兼容：优先 event.questionConfig，其次旧 event.questionCount，最后默认值
+      if (event.questionConfig) {
+        questionConfig = normalizeConfig(event.questionConfig)
+      } else {
+        const n = Number(event.questionCount) > 0 ? Number(event.questionCount) : DEFAULT_MOCK_QUESTION_COUNT
+        questionConfig = deriveConfigFromCount(n)
+      }
       startedAt = new Date(now)
       deadline = new Date(now + durationMin * 60 * 1000)
       // 模考 enrollmentId 每次都新建（允许员工多次模考）
@@ -117,11 +187,20 @@ exports.main = async (event) => {
 
       subjectId = a.subjectId
       durationMin = a.duration
-      questionCount = a.questionCount
+      // Phase 3: 优先用 questionConfig，旧考试回退到 questionCount
+      questionConfig = a.questionConfig
+        ? normalizeConfig(a.questionConfig)
+        : deriveConfigFromCount(a.questionCount)
       startedAt = new Date(now)
       // 正式考统一截止：全员从 assessment.startTime 算起，进场晚=时间少
       deadline = new Date(endMs)
       enrollmentId = assessmentId + '_' + OPENID
+    }
+
+    const fullScore = computeFullScore(questionConfig)
+    const totalNeed = questionConfig.single.count + questionConfig.multi.count + questionConfig.judge.count
+    if (totalNeed <= 0) {
+      return { ok: false, code: 'EMPTY_CONFIG', message: '考试题量配置为空，请联系 HR' }
     }
 
     // ── 2) 防重入：检查 enrollment 是否已存在
@@ -142,13 +221,15 @@ exports.main = async (event) => {
           deadline: new Date(r.deadline).getTime(),
           startedAt: new Date(r.startedAt).getTime(),
           total: r.total,
+          fullScore: r.fullScore || null,
+          questionConfig: r.questionConfig || null,
           durationMs: (durationMin || 0) * 60 * 1000,
           isMock: r.isMock
         }
       }
     }
 
-    // ── 3) 抽题
+    // ── 3) 抽题（Phase 3: 按 typecode 分桶）
     const qRes = await db.collection('questions')
       .where({ examid: subjectId })
       .limit(1000)   // 单题库一般几十题；如果题库巨大需要 skip 分页
@@ -157,8 +238,17 @@ exports.main = async (event) => {
     if (pool.length === 0) {
       return { ok: false, code: 'NO_QUESTIONS', message: '该题库暂无题目，请联系 HR' }
     }
-    const picked = pickRandom(pool, questionCount)
-    const total = picked.length    // 真实抽到的数量（可能小于配置）
+
+    const { picked, shortages } = bucketPick(pool, questionConfig)
+    if (shortages.length > 0) {
+      return {
+        ok: false,
+        code: 'NOT_ENOUGH_QUESTIONS',
+        message: '题库中某类型题目数量不足',
+        detail: shortages
+      }
+    }
+    const total = picked.length
 
     // ── 4) 剥离答案
     const questions = []
@@ -181,6 +271,8 @@ exports.main = async (event) => {
       answersOfficial,
       answers: {},
       score: null,
+      fullScore,
+      questionConfig,
       total,
       startedAt,
       submittedAt: null,
@@ -200,6 +292,8 @@ exports.main = async (event) => {
       deadline: deadline.getTime(),
       startedAt: startedAt.getTime(),
       total,
+      fullScore,
+      questionConfig,
       durationMs: (durationMin || 0) * 60 * 1000,
       isMock
     }

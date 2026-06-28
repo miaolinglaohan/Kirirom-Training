@@ -24,13 +24,21 @@ Page({
     const db = wx.cloud.database()
     db.collection('historys').where({
       _openid: openid
-    }).get({
+    }).orderBy('createTime', 'desc').get({
       success: res => {
         const arrayObject = res.data || []
         const items = arrayObject.slice(0, 5).map(item => {
           if (item.createTime) {
             item.createTime = item.createTime.substr(0, 10)
           }
+          // Phase 3：score / fullScore 派生显示字段；旧记录回退 rightNum / 题数
+          const total = item.total || (Array.isArray(item.items) ? item.items.length : 0)
+          const hasFull = typeof item.fullScore === 'number' && item.fullScore > 0
+          const score = typeof item.score === 'number' ? item.score : (item.rightNum || 0)
+          const fullScore = hasFull ? item.fullScore : total
+          item._scoreDisplay = score + '/' + fullScore + ' 分'
+          item._right = item.rightNum || 0
+          item._total = total
           return item
         })
         this.setData({ items })

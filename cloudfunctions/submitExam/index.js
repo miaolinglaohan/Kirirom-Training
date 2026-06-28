@@ -6,24 +6,30 @@
 //   { enrollmentId: string, answers: object }
 //
 // 返回：
-//   { ok: true, score, total, rightNum, switchCount,
+//   { ok: true, score, fullScore, total, rightNum, switchCount,
 //     questions,            // 题目快照
 //     answersOfficial,      // 仅在模考或允许 review 时返回
 //     userAnswers,
+//     scoreDetail,
+//     questionConfig,
 //     isMock
 //   }
 //   { ok: false, code, message }
 //
-// 判分规则：
-//   - 每题用户答案与官方答案集合相等 → 计 1 分
-//   - 多选题：用户选项集合 ≡ 官方选项集合（顺序无关）才算正确
-//   - 单选题视为「集合大小为 1 的多选」处理，逻辑统一
+// 判分规则（Phase 3 严格判分）：
+//   - 用户答案集合 ≡ 官方答案集合（顺序无关）才算正确，得该题满分
+//   - 任何错选 / 漏选 / 多选均 0 分
+//   - 题目按 typecode 取分值：
+//       '01' 单选 → questionConfig.single.score
+//       '02' 多选 → questionConfig.multi.score
+//       '03' 判断 → questionConfig.judge.score
+//   - 兼容旧考卷：若 enrollment 无 questionConfig，每题统一按 1 分计（=rightNum）
 //
 // 注意：
 //   - 即使 deadline 已过仍允许提交一次（应对客户端自动交卷在 deadline 后到达的场景）
 //   - 已 submitted 的拒绝重复提交
 //   - 正式考试写一条 historys 记录，保持与既有 history/review 页兼容
-//     （字段：_id, subject, items, rightNum, createTime, ...）
+//     （字段：_id, subject, items, rightNum, createTime, score, fullScore, scoreDetail, ...）
 
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -48,6 +54,15 @@ function formatTime(d) {
   const pad = n => (n < 10 ? '0' + n : '' + n)
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
          ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+}
+
+// Phase 3: 按 typecode 返回单题分值。无 config 时回退到 1 分/题。
+function scoreOfType(typecode, config) {
+  if (!config) return 1
+  const tc = String(typecode || '01')
+  if (tc === '02') return Number(config.multi && config.multi.score) || 0
+  if (tc === '03') return Number(config.judge && config.judge.score) || 0
+  return Number(config.single && config.single.score) || 0
 }
 
 exports.main = async (event) => {
@@ -77,17 +92,31 @@ exports.main = async (event) => {
       officialMap[a.qid] = normalizeCodes(a.correctCodes)
     })
 
+    const questionConfig = r.questionConfig || null
     let rightNum = 0
+    let score = 0
+    let fullScore = 0
     const perQuestion = []
+    const scoreDetail = []
     ;(r.questions || []).forEach(q => {
       const u = normalizeCodes(userAnswers[q._id])
       const o = officialMap[q._id] || ''
       const right = (u !== '' && u === o)
       if (right) rightNum++
+      const full = scoreOfType(q.typecode, questionConfig)
+      const earned = right ? full : 0
+      score += earned
+      fullScore += full
       perQuestion.push({ qid: q._id, userCodes: u, correctCodes: o, right })
+      scoreDetail.push({ qid: q._id, typecode: q.typecode || '01', earned, full })
     })
 
     const total = r.total || (r.questions || []).length
+    // 优先用 enrollment 上固化的 fullScore（建卷时已算好），保证与 questionConfig 一致；
+    // 若旧考卷无此字段，回退到本次累加结果（旧行为 = total × 1）
+    if (typeof r.fullScore === 'number' && r.fullScore > 0) {
+      fullScore = r.fullScore
+    }
     const submittedAt = new Date()
 
     // ── 更新 enrollment
@@ -95,7 +124,9 @@ exports.main = async (event) => {
       data: {
         answers: userAnswers,
         status: 'submitted',
-        score: rightNum,
+        score,
+        rightNum,
+        scoreDetail,
         submittedAt
       }
     })
@@ -136,6 +167,11 @@ exports.main = async (event) => {
         enrollmentId,
         assessmentId: r.assessmentId,
         total,
+        // Phase 3: 配置化分制
+        score,
+        fullScore,
+        scoreDetail,
+        questionConfig,
         switchCount: r.switchCount || 0,
         // 用户作答快照（用于复盘"您的选择"展示）
         userAnswers,
@@ -153,19 +189,20 @@ exports.main = async (event) => {
     // ── 返回
     const resp = {
       ok: true,
-      score: rightNum,
-      rightNum,            // 兼容别名
+      score,
+      fullScore,
+      rightNum,
       total,
+      scoreDetail,
+      questionConfig,
       switchCount: r.switchCount || 0,
       isMock: !!r.isMock,
       questions: r.questions,
       userAnswers
     }
-    // 模考允许看官方答案；正式考默认不返回（防作弊截图传播）
-    if (r.isMock) {
-      resp.answersOfficial = r.answersOfficial
-      resp.perQuestion = perQuestion
-    }
+    // 培训系统：交卷后即可返回官方答案 + 逐题判分供前端 examresult 渲染
+    resp.answersOfficial = r.answersOfficial || []
+    resp.perQuestion = perQuestion
     return resp
   } catch (err) {
     console.error('[submitExam] error', err)

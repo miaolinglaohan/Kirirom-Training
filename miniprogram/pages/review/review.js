@@ -76,6 +76,10 @@ Page({
         title: subjectName,
         createTime: h.createTime || '',
         rightNum: h.rightNum || 0,
+        // Phase 3：优先用分数维度，旧考卷回退 rightNum/total
+        score: typeof h.score === 'number' ? h.score : (h.rightNum || 0),
+        fullScore: typeof h.fullScore === 'number' && h.fullScore > 0 ? h.fullScore : total,
+        isPointScored: typeof h.fullScore === 'number' && h.fullScore > 0 && h.fullScore !== total,
         total
       }, () => {
         let startIdx = this._startIdx || 0
@@ -130,6 +134,7 @@ Page({
     this.setData({
       idx,
       item: q,
+      isJudge: String(q.typecode || '01') === '03',
       optionLines,
       userText: userKeys.length ? userKeys.join('、') : '未作答',
       officialText: officialKeys.length ? officialKeys.join('、') : '-',

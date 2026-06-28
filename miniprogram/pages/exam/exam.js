@@ -34,10 +34,13 @@ Page({
     // 题目
     questions: [],
     total: 0,
+    fullScore: 0,
+    questionConfig: null,
     curIdx: 0,
     question: null,        // 当前题
     options: [],           // 当前题的选项（含 selected 标记）
     isMulti: false,        // 是否多选
+    isJudge: false,        // 是否判断题（Phase 3：渲染大按钮 UI）
 
     // 答案：{ qid: ['A'] }
     answers: {},
@@ -138,6 +141,8 @@ Page({
       resumed: !!res.resumed,
       questions,
       total: res.total || questions.length,
+      fullScore: res.fullScore || 0,
+      questionConfig: res.questionConfig || null,
       answers,
       answeredMask,
       deadlineAt: res.deadline || 0,
@@ -168,7 +173,9 @@ Page({
     const questions = this.data.questions
     if (idx < 0 || idx >= questions.length) return
     const q = questions[idx]
-    const isMulti = String(q.typecode) === '02'
+    const tc = String(q.typecode || '01')
+    const isMulti = tc === '02'
+    const isJudge = tc === '03'
     const selectedCodes = this.data.answers[q._id] || []
     const options = (q.options || []).map(opt => ({
       ...opt,
@@ -178,7 +185,8 @@ Page({
       curIdx: idx,
       question: q,
       options,
-      isMulti
+      isMulti,
+      isJudge
     })
   },
 
@@ -387,11 +395,13 @@ Page({
       enrollmentId: this.data.enrollmentId,
       isMock: !!r.isMock,
       total: r.total || this.data.total,
-      rightNum: r.rightNum || r.score || 0,
-      score: r.score || r.rightNum || 0,
+      rightNum: r.rightNum || 0,
+      score: typeof r.score === 'number' ? r.score : (r.rightNum || 0),
+      fullScore: typeof r.fullScore === 'number' ? r.fullScore : (this.data.fullScore || r.total || this.data.total),
+      questionConfig: r.questionConfig || this.data.questionConfig || null,
+      scoreDetail: r.scoreDetail || null,
       questions: r.questions || this.data.questions,
       userAnswers: r.userAnswers || this.data.answers,
-      // 仅模考会有
       answersOfficial: r.answersOfficial || null,
       perQuestion: r.perQuestion || null,
       switchCount: r.switchCount || 0,

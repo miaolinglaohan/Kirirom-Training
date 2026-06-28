@@ -11,12 +11,37 @@
 //   { onlyActive?: boolean }   // true=只返回未截止的；默认 false（也返回历史）
 //
 // 返回：
-//   { ok: true, now, list: [ { ...assessment, status, statusText, deadline } ] }
+//   { ok: true, now, list: [ { ...assessment, status, statusText, deadline,
+//                              totalQuestions, fullScore } ] }
 //   { ok: false, code, message }
+//
+// Phase 3 派生字段：
+//   - totalQuestions = single.count + multi.count + judge.count（无 config 时回退 questionCount）
+//   - fullScore = Σ count×score（无 config 时回退 questionCount，相当于每题 1 分）
 
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+
+// Phase 3: 从 assessment 派生题量 & 总分
+function deriveCounts(a) {
+  const c = a.questionConfig
+  if (c) {
+    const s = (c.single && Number(c.single.count)) || 0
+    const m = (c.multi  && Number(c.multi.count))  || 0
+    const j = (c.judge  && Number(c.judge.count))  || 0
+    const ss = (c.single && Number(c.single.score)) || 0
+    const ms = (c.multi  && Number(c.multi.score))  || 0
+    const js = (c.judge  && Number(c.judge.score))  || 0
+    return {
+      totalQuestions: s + m + j,
+      fullScore: s * ss + m * ms + j * js
+    }
+  }
+  // 旧考卷回退
+  const n = Number(a.questionCount) || 0
+  return { totalQuestions: n, fullScore: n }
+}
 
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext()
@@ -60,12 +85,16 @@ exports.main = async (event) => {
 
       if (onlyActive && status === 'expired') continue
 
+      const { totalQuestions, fullScore } = deriveCounts(a)
+
       list.push({
         ...a,
         startMs: start,
         endMs: end,
         deadline: end,
-        status
+        status,
+        totalQuestions,
+        fullScore
       })
     }
 

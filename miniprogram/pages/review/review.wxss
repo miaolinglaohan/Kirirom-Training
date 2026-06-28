@@ -158,6 +158,60 @@ page { background: #f4f6f8; }
   line-height: 40rpx;
 }
 
+/* 判断题：大按钮 UI（与选项共用 state-* 配色） */
+.rv-judge {
+  margin-top: 20rpx;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.rv-judge-btn {
+  flex: 1;
+  margin: 0 12rpx;
+  padding: 36rpx 20rpx;
+  background: #fafafa;
+  border: 2rpx solid #ececec;
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.rv-judge-btn:first-child { margin-left: 0; }
+.rv-judge-btn:last-child  { margin-right: 0; }
+.rv-judge-text {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+.rv-judge-tags {
+  display: flex;
+  gap: 8rpx;
+}
+.rv-judge-btn.state-answered-right {
+  background: #f1faf7;
+  border-color: #1bcfad;
+}
+.rv-judge-btn.state-answered-right .rv-judge-text {
+  color: #1bcfad;
+}
+.rv-judge-btn.state-answered-wrong {
+  background: #fdf2f0;
+  border-color: #e74c3c;
+}
+.rv-judge-btn.state-answered-wrong .rv-judge-text {
+  color: #e74c3c;
+}
+.rv-judge-btn.state-official-only {
+  background: #f1faf7;
+  border-color: #1bcfad;
+  border-style: dashed;
+}
+.rv-judge-btn.state-official-only .rv-judge-text {
+  color: #1bcfad;
+}
+
 /* 总结区 */
 .rv-summary {
   margin-top: 22rpx;

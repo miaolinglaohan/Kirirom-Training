@@ -56,6 +56,10 @@ page {
   font-size: 22rpx;
   border-radius: 16rpx;
 }
+.topbar-tag-score {
+  background-color: #fff4dc;
+  color: #d48b1a;
+}
 .topbar-right {
   display: flex;
   align-items: center;
@@ -162,6 +166,50 @@ page {
 .opt-code {
   font-weight: 600;
   margin-right: 8rpx;
+}
+
+/* ── 判断题：大按钮 UI ── */
+.judge-options {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 12rpx;
+}
+.judge-btn {
+  flex: 1;
+  margin: 0 12rpx;
+  padding: 48rpx 20rpx;
+  background-color: #f7f9fb;
+  border: 2rpx solid transparent;
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.judge-btn:first-child { margin-left: 0; }
+.judge-btn:last-child  { margin-right: 0; }
+.judge-btn-selected {
+  background-color: #e8f9f5;
+  border-color: #1bcfad;
+}
+.judge-mark {
+  font-size: 56rpx;
+  color: #b9bfc6;
+  line-height: 1;
+  margin-bottom: 12rpx;
+}
+.judge-btn-selected .judge-mark {
+  color: #1bcfad;
+}
+.judge-text {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+}
+.judge-btn-selected .judge-text {
+  color: #1bcfad;
 }
 
 /* ── 底部操作栏 ── */

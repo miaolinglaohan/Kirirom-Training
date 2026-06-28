@@ -1,4 +1,36 @@
-### 20260628 · v0.2-phase2（考场核心 + 复盘 + 错题本）
+### 20260628 · v0.3.0-judge-type（Phase 3 子里程碑 1 · 三题型 + 配置化分制）
+
+> Phase 3 拆成 4 个子 tag 逐步推进，本 tag 是第 1 个：把"每题 1 分"的固定模型换成"按题型分桶 + 配置化分值"，并为新题型铺好客户端 UI。HR 后台 + PDF 导出 + 水印放在后续子 tag 推进。
+
+**核心改动**
+
++ **questionConfig 数据模型**：`assessments.questionConfig = { single:{count,score}, multi:{count,score}, judge:{count,score} }`；旧 `questionCount` 字段保留作回退（视为 N 道单选 × 1 分）
++ **enterExam 改造**：按 typecode 分桶随机抽题，单选 / 多选 / 判断三桶独立抽够数才放行；任一桶不足返回 `NOT_ENOUGH_QUESTIONS` 错误码（含 `detail: [{typecode, need, have}]` 便于前端友好提示）；enrollment 快照增加 `fullScore` / `questionConfig` 字段
++ **submitExam 改造（严格判分）**：按题型从 config 取每题分值，集合完全相等才得满分，错选 / 漏选 / 多选一律 0 分；`historys` 新增 `score` / `fullScore` / `scoreDetail`（含每题 `{qid, typecode, earned, full}`）/ `questionConfig` 字段；正式考也返回 `answersOfficial`（培训系统 = 允许员工对照学习）
++ **listMyAssessments 派生字段**：`totalQuestions = Σ count`、`fullScore = Σ count×score`，旧考卷回退到 `questionCount`，前端不再需要自行算分
+
+**小程序端**
+
++ `pages/exam`：题目识别 typecode=03 时切换"是 / 否"大按钮 UI；顶部栏新增"满分 N"标签；交卷参数携带 `fullScore` / `questionConfig` 到结果页
++ `pages/examresult`：分数显示由"答对/总题"切换为"得分/满分"（旧考卷自动回退）；分制差异时多显示一行"答对 X/Y 题 · 得分率 N%"
++ `pages/review`：得分头显示 `score / fullScore`；判断题用大按钮渲染（与 exam 页同款 state-* 配色，绿实底 = 选对、红实底 = 选错、绿虚框 = 应选未选）
++ `pages/history`：列表项显示 `_scoreDisplay = "X/Y 分"` + 答对 N/M 题
++ `pages/examSchedule`：每张考试卡片新增"题目数量 N 题 / 满分 N 分"两行
+
+**种子数据 / 联调**
+
++ `data/questions.json` 追加 5 题（2 道多选 / 3 道判断）共用 `examid=001001` 题库，方便挂接示例考试
++ 新建 `data/assessments.sample.json`：一场示例考试（3 单选×2 + 2 多选×4 + 3 判断×1 = 8 题 / 17 分 / 15 分钟），可直接导入 `assessments` 集合做端到端联调
+
+**兼容性**
+
++ 老历史记录（无 `fullScore`）所有页面自动回退到题数维度显示
++ 老考试（无 `questionConfig`）抽题用 `questionCount` 作为单选数量，每题 1 分
++ 任何字段升级都是新增不删除，前向后向都可读
+
+---
+
+
 
 #### Phase 2 — 考试服务端化
 

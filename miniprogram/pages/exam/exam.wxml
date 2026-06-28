@@ -6,11 +6,12 @@
   <!-- 考试主体 -->
   <view class="exam-main" wx:else>
 
-    <!-- 顶部状态栏：题号 + 倒计时 -->
+    <!-- 顶部状态栏：题号 + 总分 + 倒计时 -->
     <view class="topbar">
       <view class="topbar-left">
         <text class="qpos">{{curIdx + 1}}</text><text class="qsep">/</text><text class="qtotal">{{total}}</text>
         <text class="topbar-tag" wx:if="{{isMock}}">模考</text>
+        <text class="topbar-tag topbar-tag-score" wx:if="{{fullScore}}">满分 {{fullScore}}</text>
       </view>
       <view class="topbar-right">
         <text class="clock-icon">⏱</text>
@@ -30,7 +31,20 @@
         <text class="qcontent">{{question.title}}</text>
       </view>
 
-      <view class="options">
+      <!-- 判断题：大按钮 UI -->
+      <view class="judge-options" wx:if="{{isJudge}}">
+        <block wx:for="{{options}}" wx:key="code">
+          <view class="judge-btn {{item.selected ? 'judge-btn-selected' : ''}}"
+                data-code="{{item.code}}"
+                bindtap="selectOption">
+            <text class="judge-mark">{{item.selected ? '◉' : '○'}}</text>
+            <text class="judge-text">{{item.content}}</text>
+          </view>
+        </block>
+      </view>
+
+      <!-- 单选 / 多选：传统选项 UI -->
+      <view class="options" wx:else>
         <block wx:for="{{options}}" wx:key="code">
           <view class="option {{item.selected ? 'option-selected' : ''}}"
                 data-code="{{item.code}}"

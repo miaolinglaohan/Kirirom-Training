@@ -22,8 +22,11 @@ Page({
     rightNum: 0,
     errNum: 0,
     unAnswerNum: 0,
+    score: 0,                 // Phase 3: 实得分数
+    fullScore: 0,             // Phase 3: 满分
     scoreText: '0',           // 显示用：分数文案，未来可换算百分制
     accuracyText: '0%',
+    isPointScored: false,     // 分数 ≠ 题数（启用 1 分以外的题分）
     ordernum: '',
 
     // 模考复盘
@@ -37,7 +40,14 @@ Page({
     const total = Number(e.length) || (fromGlobal && fromGlobal.total) || 0
     const rightNum = Number(e.rightNum) || (fromGlobal && fromGlobal.rightNum) || 0
     const errNum = Math.max(0, total - rightNum)
-    const accuracy = total > 0 ? Math.round((rightNum / total) * 100) : 0
+
+    // Phase 3：优先使用分数维度；旧考卷 fromGlobal 无 fullScore 时回退到题数
+    const score = fromGlobal && typeof fromGlobal.score === 'number' ? fromGlobal.score : rightNum
+    const fullScore = fromGlobal && typeof fromGlobal.fullScore === 'number' && fromGlobal.fullScore > 0
+      ? fromGlobal.fullScore
+      : total
+    const isPointScored = fullScore > 0 && fullScore !== total
+    const accuracy = fullScore > 0 ? Math.round((score / fullScore) * 100) : 0
 
     this.setData({
       isMock: !!isMock,
@@ -45,8 +55,11 @@ Page({
       rightNum,
       errNum,
       unAnswerNum: 0,
+      score,
+      fullScore,
+      isPointScored,
       ordernum: e.ordernum || (fromGlobal && fromGlobal.enrollmentId) || '',
-      scoreText: String(rightNum),
+      scoreText: String(score),
       accuracyText: accuracy + '%'
     })
 

@@ -4,7 +4,7 @@
         <block wx:for="{{items}}" wx:key="id" wx:for-index="idx" wx:for-item="item">
             <view class="history" bindtap="toReviewPage" data-id="{{item._id}}">
                 <view class="sortnum">{{idx+1}}</view>
-                <view class="name">({{item.createTime}}){{item.subject.name}}-{{item.rightNum}}分</view>
+                <view class="name">({{item.createTime}}){{item.subject.name}} · {{item._scoreDisplay}}（答对 {{item._right}}/{{item._total}}）</view>
                 <view class="arraw">></view>
             </view>       
         </block>

@@ -6,7 +6,8 @@
     <view class="rv-title">{{title}}</view>
     <view class="rv-sub">
       <text>{{createTime}}</text>
-      <text class="rv-score">得分 {{rightNum}}/{{total}}</text>
+      <text class="rv-score" wx:if="{{isPointScored}}">得分 {{score}}/{{fullScore}}（答对 {{rightNum}}/{{total}}）</text>
+      <text class="rv-score" wx:else>得分 {{score}}/{{fullScore}}</text>
     </view>
     <view class="rv-progress">
       <progress percent="{{percent}}" color="#1bcfad" stroke-width="3" active />
@@ -24,7 +25,24 @@
     <view class="rv-qtitle">{{item.title}}</view>
     <view class="rv-qtype" wx:if="{{item.typename}}">{{item.typename}}</view>
 
-    <view class="rv-options">
+    <!-- 判断题：大按钮 UI -->
+    <view class="rv-judge" wx:if="{{isJudge}}">
+      <view
+        wx:for="{{optionLines}}"
+        wx:key="code"
+        class="rv-judge-btn state-{{opt.state}}"
+        wx:for-item="opt"
+      >
+        <text class="rv-judge-text">{{opt.content}}</text>
+        <view class="rv-judge-tags">
+          <view class="tag-user" wx:if="{{opt.isUser}}">您选</view>
+          <view class="tag-correct" wx:if="{{opt.isOfficial}}">正确</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 单选 / 多选：传统选项 UI -->
+    <view class="rv-options" wx:else>
       <view
         wx:for="{{optionLines}}"
         wx:key="code"

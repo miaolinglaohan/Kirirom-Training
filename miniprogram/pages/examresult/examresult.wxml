@@ -6,10 +6,13 @@
       <view class="title">{{isMock ? '模考结果' : '答题得分'}}</view>
     </view>
     <view class="score-area">
-      <text class="score-num">{{rightNum}}</text>
-      <text class="score-unit">/ {{total}}</text>
+      <text class="score-num">{{score}}</text>
+      <text class="score-unit">/ {{fullScore}}</text>
     </view>
-    <view class="accuracy">正确率 {{accuracyText}}</view>
+    <view class="accuracy">
+      <text wx:if="{{isPointScored}}">答对 {{rightNum}}/{{total}} 题 · 得分率 {{accuracyText}}</text>
+      <text wx:else>正确率 {{accuracyText}}</text>
+    </view>
   </view>
 
   <view class="divider"></view>
