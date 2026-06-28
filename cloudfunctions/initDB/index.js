@@ -143,8 +143,9 @@ async function ensureCollection (name) {
     await db.createCollection(name)
     return { name, created: true }
   } catch (e) {
-    // -502005: database collection already exists
-    if (e && (e.errCode === -502005 || /already exist/i.test(e.errMsg || ''))) {
+    // 集合已存在的几种返回码：-501001 / -502005 / 错误信息里包含 "exist"
+    const msg = (e && (e.errMsg || e.message)) || ''
+    if (e && (e.errCode === -501001 || e.errCode === -502005 || /exist/i.test(msg))) {
       return { name, created: false, existed: true }
     }
     return { name, created: false, error: e.errMsg || String(e) }
