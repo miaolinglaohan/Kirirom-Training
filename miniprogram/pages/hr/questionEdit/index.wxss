@@ -1,0 +1,139 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 140rpx;
+  background: #f5f6fa;
+  box-sizing: border-box;
+}
+.loading {
+  text-align: center;
+  padding: 80rpx 24rpx;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+
+.row {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.row:last-child { border-bottom: 0; }
+.lbl {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+.picker {
+  font-size: 30rpx;
+  color: #1a1a1a;
+  padding: 10rpx 0;
+}
+.ta {
+  width: 100%;
+  font-size: 28rpx;
+  color: #1a1a1a;
+  line-height: 1.55;
+  padding: 8rpx 0;
+  min-height: 48rpx;
+  box-sizing: border-box;
+}
+
+.opts-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 8rpx 0 14rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.opts-title { font-size: 28rpx; font-weight: 600; color: #1a1a1a; }
+.opts-hint { font-size: 22rpx; color: #999; }
+
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx dashed #f0f0f0;
+}
+.opt:last-of-type { border-bottom: 0; }
+.opt-code {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #eef0f4;
+  color: #555;
+  font-size: 26rpx;
+  font-weight: 600;
+  text-align: center;
+  line-height: 48rpx;
+  flex-shrink: 0;
+}
+.opt-content {
+  flex: 1;
+  min-width: 0;
+  font-size: 28rpx;
+  background: #f8f9fb;
+  padding: 14rpx 16rpx;
+  border-radius: 10rpx;
+}
+.opt-content.readonly {
+  background: #f0f0f0;
+  color: #777;
+}
+.opt-mark {
+  font-size: 22rpx;
+  padding: 10rpx 14rpx;
+  border-radius: 10rpx;
+  background: #eef0f4;
+  color: #888;
+  white-space: nowrap;
+}
+.opt-mark.on {
+  background: #1baa7a;
+  color: #fff;
+  font-weight: 600;
+}
+.opt-del {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 10rpx;
+  background: #fde2e2;
+  color: #c53030;
+  font-size: 24rpx;
+  text-align: center;
+  line-height: 48rpx;
+  flex-shrink: 0;
+}
+.opt-del.disabled {
+  background: #f3f3f3;
+  color: #ccc;
+}
+
+.add-row {
+  margin-top: 14rpx;
+  text-align: center;
+}
+.btn { margin: 0; font-size: 26rpx; }
+.btn.add {
+  background: #e6efff;
+  color: #2d6cf0;
+}
+
+.footer {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  gap: 16rpx;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -2rpx 12rpx rgba(0,0,0,0.06);
+}
+.footer .btn { flex: 1; font-size: 28rpx; height: 80rpx; line-height: 80rpx; }
+.btn.cancel { background: #eef0f4; color: #333; }
+.btn.primary { background: #2d8cf0; color: #fff; }

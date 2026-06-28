@@ -1,0 +1,40 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 48rpx;
+  background: #f5f6fa;
+  box-sizing: border-box;
+}
+.section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 8rpx 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+.row {
+  display: flex;
+  align-items: center;
+  min-height: 88rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #eef0f4;
+}
+.row:last-child { border-bottom: none; }
+.label {
+  width: 180rpx;
+  font-size: 28rpx;
+  color: #333;
+  flex-shrink: 0;
+}
+.input { flex: 1; font-size: 28rpx; color: #1a1a1a; }
+.input.readonly { color: #888; }
+.picker { flex: 1; }
+.picker-text { font-size: 28rpx; color: #1a1a1a; padding: 4rpx 0; }
+.picker-text.placeholder { color: #b0b0b0; }
+.hint {
+  padding: 8rpx 0 16rpx;
+  font-size: 22rpx;
+  color: #b0b0b0;
+  line-height: 1.5;
+}
+.footer { padding: 24rpx 0; }
+.submit { font-size: 30rpx; }

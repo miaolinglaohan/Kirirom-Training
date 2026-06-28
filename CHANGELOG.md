@@ -1,4 +1,50 @@
-### 20260628 · v0.3.1-hr-skeleton（Phase 3 子里程碑 2 · HR 管理后台骨架）
+### 20260628 · v0.3.2-subject-question-crud（Phase 3 子里程碑 3 · 题库 + 题目 CRUD）
+
+> 把 v0.3.1 留下的"敬请期待"两张卡片落地：HR 现在可以直接在小程序里维护题库（subjects）和题目（questions），不再需要去云开发控制台手改文档。题库删除支持级联删题目，被考试引用时阻断；题目编辑页选项动态行 + 三题型自适应。
+
+**核心改动 · 7 个新 HR 云函数**
+
++ `hrListExams`：返回 `exam` 集合一级列表 `[{_id, name}]`，给题库编辑页 pid picker 用
++ `hrListSubjects`：列出全部 subjects，并用 `aggregate.group({examid, typecode})` 一次性聚合出每个题库的题量分桶 `{single, multi, judge, total}`（聚合失败时自动回退逐条 count）；同时返回 exams 数组方便前端按一级试卷分组渲染
++ `hrSaveSubject`：新建 / 更新题库。`_id` 必须 `/^[A-Za-z0-9_-]+$/`、pid 必须存在于 `exam`；新建时查重；编辑时 `_id` 锁死只能改 name / pid
++ `hrDeleteSubject`：**级联删除**。先查 `assessments.subjectId === _id`，有引用则返回 `BLOCKED_BY_ASSESSMENT` + `detail: [{_id, name}]` 阻断；无引用则先批量删 `questions.examid === _id`（循环 ≤100 条/次直到清空），再删 subject 本身
++ `hrListQuestions`：按 `examid` + 可选 `typecode` 分页列题（默认 20 / 页，上限 100）。**额外支持 `_id` 单条直查模式**：编辑页拉详情用，同时校验 `examid` 防越权
++ `hrSaveQuestion`：新建 / 更新题目，校验逻辑覆盖：examid 在 subjects 存在 / title 必填 / typecode 三选一 / options ≥ 2 项 / code 单大写字母且唯一 / value 仅 '0' / '1' / 单选 + 判断恰好 1 个正确 / 多选 ≥ 2 个正确 / 判断必须恰好 2 项；typename 由 typecode 自动派生
++ `hrDeleteQuestion`：单条删除（不查 examEnrollments，因为报名快照已经把题面 + 选项快照下来，删题不影响在考人员）
+
+所有 HR 函数沿用 v0.3.1 的 `requireHr(OPENID)` 闸：`role` 是 `hr` 或 `admin` 且 `active !== false` 才放行。
+
+**顺手修 bug**
+
++ `hrSaveAssessment`：v0.3.1 的"题库存在性"预检查的是 `exam` 集合，但 `assessments.subjectId` 实际指向 `subjects._id`。本次改为查 `subjects` 集合，否则所有新建考试都会卡在 `SUBJECT_NOT_FOUND`
+
+**小程序端 · 4 个新页面**
+
++ `pages/hr/subjects`：题库列表页。按一级试卷分组渲染，每张卡片显示题库 `_id` / name / 题量分桶彩色 chips（总数蓝 / 单选绿 / 多选橙 / 判断紫）+ 三操作按钮（查看题目 / 编辑 / 删除）。删除前 `wx.showModal` 二次确认并提示连带删除的题目数；遇 `BLOCKED_BY_ASSESSMENT` 弹模态列出所有引用考试名
++ `pages/hr/subjectEdit`：题库编辑页。新建模式 `_id` 可填（带正则提示），编辑模式 `_id` 只读；name 必填；pid 用 `<picker>` 从 hrListExams 拉一级试卷下拉
++ `pages/hr/questions`：题目列表页。顶部 4 个 tab（全部 / 单选 / 多选 / 判断）切换 typecode 过滤，分页 20 条 / 页 + 触底加载更多；每张卡片显示题型彩色 tag / 题干 / 选项数 / "正确答案 A,C"（由 `options.filter(o=>o.value==='1')` 派生）+ 编辑 / 删除按钮；右上角"+ 新建"按钮
++ `pages/hr/questionEdit`：题目编辑页。`<picker>` 切题型（单选 / 多选 / 判断）；**选项动态行**：每行 = code 圆徽（A/B/...自动编号） + content 输入框 + "设为正确 / ✓ 正确"切换 + "删"按钮；底部"+ 添加选项"按钮（上限 8 项、下限 2 项）。**三题型自适应**：
+  - 切到判断：强制重置为 2 项，A=正确 / B=错误（content 只读，不可删 / 不可加）
+  - 单选：标记任一项自动把其他项设回未选（互斥）
+  - 多选：可任意切换，保存时 < 2 个正确被阻断
+  - 多选 → 单选：自动只保留第一个正确项，避免回头报"单选只能 1 个正确"
++ 保存前客户端先做与云函数一致的校验，云函数失败时弹模态显示具体 message（不是只一个 toast 一闪而过）
+
+**hr/home 入口卡片**
+
++ 移除"题库管理"/"题目管理"两张卡的 `disabled` 灰底 + "敬请期待"角标，描述改为正常文案，两个 `goSubjects` / `goQuestions` 方法都指向 `/pages/hr/subjects/index`（题目入口走"题库 → 查看题目"二次跳转，避免裸题目列表缺 examid 上下文）
++ 底部 footer-tip 改为"提示：题目管理需先进入对应题库，再点「查看题目」"
+
+**部署清单**
+
++ 新增上传 7 个云函数：`hrListExams` / `hrListSubjects` / `hrSaveSubject` / `hrDeleteSubject` / `hrListQuestions` / `hrSaveQuestion` / `hrDeleteQuestion`
++ 重新上传 1 个云函数：`hrSaveAssessment`（subject 查询表改成 subjects 集合）
++ `miniprogram/app.json` 已注册 4 个新页路径
++ 数据库 schema 无变更，沿用现有 `exam` / `subjects` / `questions` / `assessments` 四表
+
+---
+
+
 
 > 在小程序内嵌一个轻量 HR 管理后台，先满足"凑合用"的运营需求（员工角色切换 + 考试 CRUD）。重 Web 后台（React + cloudbase web SDK）择机另起新项目。本 tag 不含题库 / 题目的小程序内增删改，仍需在云开发控制台或下版本（v0.3.2）处理。
 

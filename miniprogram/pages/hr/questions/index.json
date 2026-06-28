@@ -1,0 +1,5 @@
+{
+  "navigationBarTitleText": "题目管理",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 80
+}

@@ -1,0 +1,7 @@
+{
+  "name": "hrListQuestions",
+  "version": "1.0.0",
+  "description": "HR 按 examid 分页列出题目，支持 typecode 过滤",
+  "main": "index.js",
+  "dependencies": { "wx-server-sdk": "~2.4.0" }
+}

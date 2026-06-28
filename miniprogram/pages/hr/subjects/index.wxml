@@ -1,0 +1,64 @@
+<view class="page">
+  <view class="header">
+    <view class="title">题库管理</view>
+    <button class="add-btn" size="mini" type="primary" bindtap="onCreate">+ 新建</button>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">加载中…</view>
+
+  <view class="empty" wx:if="{{!loading && groups.length === 0 && looseItems.length === 0}}">
+    暂无题库。
+    {"\n"}请先在云开发控制台 `exam` 集合中创建一级试卷，再回来点「+ 新建」添加题库。
+  </view>
+
+  <view wx:if="{{!loading}}">
+    <block wx:for="{{groups}}" wx:key="exam._id" wx:for-item="group">
+      <view class="group">
+        <view class="group-title">
+          <text class="ex-name">{{group.exam.name}}</text>
+          <text class="ex-id">#{{group.exam._id}}</text>
+        </view>
+
+        <view class="empty-sub" wx:if="{{group.items.length === 0}}">此一级试卷下还没有题库</view>
+
+        <view class="item" wx:for="{{group.items}}" wx:key="_id" wx:for-item="sub">
+          <view class="row1">
+            <view class="name">{{sub.name}}</view>
+            <view class="sub-id">#{{sub._id}}</view>
+          </view>
+          <view class="row2">
+            <view class="qc total">共 {{sub.questionCount.total}} 题</view>
+            <view class="qc single">单选 {{sub.questionCount.single}}</view>
+            <view class="qc multi">多选 {{sub.questionCount.multi}}</view>
+            <view class="qc judge">判断 {{sub.questionCount.judge}}</view>
+          </view>
+          <view class="actions">
+            <button size="mini" class="btn primary" data-id="{{sub._id}}" data-name="{{sub.name}}" bindtap="onQuestions">查看题目</button>
+            <button size="mini" class="btn" data-id="{{sub._id}}" bindtap="onEdit">编辑</button>
+            <button size="mini" class="btn warn" data-id="{{sub._id}}" data-name="{{sub.name}}" data-total="{{sub.questionCount.total}}" bindtap="onDelete">删除</button>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view class="group" wx:if="{{looseItems.length > 0}}">
+      <view class="group-title">
+        <text class="ex-name">游离题库</text>
+        <text class="ex-id">（pid 找不到对应一级试卷）</text>
+      </view>
+      <view class="item" wx:for="{{looseItems}}" wx:key="_id" wx:for-item="sub">
+        <view class="row1">
+          <view class="name">{{sub.name}}</view>
+          <view class="sub-id">#{{sub._id}} · pid={{sub.pid}}</view>
+        </view>
+        <view class="row2">
+          <view class="qc total">共 {{sub.questionCount.total}} 题</view>
+        </view>
+        <view class="actions">
+          <button size="mini" class="btn" data-id="{{sub._id}}" bindtap="onEdit">编辑</button>
+          <button size="mini" class="btn warn" data-id="{{sub._id}}" data-name="{{sub.name}}" data-total="{{sub.questionCount.total}}" bindtap="onDelete">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

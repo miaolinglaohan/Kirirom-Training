@@ -1,0 +1,76 @@
+<view class="page">
+  <view class="loading" wx:if="{{loading}}">加载中…</view>
+
+  <view wx:if="{{!loading}}">
+    <view class="card">
+      <view class="row">
+        <view class="lbl">题目类型</view>
+        <picker bindchange="onTypeChange" value="{{typeIndex}}" range="{{typeLabels}}">
+          <view class="picker">{{typeLabels[typeIndex]}}</view>
+        </picker>
+      </view>
+
+      <view class="row">
+        <view class="lbl">题干</view>
+        <textarea
+          class="ta"
+          placeholder="请输入题干…"
+          maxlength="500"
+          auto-height
+          value="{{title}}"
+          bindinput="onTitleInput"></textarea>
+      </view>
+
+      <view class="row">
+        <view class="lbl">解析（可选）</view>
+        <textarea
+          class="ta"
+          placeholder="可填写答案解析，留空表示无解析"
+          maxlength="500"
+          auto-height
+          value="{{comments}}"
+          bindinput="onCommentsInput"></textarea>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="opts-head">
+        <view class="opts-title">选项</view>
+        <view class="opts-hint" wx:if="{{typecode === '01'}}">单选 · 仅 1 项正确</view>
+        <view class="opts-hint" wx:elif="{{typecode === '02'}}">多选 · 至少 2 项正确</view>
+        <view class="opts-hint" wx:elif="{{typecode === '03'}}">判断 · 固定 A 正确 / B 错误，二选一</view>
+      </view>
+
+      <view class="opt" wx:for="{{options}}" wx:key="code" wx:for-item="o" wx:for-index="i">
+        <view class="opt-code">{{o.code}}</view>
+        <input
+          class="opt-content {{isJudge ? 'readonly' : ''}}"
+          placeholder="选项内容"
+          disabled="{{isJudge}}"
+          value="{{o.content}}"
+          maxlength="200"
+          data-i="{{i}}"
+          bindinput="onOptionContentInput"/>
+        <view
+          class="opt-mark {{o.value === '1' ? 'on' : ''}}"
+          data-i="{{i}}"
+          bindtap="onToggleCorrect">
+          {{o.value === '1' ? '✓ 正确' : '设为正确'}}
+        </view>
+        <view
+          class="opt-del {{isJudge || options.length <= 2 ? 'disabled' : ''}}"
+          data-i="{{i}}"
+          bindtap="onDeleteOption">删</view>
+      </view>
+
+      <view class="add-row" wx:if="{{!isJudge}}">
+        <button size="mini" class="btn add" bindtap="onAddOption">+ 添加选项</button>
+      </view>
+    </view>
+
+    <view class="footer">
+      <button class="btn cancel" bindtap="onCancel">取消</button>
+      <button class="btn primary" loading="{{saving}}" disabled="{{saving}}" bindtap="onSave">保存</button>
+    </view>
+  </view>
+</view>

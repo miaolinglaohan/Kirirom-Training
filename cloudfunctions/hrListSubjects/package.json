@@ -1,0 +1,7 @@
+{
+  "name": "hrListSubjects",
+  "version": "1.0.0",
+  "description": "HR 列出所有题库（subjects 集合），附题型分桶题量统计",
+  "main": "index.js",
+  "dependencies": { "wx-server-sdk": "~2.4.0" }
+}

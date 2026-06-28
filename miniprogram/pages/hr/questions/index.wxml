@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="header">
+    <view class="title-wrap">
+      <view class="title">题目管理</view>
+      <view class="sub" wx:if="{{subjectName}}">{{subjectName}} · #{{examid}}</view>
+      <view class="sub" wx:else>#{{examid}}</view>
+    </view>
+    <button class="add-btn" size="mini" type="primary" bindtap="onCreate">+ 新建</button>
+  </view>
+
+  <view class="tabs">
+    <view
+      class="tab {{activeTab === item.key ? 'active' : ''}}"
+      wx:for="{{tabs}}" wx:key="key"
+      data-key="{{item.key}}" bindtap="onTabChange">
+      {{item.label}}
+    </view>
+  </view>
+
+  <view class="count" wx:if="{{!loading}}">共 {{total}} 道题目</view>
+
+  <view class="loading" wx:if="{{loading}}">加载中…</view>
+
+  <view class="empty" wx:if="{{!loading && list.length === 0}}">
+    暂无题目，点右上角「+ 新建」开始添加。
+  </view>
+
+  <view wx:if="{{!loading && list.length > 0}}">
+    <view class="item" wx:for="{{list}}" wx:key="_id" wx:for-item="q">
+      <view class="row1">
+        <view class="type-tag {{q.typeClass}}">{{q.typeName}}</view>
+        <view class="opt-count">{{q.optionCount}} 选项</view>
+      </view>
+      <view class="q-title">{{q.title}}</view>
+      <view class="correct">
+        <text class="lbl">正确答案：</text>
+        <text class="val">{{q.correctText}}</text>
+      </view>
+      <view class="actions">
+        <button size="mini" class="btn" data-id="{{q._id}}" bindtap="onEdit">编辑</button>
+        <button size="mini" class="btn warn" data-id="{{q._id}}" data-title="{{q.title}}" bindtap="onDelete">删除</button>
+      </view>
+    </view>
+
+    <view class="more" wx:if="{{loadingMore}}">加载中…</view>
+    <view class="more end" wx:elif="{{!hasMore}}">— 已到底部 —</view>
+  </view>
+</view>

@@ -24,6 +24,6 @@ Page({
 
   goEmployees() { wx.navigateTo({ url: '/pages/hr/employees/index' }) },
   goAssessments() { wx.navigateTo({ url: '/pages/hr/assessments/index' }) },
-  goSubjects() { wx.navigateTo({ url: '/pages/hr/placeholder/index?kind=subjects' }) },
-  goQuestions() { wx.navigateTo({ url: '/pages/hr/placeholder/index?kind=questions' }) }
+  goSubjects() { wx.navigateTo({ url: '/pages/hr/subjects/index' }) },
+  goQuestions() { wx.navigateTo({ url: '/pages/hr/subjects/index' }) }
 })

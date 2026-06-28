@@ -17,20 +17,18 @@
       <view class="card-desc">新建 / 编辑 / 查看报名</view>
     </view>
 
-    <view class="card disabled" bindtap="goSubjects">
+    <view class="card" bindtap="goSubjects">
       <view class="icon">📚</view>
       <view class="card-title">题库管理</view>
-      <view class="card-desc">维护 exam 集合</view>
-      <view class="badge">敬请期待</view>
+      <view class="card-desc">新建 / 编辑题库，进入题目</view>
     </view>
 
-    <view class="card disabled" bindtap="goQuestions">
+    <view class="card" bindtap="goQuestions">
       <view class="icon">❓</view>
       <view class="card-title">题目管理</view>
-      <view class="card-desc">维护 questions 集合</view>
-      <view class="badge">敬请期待</view>
+      <view class="card-desc">通过题库进入题目维护</view>
     </view>
   </view>
 
-  <view class="footer-tip">提示：题库与题目可暂在云开发控制台手动维护，v0.3.2 将上线小程序内编辑。</view>
+  <view class="footer-tip">提示：题目管理需先进入对应题库，再点「查看题目」。</view>
 </view>

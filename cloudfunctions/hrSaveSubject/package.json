@@ -1,0 +1,7 @@
+{
+  "name": "hrSaveSubject",
+  "version": "1.0.0",
+  "description": "HR 新建或更新题库（subjects 集合）",
+  "main": "index.js",
+  "dependencies": { "wx-server-sdk": "~2.4.0" }
+}

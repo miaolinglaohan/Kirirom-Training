@@ -1,0 +1,7 @@
+{
+  "name": "hrListExams",
+  "version": "1.0.0",
+  "description": "HR 列出一级试卷（exam 集合），用于 subjectEdit 的 pid picker",
+  "main": "index.js",
+  "dependencies": { "wx-server-sdk": "~2.4.0" }
+}

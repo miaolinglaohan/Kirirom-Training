@@ -95,10 +95,10 @@ exports.main = async (event) => {
     }
   }
 
-  // ── 题库存在性校验
+  // ── 题库存在性校验（subjectId 指向 subjects._id，非 exam._id）
   let subjectName = ''
   try {
-    const exRes = await db.collection('exam').where({ _id: subjectId }).limit(1).get()
+    const exRes = await db.collection('subjects').where({ _id: subjectId }).limit(1).get()
     if (!exRes.data || exRes.data.length === 0) {
       return { ok: false, code: 'SUBJECT_NOT_FOUND', message: '指定的题库不存在' }
     }

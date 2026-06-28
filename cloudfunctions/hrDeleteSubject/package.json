@@ -1,0 +1,7 @@
+{
+  "name": "hrDeleteSubject",
+  "version": "1.0.0",
+  "description": "HR 删除题库（含其下所有题目级联删除）",
+  "main": "index.js",
+  "dependencies": { "wx-server-sdk": "~2.4.0" }
+}

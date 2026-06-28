@@ -1,0 +1,41 @@
+<view class="page">
+  <view class="section">
+    <view class="row">
+      <view class="label">题库编号</view>
+      <input
+        class="input {{isEdit ? 'readonly' : ''}}"
+        placeholder="例如：001002"
+        value="{{form._id}}"
+        disabled="{{isEdit}}"
+        data-field="_id"
+        bindinput="onInput" />
+    </view>
+    <view class="hint" wx:if="{{!isEdit}}">提示：编号一旦创建后不可修改；建议沿用 3+3 数字习惯（如 pid=001 → 题库 001001 / 001002 ...）</view>
+
+    <view class="row">
+      <view class="label">题库名称</view>
+      <input class="input" placeholder="例如：微信测评二" value="{{form.name}}" data-field="name" bindinput="onInput" />
+    </view>
+
+    <view class="row">
+      <view class="label">一级试卷</view>
+      <picker
+        class="picker"
+        range="{{exams}}"
+        range-key="name"
+        value="{{pidIndex}}"
+        bindchange="onPidChange">
+        <view class="picker-text {{pidIndex < 0 ? 'placeholder' : ''}}">
+          {{pidIndex >= 0 ? exams[pidIndex].name : (loadingExams ? '加载中…' : '请选择')}}
+        </view>
+      </picker>
+    </view>
+    <view class="hint" wx:if="{{!loadingExams && exams.length === 0}}">⚠️ 还没有任何一级试卷，请先在云开发控制台 `exam` 集合中创建一行</view>
+  </view>
+
+  <view class="footer">
+    <button class="submit" type="primary" loading="{{saving}}" disabled="{{saving}}" bindtap="onSubmit">
+      {{isEdit ? '保存修改' : '创建题库'}}
+    </button>
+  </view>
+</view>
