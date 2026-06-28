@@ -9,7 +9,4 @@
             </view>       
         </block>
     </view>
-    <view class="adContainer">
-        <ad unit-id="adunit-8f925e8e1afdc0f6" ad-type="video" ad-theme="white"></ad>
-    </view>
 </view>

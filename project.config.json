@@ -36,9 +36,15 @@
     "minifyWXSS": true,
     "disableUseStrict": false,
     "showES6CompileOption": false,
-    "useCompilerPlugins": false
+    "useCompilerPlugins": false,
+    "compileWorklet": false,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true
   },
-  "appid": "wx34775c9211ae4d58",
+  "appid": "wxb156b565d579ec42",
   "projectname": "cloudapp",
   "libVersion": "3.7.12",
   "simulatorType": "wechat",

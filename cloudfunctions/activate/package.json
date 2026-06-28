@@ -1,0 +1,9 @@
+{
+  "name": "activate",
+  "version": "1.0.0",
+  "description": "员工激活：按姓名+部门匹配白名单，绑定当前 openid",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

@@ -1,0 +1,53 @@
+<view class="activate-page">
+  <view class="header">
+    <view class="logo">🎓</view>
+    <view class="title">员工激活</view>
+    <view class="subtitle">首次进入需要绑定身份</view>
+  </view>
+
+  <view wx:if="{{reasonText}}" class="reason-box">
+    {{reasonText}}
+  </view>
+
+  <view class="form-card">
+    <view class="form-item">
+      <view class="form-label">姓名</view>
+      <input
+        class="form-input"
+        placeholder="请输入您在 HR 处登记的真实姓名"
+        value="{{name}}"
+        bindinput="onNameInput"
+        maxlength="20"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">部门</view>
+      <picker
+        mode="selector"
+        range="{{deptList}}"
+        value="{{deptIndex < 0 ? 0 : deptIndex}}"
+        bindchange="onDeptChange"
+      >
+        <view class="picker-display {{deptIndex < 0 ? 'placeholder' : ''}}">
+          {{deptIndex < 0 ? '请选择您所在的部门' : deptList[deptIndex]}}
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="tips">
+    <view class="tip-item">· 请如实填写，姓名和部门必须与 HR 登记一致</view>
+    <view class="tip-item">· 每个微信号只能绑定一次，请使用本人微信</view>
+    <view class="tip-item">· 信息不符或未登记请联系 HR</view>
+  </view>
+
+  <button
+    class="submit-btn {{submitting ? 'submitting' : ''}}"
+    bindtap="onSubmit"
+    disabled="{{submitting}}"
+  >
+    {{submitting ? '提交中...' : '提交激活'}}
+  </button>
+</view>

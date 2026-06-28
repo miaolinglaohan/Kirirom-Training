@@ -1,0 +1,53 @@
+<view class="schedule-page">
+  <view class="hint-bar">
+    <text class="hint-text">📋 显示由 HR 发布的月度摸底考试</text>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">加载中...</view>
+
+  <view class="empty" wx:elif="{{!loading && list.length === 0}}">
+    <view class="empty-icon">📭</view>
+    <view class="empty-title">暂无考试安排</view>
+    <view class="empty-desc">HR 发布月度摸底考试后<br/>会在这里显示</view>
+  </view>
+
+  <view class="list" wx:else>
+    <block wx:for="{{list}}" wx:key="_id">
+      <view class="card status-{{item.status}}" bindtap="onTapExam" data-item="{{item}}">
+        <view class="card-header">
+          <view class="card-title">{{item.name}}</view>
+          <view class="status-tag tag-{{item.status}}">{{item.statusText}}</view>
+        </view>
+
+        <view class="card-row">
+          <text class="row-label">开考时间</text>
+          <text class="row-value">{{item.startTimeText || '待定'}}</text>
+        </view>
+        <view class="card-row" wx:if="{{item.duration}}">
+          <text class="row-label">答题时长</text>
+          <text class="row-value">{{item.duration / 60}} 分钟</text>
+        </view>
+        <view class="card-row" wx:if="{{item.questionCount}}">
+          <text class="row-label">题目数量</text>
+          <text class="row-value">{{item.questionCount}} 题</text>
+        </view>
+        <view class="card-row" wx:if="{{item.remark}}">
+          <text class="row-label">备注</text>
+          <text class="row-value">{{item.remark}}</text>
+        </view>
+
+        <!-- 倒计时区 -->
+        <view class="countdown-area" wx:if="{{item.status === 'pending'}}">
+          <text class="countdown-label">距离开考</text>
+          <text class="countdown-value">{{item.countdownText}}</text>
+        </view>
+
+        <view class="action-bar action-{{item.status}}">
+          <text wx:if="{{item.status === 'pending'}}">等待开考</text>
+          <text wx:elif="{{item.status === 'ongoing'}}">▶ 进入考场</text>
+          <text wx:else>已截止</text>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

@@ -1,0 +1,45 @@
+<view class="profile">
+  <!-- 头像 + 姓名区 -->
+  <view class="user-card">
+    <view class="avatar">
+      <text class="avatar-text">{{employee.name ? employee.name[0] : '?'}}</text>
+    </view>
+    <view class="user-info">
+      <view class="user-name">{{employee.name || '未激活用户'}}</view>
+      <view class="user-meta" wx:if="{{employee}}">
+        <text class="dept">{{employee.dept || '未设置部门'}}</text>
+        <text wx:if="{{employee.role === 'admin'}}" class="role-tag">  ·  管理员</text>
+      </view>
+      <view class="user-meta" wx:else>
+        <text class="hint">请联系 HR 完成激活</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- openid 卡片 -->
+  <view class="section">
+    <view class="section-title">我的小程序 ID</view>
+    <view class="openid-box">
+      <text class="openid-text" selectable="true">{{openid || '加载中...'}}</text>
+    </view>
+    <view class="copy-btn" bindtap="copyOpenid">复制 ID</view>
+  </view>
+
+  <!-- 功能列表 -->
+  <view class="menu-list">
+    <view class="menu-item" bindtap="toAbout">
+      <text class="menu-label">关于我们</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="toRule">
+      <text class="menu-label">使用说明</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item admin-item" wx:if="{{isAdmin}}" bindtap="toAdminEntry">
+      <text class="menu-label">🔧 管理后台</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="footer">基里隆项目部业务培训考试 · KIRIROM TRAINING</view>
+</view>

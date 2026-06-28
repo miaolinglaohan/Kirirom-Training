@@ -1,0 +1,9 @@
+{
+  "name": "whoAmI",
+  "version": "1.0.0",
+  "description": "查询当前微信号在员工白名单中的身份状态",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

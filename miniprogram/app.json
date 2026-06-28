@@ -1,20 +1,9 @@
 {
   "pages": [
     "pages/home/index",
-    "pages/info/index",
-    "pages/index/index",
-    "pages/userConsole/userConsole",
-    "pages/storageConsole/storageConsole",
-    "pages/databaseGuide/databaseGuide",
-    "pages/addFunction/addFunction",
-    "pages/deployFunctions/deployFunctions",
-    "pages/chooseLib/chooseLib",
-    "pages/openapi/openapi",
-    "pages/openapi/serverapi/serverapi",
-    "pages/openapi/callback/callback",
-    "pages/openapi/cloudid/cloudid",
-    "pages/im/im",
-    "pages/im/room/room",
+    "pages/profile/index",
+    "pages/activate/index",
+    "pages/examSchedule/index",
     "pages/subject/index",
     "pages/entry/index",
     "pages/question/index",
@@ -26,7 +15,7 @@
     "pages/study/index",
     "pages/detail/index",
     "pages/look/index",
-    "pages/pay/index",
+    "pages/view/index",
     "pages/exam/exam",
     "pages/result/result",
     "pages/examresult/examresult",
@@ -37,10 +26,14 @@
     "backgroundColor": "#F6F6F6",
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#1bcfad",
-    "navigationBarTitleText": "考试助手",
+    "navigationBarTitleText": "基里隆项目部业务培训考试",
     "navigationBarTextStyle": "white"
   },
   "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1bcfad",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
     "list": [
       {
         "selectedIconPath": "icons/home81x81.png",
@@ -49,10 +42,16 @@
         "text": "首页"
       },
       {
+        "selectedIconPath": "icons/some81x81.png",
+        "iconPath": "icons/some81x81-2.png",
+        "pagePath": "pages/history/index",
+        "text": "我的成绩"
+      },
+      {
         "selectedIconPath": "icons/edit81x81.png",
         "iconPath": "icons/edit81x81-2.png",
-        "pagePath": "pages/info/index",
-        "text": "关于"
+        "pagePath": "pages/profile/index",
+        "text": "我的"
       }
     ]
   },

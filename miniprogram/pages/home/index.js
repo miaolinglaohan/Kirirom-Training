@@ -1,178 +1,137 @@
 // pages/home/index.js
 const app = getApp()
+
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-    openid:'',
-    queryResult: []
+    openid: '',
+    queryResult: [],
+
+    // 统计条数据（Phase 0 占位，Phase 2 后接入真实数据）
+    stats: {
+      answered: 0,
+      accuracy: 0
+    },
+
+    // 当前考试通知卡片
+    // status: pending(未开考) | ongoing(进行中) | submitted(已交卷) | expired(已截止)
+    // Phase 0 占位，Phase 3 接入真实数据
+    currentExam: null
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-    if (app.globalData.openid) {
-      this.setData({
-        openid: app.globalData.openid
-      })
-    }
-    this.onQuery();
+  onLoad() {
+    // 真正的初始化由 onShow 触发（先过身份守卫）
   },
-    goExam: function () {
-    var a = this.data.isCanAnswer;
-    wx.getStorageSync("uid") ? a ? wx.navigateTo({
-      url: "../exam-desc/exam-desc"
-    }) : this.testInfo() : wx.navigateTo({
-      url: "../login/login"
-    });
+
+  onShow() {
+    app.guardAuth().then(emp => {
+      if (!emp) return  // 未激活/已停用：已被 reLaunch 走
+      this.setData({ openid: app.globalData.openid || '' })
+      this.loadExamList()
+      this.loadStats()
+      this.loadCurrentExam()
+    })
   },
-  bindWechat: function () {
-    wx.showModal({
-      title: "绑定微信",
-      content: "需要绑定微信才能进行下一步操作,点击确定去绑定",
-      showCancel: !0,
-      confirmText: "确定",
-      success: function (a) {
-        console.log(a), a.confirm && wx.navigateTo({
-          url: "../bindWechat/bindWechat"
-        });
-      }
-    });
-  },
-  testInfo: function () {
-    wx.showModal({
-      title: "完善信息",
-      content: "答题前需要完善姓名和手机号信息",
-      showCancel: !0,
-      confirmText: "去完善",
-      success: function (a) {
-        console.log(a), a.confirm && wx.navigateTo({
-          url: "../my-info/my-info"
-        });
-      }
-    });
-  },
-  onQuery: function() {
-    const db = wx.cloud.database()
-    db.collection('exam').get({
+
+  // —— 数据加载 ——
+  loadExamList() {
+    wx.cloud.database().collection('exam').get({
       success: res => {
-        this.setData({
-          queryResult: res.data
-        })
-        console.log('[数据库] [查询记录] 成功: ', res)
+        this.setData({ queryResult: res.data })
       },
       fail: err => {
-        wx.showToast({
-          icon: 'none',
-          title: '查询记录失败'
-        })
-        console.error('[数据库] [查询记录] 失败：', err)
+        console.error('[home] exam 查询失败：', err)
       }
     })
   },
-  toQuestionPage: function(e){
-    console.log(e.currentTarget.dataset.id);
-    let id = e.currentTarget.dataset.id;
-    let url = '/pages/question/index?id='+id;
-    console.log('[跳转url] ：', url)
 
-    wx.navigateTo({
-      url: url
+  loadStats() {
+    // Phase 0 占位实现：从 historys 集合数一下
+    // Phase 2 改为正经的 stats 云函数
+    const db = wx.cloud.database()
+    db.collection('historys').count({
+      success: res => {
+        this.setData({ 'stats.answered': res.total || 0 })
+      },
+      fail: () => {}
     })
-  },
-  toSubjectsPage: function(e){
-    console.log(e.currentTarget.dataset.id);
-    let id = e.currentTarget.dataset.id;
-
-    let url = '/pages/subject/index?id='+id;
-    wx.navigateTo({
-      url: url
-    })
-  }, 
-  getExamByCode(code){
-    let exams = this.data.queryResult;
-    let exam;
-    exams.forEach((item)=>{
-      if(item.code == code){
-        exam = item;
-      }
-    })
-    return exam;
-  },
-  
-  toEntryPage: function(e){
-    console.log(e.currentTarget.dataset.code);
-    let code = e.currentTarget.dataset.code;
-    let url = '/pages/entry/index?code='+code;
-    wx.navigateTo({
-      url: url
-    })
-  },  
-  toAttendPage: function(e){
-    console.log(e.currentTarget.dataset.id);
-    let id = e.currentTarget.dataset.id;
-    let title = e.currentTarget.dataset.title;
-    let url;
-    url = '/pages/question/index?id='+id +'&title=' +title;
-    wx.navigateTo({
-      url: url
-    })
-
+    // accuracy 暂时保持 0，等正经统计逻辑接入
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-    const pages = getCurrentPages();
-    const prevPage = pages[pages.length - 1];
-    console.log('开始输出');
-    console.log(pages);
-    console.log(prevPage);
+  loadCurrentExam() {
+    // Phase 3 才真正实现；Phase 0 先不显示考试卡片
+    this.setData({ currentExam: null })
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-    this.onQuery();
+  // —— 入口跳转 ——
+  goExamList() {
+    // 顺序练习：跳到第一个 exam 的 subjects 列表，没有则提示
+    if (this.data.queryResult.length === 0) {
+      wx.showToast({ icon: 'none', title: '暂无可练习题库' })
+      return
+    }
+    const first = this.data.queryResult[0]
+    wx.navigateTo({ url: '/pages/subject/index?id=' + first._id })
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
+  goRandom() {
+    if (this.data.queryResult.length === 0) {
+      wx.showToast({ icon: 'none', title: '暂无可练习题库' })
+      return
+    }
+    // 随机刷题 = 走 simple 页（已有逻辑）
+    const first = this.data.queryResult[0]
+    wx.navigateTo({ url: '/pages/simple/index?id=' + first._id })
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
+  goNote() {
+    wx.navigateTo({ url: '/pages/note/note' })
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
+  goReview() {
+    wx.navigateTo({ url: '/pages/review/review' })
   },
 
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
+  goHistory() {
+    wx.switchTab({ url: '/pages/history/index' })
   },
 
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
+  goProfile() {
+    wx.switchTab({ url: '/pages/profile/index' })
+  },
 
+  // —— 大按钮：模拟考试 ——
+  goMockExam() {
+    // Phase 0：先复用现有 simple 页（随机刷题）作为模考入口，不写历史
+    // Phase 2 后改为正式的模考流程（独立云函数 + 不写 historys）
+    if (this.data.queryResult.length === 0) {
+      wx.showToast({ icon: 'none', title: '暂无可用题库' })
+      return
+    }
+    const first = this.data.queryResult[0]
+    wx.navigateTo({ url: '/pages/simple/index?id=' + first._id + '&mode=mock' })
+  },
+
+  // —— 大按钮：考试安排 ——
+  goExamSchedule() {
+    wx.navigateTo({ url: '/pages/examSchedule/index' })
+  },
+
+  // —— 考试卡片点击 ——
+  onTapExamCard() {
+    // Phase 3 实现：根据状态决定跳候考页/考试页/成绩页
+    wx.showToast({ icon: 'none', title: '考试功能待 Phase 2/3 实现' })
+  },
+
+  // —— 题库分类跳转（原有逻辑保留）——
+  toSubjectsPage(e) {
+    const id = e.currentTarget.dataset.id
+    wx.navigateTo({ url: '/pages/subject/index?id=' + id })
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '基里隆项目部业务培训考试',
+      path: '/pages/home/index'
+    }
   }
 })

@@ -1,12 +1,97 @@
-<view class="page-home">
-  <view class="title">题库目前收录以下类型考试</view>
-  <view class="home">
-        <block wx:for="{{queryResult}}" wx:key="*this" wx:for-index="idx" wx:for-item="exam">
-            <view class="brand" bindtap="toSubjectsPage" data-id="{{exam._id}}" data-code="{{exam.code}}">
-                <view class="sortnum">{{idx+1}}</view>
-                <view class="name">{{exam.name}}</view>
-                <view class="arraw">></view>
-            </view>       
-        </block>
+<view class="home-page">
+  <!-- 顶部统计条 -->
+  <view class="stats-bar">
+    <view class="stat-item">
+      <view class="stat-label">已答题数</view>
+      <view class="stat-value">{{stats.answered}}</view>
+      <view class="stat-sub">累计</view>
     </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <view class="stat-label">正确率</view>
+      <view class="stat-value">{{stats.accuracy}}%</view>
+      <view class="stat-sub">总体</view>
+    </view>
+  </view>
+
+  <!-- 考试通知卡片 -->
+  <view class="exam-card" wx:if="{{currentExam}}" bindtap="onTapExamCard">
+    <view class="exam-card-header">
+      <text class="exam-icon">📢</text>
+      <text class="exam-title">{{currentExam.name}}</text>
+    </view>
+    <view class="exam-card-body">
+      <text class="exam-time">{{currentExam.timeText}}</text>
+      <view class="exam-status status-{{currentExam.status}}">
+        {{currentExam.statusText}}
+      </view>
+    </view>
+    <view class="exam-card-footer">
+      <text class="exam-action">{{currentExam.actionText}}</text>
+      <text class="exam-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="empty-exam-card" wx:else>
+    <text class="empty-text">本月暂无摸底考试安排</text>
+  </view>
+
+  <!-- 两个大圆形按钮：模拟考试 / 考试安排 -->
+  <view class="big-buttons">
+    <view class="big-btn big-btn-blue" bindtap="goMockExam">
+      <view class="big-btn-inner">
+        <view class="big-btn-icon">📝</view>
+        <text class="big-btn-text">模拟考试</text>
+      </view>
+    </view>
+    <view class="big-btn big-btn-green" bindtap="goExamSchedule">
+      <view class="big-btn-inner">
+        <view class="big-btn-icon">📅</view>
+        <text class="big-btn-text">考试安排</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 入口图标网格 -->
+  <view class="entry-grid">
+    <view class="entry-item" bindtap="goExamList">
+      <view class="entry-icon icon-1">🎯</view>
+      <text class="entry-label">顺序练习</text>
+    </view>
+    <view class="entry-item" bindtap="goRandom">
+      <view class="entry-icon icon-2">🎲</view>
+      <text class="entry-label">随机刷题</text>
+    </view>
+    <view class="entry-item" bindtap="goNote">
+      <view class="entry-icon icon-3">📝</view>
+      <text class="entry-label">我的收藏</text>
+    </view>
+    <view class="entry-item" bindtap="goReview">
+      <view class="entry-icon icon-4">📋</view>
+      <text class="entry-label">错题本</text>
+    </view>
+    <view class="entry-item" bindtap="goHistory">
+      <view class="entry-icon icon-5">📊</view>
+      <text class="entry-label">我的成绩</text>
+    </view>
+    <view class="entry-item" bindtap="goProfile">
+      <view class="entry-icon icon-6">👤</view>
+      <text class="entry-label">个人信息</text>
+    </view>
+  </view>
+
+  <!-- 题库分类（原有的练习入口） -->
+  <view class="section-title-bar" wx:if="{{queryResult.length > 0}}">
+    <text class="section-title-text">题库分类</text>
+  </view>
+
+  <view class="exam-list" wx:if="{{queryResult.length > 0}}">
+    <block wx:for="{{queryResult}}" wx:key="_id" wx:for-index="idx" wx:for-item="exam">
+      <view class="exam-list-item" bindtap="toSubjectsPage" data-id="{{exam._id}}">
+        <view class="exam-list-num">{{idx + 1}}</view>
+        <view class="exam-list-name">{{exam.name}}</view>
+        <view class="exam-list-arrow">›</view>
+      </view>
+    </block>
+  </view>
 </view>
