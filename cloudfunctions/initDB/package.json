@@ -1,0 +1,14 @@
+{
+  "name": "initDB",
+  "version": "1.0.0",
+  "description": "一次性数据库初始化云函数：建集合 + 写种子数据",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}
