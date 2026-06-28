@@ -19,7 +19,7 @@ async function requireHr(OPENID) {
   if (!OPENID) return { err: { ok: false, code: 'NO_OPENID', message: '无法获取微信身份' } }
   const r = await db.collection('employees').where({ openid: OPENID }).limit(1).get()
   const me = r.data[0]
-  if (!me || me.active === false || me.role !== 'hr') {
+  if (!me || me.active === false || (me.role !== 'hr' && me.role !== 'admin')) {
     return { err: { ok: false, code: 'FORBIDDEN', message: '没有 HR 权限' } }
   }
   return { me }

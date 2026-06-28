@@ -12,7 +12,7 @@ Page({
   onShow() {
     app.guardAuth().then(emp => {
       if (!emp) return
-      if (emp.role !== 'hr') {
+      if (emp.role !== 'hr' && emp.role !== 'admin') {
         wx.showToast({ icon: 'none', title: '无权访问' })
         setTimeout(() => wx.reLaunch({ url: '/pages/home/index' }), 800)
         return
@@ -49,6 +49,10 @@ Page({
     const id = e.currentTarget.dataset.id
     const item = this.data.list.find(x => x._id === id)
     if (!item) return
+    if (item.role === 'admin') {
+      wx.showToast({ icon: 'none', title: '超管账号请在控制台调整' })
+      return
+    }
     if (this.data.me && item.openid === this.data.me.openid) {
       wx.showToast({ icon: 'none', title: '不能修改自己的角色' })
       return
@@ -67,6 +71,10 @@ Page({
     const id = e.currentTarget.dataset.id
     const item = this.data.list.find(x => x._id === id)
     if (!item) return
+    if (item.role === 'admin') {
+      wx.showToast({ icon: 'none', title: '超管账号请在控制台调整' })
+      return
+    }
     if (this.data.me && item.openid === this.data.me.openid) {
       wx.showToast({ icon: 'none', title: '不能停用自己' })
       return
@@ -94,7 +102,8 @@ Page({
           FORBIDDEN: '无权操作',
           SELF_LOCK: '不能修改自己',
           NOT_FOUND: '员工不存在',
-          INVALID_PATCH: '参数错误'
+          INVALID_PATCH: '参数错误',
+          PROTECTED: '超管账号请在控制台调整'
         }
         wx.showToast({ icon: 'none', title: msgMap[r.code] || r.msg || '操作失败' })
         return

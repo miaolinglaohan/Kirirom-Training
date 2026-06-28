@@ -17,7 +17,7 @@ Page({
   onShow() {
     app.guardAuth().then(emp => {
       if (!emp) return
-      if (emp.role !== 'hr') {
+      if (emp.role !== 'hr' && emp.role !== 'admin') {
         wx.showToast({ icon: 'none', title: '无权访问' })
         setTimeout(() => wx.reLaunch({ url: '/pages/home/index' }), 800)
         return

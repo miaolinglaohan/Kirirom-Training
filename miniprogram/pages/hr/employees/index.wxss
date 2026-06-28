@@ -28,6 +28,7 @@
   color: #fff;
 }
 .tag.hr { background: #2d8cf0; }
+.tag.admin { background: #f5a623; }
 .tag.off { background: #b0b0b0; }
 
 .row2 { margin-top: 8rpx; font-size: 24rpx; color: #888; }

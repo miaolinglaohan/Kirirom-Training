@@ -31,7 +31,7 @@ Page({
       if (!emp) return  // 未激活/已停用：已被 reLaunch 走
       this.setData({
         openid: app.globalData.openid || '',
-        isHr: emp.role === 'hr'
+        isHr: emp.role === 'hr' || emp.role === 'admin'
       })
       this.loadExamList()
       this.loadStats()
