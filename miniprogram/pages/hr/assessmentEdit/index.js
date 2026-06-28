@@ -59,9 +59,28 @@ Page({
 
   loadSubjects() {
     this.setData({ loadingSubjects: true })
-    wx.cloud.database().collection('exam').limit(100).get()
+    // 改走 hrListSubjects 云函数：
+    //   1) 修旧 bug —— 原实现查 exam 集合（一级试卷，1~2 条），但 assessments.subjectId
+    //      实际应该指向 subjects._id（题库二级），picker 选错集合会导致 hrSaveAssessment
+    //      报 SUBJECT_NOT_FOUND
+    //   2) 顺带消除"全量查询告警"（服务端查询不会触发客户端告警）
+    wx.cloud.callFunction({ name: 'hrListSubjects' })
       .then(res => {
-        const subjects = (res.data || []).map(s => ({ _id: s._id, name: s.name || s._id }))
+        const r = res.result || {}
+        if (!r.ok) {
+          this.setData({ loadingSubjects: false })
+          wx.showToast({ icon: 'none', title: r.msg || '题库加载失败' })
+          return
+        }
+        const exams = r.exams || []
+        const examMap = {}
+        exams.forEach(e => { examMap[e._id] = e.name || e._id })
+        // 标签拼成「题库名（一级试卷名）」，方便 HR 在多个 exam 下区分同名题库
+        const subjects = (r.list || []).map(s => {
+          const ex = examMap[s.pid]
+          const label = ex ? `${s.name || s._id}（${ex}）` : (s.name || s._id)
+          return { _id: s._id, name: label }
+        })
         let idx = -1
         if (this.data.form.subjectId) {
           idx = subjects.findIndex(s => s._id === this.data.form.subjectId)

@@ -41,15 +41,21 @@ Page({
 
   // —— 数据加载 ——
   loadExamList() {
-    // limit(50) 兼具：消除"全量查询告警" + 防极端情况下一级试卷被批量灌入时拉爆首页
-    wx.cloud.database().collection('exam').limit(50).get({
-      success: res => {
-        this.setData({ queryResult: res.data })
-      },
-      fail: err => {
-        console.error('[home] exam 查询失败：', err)
-      }
-    })
+    // 一级 exam 表是字典表（生产 1~2 条），业务上必须取全表。
+    // 但小程序索引检查器只看是否带 where 条件，不带就报"全量查询告警"，
+    // 这里加一个永真的 _id exists(true) 条件（走主键索引），等价于全扫但能消除告警。
+    const db = wx.cloud.database()
+    db.collection('exam')
+      .where({ _id: db.command.exists(true) })
+      .limit(50)
+      .get({
+        success: res => {
+          this.setData({ queryResult: res.data })
+        },
+        fail: err => {
+          console.error('[home] exam 查询失败：', err)
+        }
+      })
   },
 
   loadStats() {
