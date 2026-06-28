@@ -1,0 +1,9 @@
+{
+  "name": "getServerTime",
+  "version": "1.0.0",
+  "description": "返回服务端时间戳，供考试倒计时校时",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

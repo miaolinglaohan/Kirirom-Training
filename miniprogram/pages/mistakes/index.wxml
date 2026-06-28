@@ -1,0 +1,37 @@
+<!-- pages/mistakes/index.wxml -->
+<view class="mk-page">
+
+  <view class="mk-header">
+    <view class="mk-title">我的错题</view>
+    <view class="mk-sub">汇总最近 20 次考试中答错的题目，可点击进入查看正确答案</view>
+  </view>
+
+  <view class="mk-empty" wx:if="{{!loading && list.length === 0}}">
+    <view class="mk-empty-icon">📭</view>
+    <view class="mk-empty-text">{{emptyTip}}</view>
+  </view>
+
+  <view class="mk-list" wx:if="{{list.length > 0}}">
+    <view
+      class="mk-card"
+      wx:for="{{list}}"
+      wx:key="*this"
+      data-id="{{item.historyId}}"
+      data-idx="{{item.idx}}"
+      bindtap="toReview"
+    >
+      <view class="mk-card-head">
+        <view class="mk-card-num">#{{index + 1}}</view>
+        <view class="mk-card-source">{{item.source}} · {{item.dateText}}</view>
+      </view>
+      <view class="mk-card-q">{{item.qtitle}}</view>
+      <view class="mk-card-foot">
+        <view class="mk-tag tag-wrong">您选 {{item.userText}}</view>
+        <view class="mk-tag tag-right">正确 {{item.officialText}}</view>
+        <view class="mk-arrow">查看 ›</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="mk-loading" wx:if="{{loading}}">加载中…</view>
+</view>

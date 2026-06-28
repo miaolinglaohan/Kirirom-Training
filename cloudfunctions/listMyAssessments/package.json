@@ -1,0 +1,9 @@
+{
+  "name": "listMyAssessments",
+  "version": "1.0.0",
+  "description": "列出当前员工可见的摸底考试（绕过 _openid 默认过滤）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

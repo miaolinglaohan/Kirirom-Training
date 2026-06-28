@@ -32,8 +32,9 @@
     </view>
   </view>
 
-  <view class="empty-exam-card" wx:else>
+  <view class="empty-exam-card" wx:else bindtap="onTapExamCard">
     <text class="empty-text">本月暂无摸底考试安排</text>
+    <text class="empty-action">查看考试安排 ›</text>
   </view>
 
   <!-- 两个大圆形按钮：模拟考试 / 考试安排 -->

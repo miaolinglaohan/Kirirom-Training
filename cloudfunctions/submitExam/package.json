@@ -1,0 +1,9 @@
+{
+  "name": "submitExam",
+  "version": "1.0.0",
+  "description": "交卷：服务端判分、写 historys、更新 enrollment 状态",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

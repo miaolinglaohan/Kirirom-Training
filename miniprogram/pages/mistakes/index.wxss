@@ -1,0 +1,101 @@
+/* pages/mistakes/index.wxss */
+page { background: #f4f6f8; }
+
+.mk-page { padding: 24rpx; }
+
+.mk-header {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.mk-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #222;
+}
+.mk-sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #888;
+  line-height: 1.5;
+}
+
+.mk-empty {
+  text-align: center;
+  padding: 140rpx 0;
+}
+.mk-empty-icon { font-size: 90rpx; }
+.mk-empty-text {
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  color: #888;
+}
+
+.mk-list { margin-top: 20rpx; }
+.mk-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.mk-card-head {
+  display: flex;
+  align-items: center;
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 12rpx;
+}
+.mk-card-num {
+  background: #fde2e2;
+  color: #e74c3c;
+  padding: 2rpx 14rpx;
+  border-radius: 16rpx;
+  font-weight: 600;
+  margin-right: 12rpx;
+}
+.mk-card-source { flex: 1; }
+
+.mk-card-q {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+  /* 限 2 行 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mk-card-foot {
+  margin-top: 16rpx;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+.mk-tag {
+  font-size: 22rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+}
+.tag-wrong {
+  background: #fdf2f0;
+  color: #e74c3c;
+}
+.tag-right {
+  background: #d8f5ee;
+  color: #1bcfad;
+}
+.mk-arrow {
+  margin-left: auto;
+  font-size: 24rpx;
+  color: #1bcfad;
+}
+
+.mk-loading {
+  text-align: center;
+  color: #888;
+  margin-top: 200rpx;
+}

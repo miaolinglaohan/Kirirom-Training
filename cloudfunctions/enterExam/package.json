@@ -1,0 +1,9 @@
+{
+  "name": "enterExam",
+  "version": "1.0.0",
+  "description": "进入考场：抽题、固化快照、防重入",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

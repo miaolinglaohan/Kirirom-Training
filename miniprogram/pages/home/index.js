@@ -58,8 +58,42 @@ Page({
   },
 
   loadCurrentExam() {
-    // Phase 3 才真正实现；Phase 0 先不显示考试卡片
-    this.setData({ currentExam: null })
+    // 调云函数取「进行中 / 即将开始」的考试，挑第一条展示
+    wx.cloud.callFunction({
+      name: 'listMyAssessments',
+      data: { onlyActive: true }
+    }).then(res => {
+      const r = res.result || {}
+      if (!r.ok || !r.list || r.list.length === 0) {
+        this.setData({ currentExam: null })
+        return
+      }
+      // 优先展示「进行中」，否则展示最近的「未开考」
+      const ongoing = r.list.find(x => x.status === 'ongoing')
+      const pending = r.list.find(x => x.status === 'pending')
+      const pick = ongoing || pending
+      if (!pick) {
+        this.setData({ currentExam: null })
+        return
+      }
+      const start = pick.startMs
+      const startD = new Date(start)
+      const pad = n => (n < 10 ? '0' + n : '' + n)
+      const timeText = `${startD.getFullYear()}-${pad(startD.getMonth() + 1)}-${pad(startD.getDate())} ${pad(startD.getHours())}:${pad(startD.getMinutes())}`
+      this.setData({
+        currentExam: {
+          _id: pick._id,
+          name: pick.name,
+          timeText,
+          status: pick.status,
+          statusText: pick.status === 'ongoing' ? '进行中' : '未开考',
+          actionText: pick.status === 'ongoing' ? '立即进入考场' : '查看详情'
+        }
+      })
+    }).catch(err => {
+      console.error('[home] listMyAssessments 失败', err)
+      this.setData({ currentExam: null })
+    })
   },
 
   // —— 入口跳转 ——
@@ -88,7 +122,7 @@ Page({
   },
 
   goReview() {
-    wx.navigateTo({ url: '/pages/review/review' })
+    wx.navigateTo({ url: '/pages/mistakes/index' })
   },
 
   goHistory() {
@@ -101,14 +135,29 @@ Page({
 
   // —— 大按钮：模拟考试 ——
   goMockExam() {
-    // Phase 0：先复用现有 simple 页（随机刷题）作为模考入口，不写历史
-    // Phase 2 后改为正式的模考流程（独立云函数 + 不写 historys）
+    // 直接走真正的模考流程（云函数 enterExam，isMock=true，写 examEnrollments 不写 historys）
     if (this.data.queryResult.length === 0) {
       wx.showToast({ icon: 'none', title: '暂无可用题库' })
       return
     }
-    const first = this.data.queryResult[0]
-    wx.navigateTo({ url: '/pages/simple/index?id=' + first._id + '&mode=mock' })
+    // 题库只有一个就直接进；多个走选择页
+    if (this.data.queryResult.length === 1) {
+      const first = this.data.queryResult[0]
+      wx.navigateTo({
+        url: '/pages/exam/exam?mock=1&subjectId=' + encodeURIComponent(first._id)
+      })
+      return
+    }
+    // 多题库：让用户先选一个
+    wx.showActionSheet({
+      itemList: this.data.queryResult.map(x => x.name || x._id),
+      success: r => {
+        const picked = this.data.queryResult[r.tapIndex]
+        wx.navigateTo({
+          url: '/pages/exam/exam?mock=1&subjectId=' + encodeURIComponent(picked._id)
+        })
+      }
+    })
   },
 
   // —— 大按钮：考试安排 ——
@@ -118,8 +167,20 @@ Page({
 
   // —— 考试卡片点击 ——
   onTapExamCard() {
-    // Phase 3 实现：根据状态决定跳候考页/考试页/成绩页
-    wx.showToast({ icon: 'none', title: '考试功能待 Phase 2/3 实现' })
+    const cur = this.data.currentExam
+    if (!cur) {
+      // 卡片为空时点击也跳到考试安排页（方便用户看完整列表）
+      wx.navigateTo({ url: '/pages/examSchedule/index' })
+      return
+    }
+    if (cur.status === 'ongoing') {
+      wx.navigateTo({
+        url: '/pages/exam/exam?assessmentId=' + encodeURIComponent(cur._id)
+      })
+    } else {
+      // 未开考：跳到考试安排页看详情
+      wx.navigateTo({ url: '/pages/examSchedule/index' })
+    }
   },
 
   // —— 题库分类跳转（原有逻辑保留）——

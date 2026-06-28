@@ -4,8 +4,8 @@ const app = getApp()
 Page({
   data: {
     loading: true,
-    list: [],   // 摸底考试列表
-    now: 0      // 服务端时间（Phase 2 接入 getServerTime 云函数后替换）
+    list: [],          // 摸底考试列表（已加工，含 status/statusText/...）
+    serverOffset: 0    // 服务端时间偏移（仅用于本地倒计时显示，不影响判定）
   },
 
   onLoad() {
@@ -22,46 +22,48 @@ Page({
   },
 
   refresh() {
-    const db = wx.cloud.database()
-    const _ = db.command
-    // 查找 mode='assessment' 且未截止的考试
-    // Phase 0 占位实现：直接查所有 visible 且 mode=assessment 的考试
-    db.collection('exam').where({
-      mode: 'assessment',
-      visible: true
-    }).get({
-      success: res => {
-        this.setData({
-          loading: false,
-          list: this.decorate(res.data || []),
-          now: Date.now()
-        })
-      },
-      fail: err => {
-        console.error('[examSchedule] 查询失败', err)
+    wx.cloud.callFunction({
+      name: 'listMyAssessments',
+      data: { onlyActive: false }
+    }).then(res => {
+      const r = res.result || {}
+      if (!r.ok) {
+        console.error('[examSchedule] 后端拒绝', r)
         this.setData({ loading: false, list: [] })
+        if (r.code !== 'UNACTIVATED') {
+          wx.showToast({ icon: 'none', title: r.message || '加载失败' })
+        }
+        return
       }
+      this.setData({
+        loading: false,
+        serverOffset: (r.now || Date.now()) - Date.now(),
+        list: this.decorate(r.list || [])
+      })
+    }).catch(err => {
+      console.error('[examSchedule] 云函数失败', err)
+      this.setData({ loading: false, list: [] })
+      wx.showToast({ icon: 'none', title: '网络异常' })
     })
   },
 
   // 给每条考试加上展示用字段
   decorate(list) {
-    const now = Date.now()
+    const now = Date.now() + this.data.serverOffset
     return list.map(item => {
-      const start = item.startTime || 0
-      const end = item.endTime || 0
-      let status, statusText, canEnter = false
-      if (now < start) {
-        status = 'pending'
-        statusText = '未开考'
-      } else if (now >= start && now <= end) {
-        status = 'ongoing'
-        statusText = '进行中'
-        canEnter = true
-      } else {
-        status = 'expired'
-        statusText = '已截止'
-      }
+      const start = item.startMs || new Date(item.startTime || 0).getTime()
+      const end = item.endMs || (start + (item.duration || 0) * 60 * 1000)
+      // 服务端已计算 status，但本地 1 秒一跳时也要重算（应对时间穿越）
+      let status = item.status
+      if (now < start) status = 'pending'
+      else if (now <= end) status = 'ongoing'
+      else status = 'expired'
+
+      let statusText, canEnter = false
+      if (status === 'pending') statusText = '未开考'
+      else if (status === 'ongoing') { statusText = '进行中'; canEnter = true }
+      else statusText = '已截止'
+
       return {
         ...item,
         startTimeText: start ? this.fmtTime(start) : '',
@@ -96,12 +98,12 @@ Page({
   startTick() {
     this.stopTick()
     this.tickTimer = setInterval(() => {
+      // 保留服务端给的原始字段（startMs/endMs/...），剥离展示衍生字段后重新 decorate
       const decorated = this.decorate(this.data.list.map(it => {
-        // 移除展示字段，保留原始数据
-        const { startTimeText, endTimeText, countdownText, status, statusText, canEnter, ...rest } = it
+        const { startTimeText, endTimeText, countdownText, statusText, canEnter, ...rest } = it
         return rest
       }))
-      this.setData({ list: decorated, now: Date.now() })
+      this.setData({ list: decorated })
     }, 1000)
   },
 
@@ -123,7 +125,9 @@ Page({
       wx.showToast({ icon: 'none', title: '考试已截止' })
       return
     }
-    // ongoing：Phase 2 实现进入考场逻辑
-    wx.showToast({ icon: 'none', title: '进入考场（待 Phase 2 实现）' })
+    // ongoing：跳转考场，enterExam 会再校验一次
+    wx.navigateTo({
+      url: '/pages/exam/exam?assessmentId=' + encodeURIComponent(item._id)
+    })
   }
 })

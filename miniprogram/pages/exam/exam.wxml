@@ -1,27 +1,89 @@
-<wxs src="./../tools.wxs" module="JSON" />
-<view class="exam">
-    <view class="sortnumber">
-        <view class="left">正在诊断考点的掌握情况</view>
-        <view class="right">
-            <text>{{idx+1}}</text>/<text>{{length}}</text></view>
+<view class="exam-page">
+
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">进入考场中...</view>
+
+  <!-- 考试主体 -->
+  <view class="exam-main" wx:else>
+
+    <!-- 顶部状态栏：题号 + 倒计时 -->
+    <view class="topbar">
+      <view class="topbar-left">
+        <text class="qpos">{{curIdx + 1}}</text><text class="qsep">/</text><text class="qtotal">{{total}}</text>
+        <text class="topbar-tag" wx:if="{{isMock}}">模考</text>
+      </view>
+      <view class="topbar-right">
+        <text class="clock-icon">⏱</text>
+        <text class="remain {{timeLow ? 'remain-low' : ''}}">{{remainText}}</text>
+      </view>
     </view>
-    <view class="progress">
-        <progress percent="{{percent}}" color="#1dcc70" active />
+
+    <!-- 进度条 -->
+    <view class="progress-bar">
+      <view class="progress-inner" style="width: {{(curIdx + 1) / total * 100}}%"></view>
     </view>
-    <view class="question">
-        <view class="title">{{question.title}}</view>
-        <view class="type">{{question.typename}}</view>
-        <view class="options">
-            <view wx:for="{{options}}" wx:for-index="idx" wx:for-item="item" class="option"  data-value="{{JSON.stringify(item)}}" bindtap="selectOption">
-                <view class="icon">
-                    <image src="{{item.selected ? '/images/radio-selected.png' : '/images/radio.png'}}" />
-                </view>
-                <view class="content">{{item.code}}: {{item.content}}</view>
+
+    <!-- 题干 -->
+    <view class="question-card">
+      <view class="qtitle">
+        <text class="qtype">{{question.typename || '题'}}</text>
+        <text class="qcontent">{{question.title}}</text>
+      </view>
+
+      <view class="options">
+        <block wx:for="{{options}}" wx:key="code">
+          <view class="option {{item.selected ? 'option-selected' : ''}}"
+                data-code="{{item.code}}"
+                bindtap="selectOption">
+            <view class="opt-icon">
+              <text wx:if="{{isMulti}}" class="opt-mark">{{item.selected ? '☑' : '☐'}}</text>
+              <text wx:else class="opt-mark">{{item.selected ? '◉' : '○'}}</text>
             </view>
-        </view>
+            <view class="opt-body">
+              <text class="opt-code">{{item.code}}.</text>
+              <text class="opt-content">{{item.content}}</text>
+            </view>
+          </view>
+        </block>
+      </view>
     </view>
-    <view class="btn-area" bindtap="doNext">
-        <view class="button">{{btnText}}</view>
+
+    <!-- 底部操作栏 -->
+    <view class="bottom-bar">
+      <view class="nav-btn {{curIdx === 0 ? 'nav-btn-disabled' : ''}}" bindtap="goPrev">上一题</view>
+      <view class="nav-btn nav-btn-jump" bindtap="toggleJumpPanel">题号</view>
+      <view class="nav-btn {{curIdx >= total - 1 ? 'nav-btn-disabled' : ''}}" bindtap="goNext" wx:if="{{curIdx < total - 1}}">下一题</view>
+      <view class="nav-btn nav-btn-submit" bindtap="onSubmitTap" wx:else>交卷</view>
     </view>
-    
+
+    <!-- 答题保存状态 -->
+    <view class="saved-status" wx:if="{{lastSavedText}}">已保存 {{lastSavedText}}</view>
+
+    <!-- 跳题面板 -->
+    <view class="jump-mask" wx:if="{{showJumpPanel}}" bindtap="toggleJumpPanel"></view>
+    <view class="jump-panel" wx:if="{{showJumpPanel}}">
+      <view class="jump-title">
+        <text>答题卡</text>
+        <text class="jump-close" bindtap="toggleJumpPanel">×</text>
+      </view>
+      <view class="jump-legend">
+        <text class="legend-item"><text class="legend-dot legend-done"></text>已答</text>
+        <text class="legend-item"><text class="legend-dot legend-todo"></text>未答</text>
+        <text class="legend-item"><text class="legend-dot legend-cur"></text>当前</text>
+      </view>
+      <view class="jump-grid">
+        <block wx:for="{{questions}}" wx:key="_id" wx:for-index="i">
+          <view class="jump-cell {{i === curIdx ? 'jump-cell-cur' : (answeredMask[i] ? 'jump-cell-done' : 'jump-cell-todo')}}"
+                data-i="{{i}}" bindtap="onJumpTap">{{i + 1}}</view>
+        </block>
+      </view>
+      <view class="jump-submit" bindtap="onSubmitTap">提交答卷</view>
+    </view>
+
+    <!-- 已交卷蒙层 -->
+    <view class="submit-mask" wx:if="{{submitting}}">
+      <view class="submit-mask-text">交卷中，请稍候...</view>
+    </view>
+  </view>
+
 </view>

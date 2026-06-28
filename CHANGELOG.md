@@ -1,3 +1,53 @@
+### 20260628 · v0.2-phase2（考场核心 + 复盘 + 错题本）
+
+#### Phase 2 — 考试服务端化
+
+**5 个云函数全部落地（cloud1-d5gievact76bc75a4 环境）**
+
++ `getServerTime`：返回服务端 UTC 毫秒，客户端用 `serverOffset = serverNow - Date.now()` 校准倒计时，避免本地改时间作弊
++ `enterExam`：进考场。支持正式考（`assessmentId`）+ 模拟考（`isMock` + `subjectId`）两种入口；服务端从 `assessments` 读规则、检查可见性/部门/起止时间，随机抽题剥离 `value` 字段；写 `examEnrollments` 防重入（_id = `{assessmentId}_{openid}` 单卷一人，模考用时间戳允许多次）；正式考统一 `deadline = startTime + duration`，进场晚 = 时间少
++ `saveDraft`：30s 自动暂存用户作答；同步 `clientLastSavedAt` 与 `switchCount`
++ `submitExam`：服务端判分（集合相等才算对，多选无关顺序）+ 写 `historys`（带 `_openid` / `userAnswers` / `answersOfficial` 三个关键字段供复盘和错题本使用）+ 更新 enrollment 状态；模考可返回标准答案，正式考引导到复盘页查看
++ `listMyAssessments`：列出当前员工可见的考试。**核心价值：绕开微信默认 `_openid` 过滤器** —— HR 在云开发控制台手工建的 assessments 没有 `_openid` 字段，客户端 `db.where().get()` 会被自动加这个过滤条件而查不到记录，云函数读没有这个限制；同时做部门权限服务端过滤、计算 ongoing/pending/expired 三态
+
+**新增 2 个集合**
+
++ `assessments`：HR 派发的考试（`name` / `subjectId` / `startTime` / `duration` / `questionCount` / `targetDepts` / `visible`）
++ `examEnrollments`：每人每场的答卷快照（题目、用户作答、官方答案、deadline、状态、切屏计数）
+
+**前端页面**
+
++ `pages/exam` 完整重写（~310 行 js + 全新 wxml/wxss）：服务端取题 + 倒计时 + 单选/多选自动识别（typecode `02` = 多选）+ 30s 静默 saveDraft + onHide 计 switchCount + 1 分钟内闪红警告 + 自动交卷 + 滑出式题号跳转面板
++ `pages/examresult` 重写：顶部分数大图 + 答对/答错/总题数三栏 + 模考可展开"查看正确答案"折叠块（每选项绿/红配色 + 用户/官方标签 + 解析）+ 正式考"查看完整复盘 ›"卡片引导到我的成绩
++ `pages/review` 完整重写：从 `historys` 快照本地渲染（不再二次查 `question` 集合）+ 选项三态配色（绿实底 = 选对、红实底 = 选错、绿虚框 = 应选未选）+ 题干 / 您选 / 正确 / 解析四行 + 旧版数据兜底页 + 支持 `?idx=N` 参数定位到指定题
++ **新增 `pages/mistakes`**：聚合最近 20 次 `historys` 记录的错题列表，每条显示来源考试 + 时间 + "您选 / 正确"简略，点击带 historyId + idx 跳到复盘页定位
++ `pages/home`：考试通知卡接 `listMyAssessments` 真实数据，4 态（ongoing 跳考试 / pending 跳考试安排 / null 显示"查看考试安排" / submitted 显示"已完成"）；"错题本"按钮跳新 mistakes 页；"模拟考试"大按钮调通真实模考流程
++ `pages/examSchedule`：改用 `listMyAssessments`，1s 倒计时刷新 + ongoing 项可直接进考场
+
+**关键修复**
+
++ **云函数写 historys 必须显式带 `_openid: OPENID`** —— 否则客户端 `where({_openid: openid})` 永远查不到自己刚交卷的记录，会出现"成绩页没我的考试"和"错题本永远是空"两个怪 bug
++ 用 `app.globalData.lastExamResult` 跨页传题目快照（`wx.redirectTo` URL 太短装不下）
+
+#### 数据库设计
+
++ 更新 `docs/数据库设计.md`：补 assessments / examEnrollments 两张表 schema
+
+#### 文档
+
++ 新增 `docs/Phase2-Step2.1-建assessments和enrollments集合.md`
++ 新增 `docs/Phase2-Step2.2-2.5-部署4个云函数.md`
++ 新增 `docs/初始考试数据.json`（HR 用于种数据的样板）
++ `月度摸底考试改造方案-v2.md` 进度表把 Phase 2 标记为已完成，补"Phase 2 实际产出"小节
+
+#### 验证场景
+
++ 正式考完整跑通：进入 → 作答 5 题 → 交卷 → 4/5 分 → 点"查看完整复盘 ›" → 我的成绩列表看到记录 → 点开复盘 → 题干 / 选项 / 标准答案高亮展示正确
++ 错题本：聚合显示历次错题，点击直达复盘对应题目
++ 防重入：同一人同一场二次进入提示"您已提交此次考试"
+
+---
+
 ### 20260628 · v0.1-phase1（KIRIROM TRAINING 二开起点）
 
 #### Phase 0 — 项目清理 + UI 重做

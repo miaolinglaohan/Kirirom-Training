@@ -1,38 +1,85 @@
-<!--pages/examResult/index.wxml-->
-<view class='page'>
+<view class="result-page">
+
+  <!-- 顶部分数 -->
   <view class="topBG">
-      <view class="top">
-        <view class="title">答题得分</view>
-        <image class="image" src="/images/todaySubmit2.png"></image>
-      </view>
-      <view class="bottom">
-        {{rightNum}}
-        <text style="font-size:35rpx;">分</text>
-      </view>
+    <view class="top">
+      <view class="title">{{isMock ? '模考结果' : '答题得分'}}</view>
+    </view>
+    <view class="score-area">
+      <text class="score-num">{{rightNum}}</text>
+      <text class="score-unit">/ {{total}}</text>
+    </view>
+    <view class="accuracy">正确率 {{accuracyText}}</view>
   </view>
-  <view style="height:20rpx;background:#f5f6f7"></view>
-  <view bindtap="examBack" class="examBack">
-        <view class="left">
-            <image src="/images/exam-icon.png"></image>
-            <view>
-                <view class="title">查看错题</view>
-                <view class="title-text">做错<text style="color:#fa3638">{{errNum}}</text>题，未做<text style="color:#46c223">{{unAnswerNum}}</text>题目</view>
-            </view>
-        </view>
-        <view class="right">
-            <image src="/images/right.png"></image>
-        </view>
+
+  <view class="divider"></view>
+
+  <!-- 概览统计 -->
+  <view class="summary-row">
+    <view class="summary-cell">
+      <view class="cell-num cell-right">{{rightNum}}</view>
+      <view class="cell-label">答对</view>
     </view>
-    <view bindtap="exam_repeat" class="examBack">
-        <view class="left">
-            <image src="/images/white-icon.png"></image>
-            <view>
-                <view class="title">重新考试</view>
-                <view class="title-text">状态不错，再考一次呗</view>
-            </view>
-        </view>
-        <view class="right">
-            <image src="/images/right.png"></image>
-        </view>
+    <view class="summary-cell">
+      <view class="cell-num cell-wrong">{{errNum}}</view>
+      <view class="cell-label">答错</view>
     </view>
+    <view class="summary-cell">
+      <view class="cell-num">{{total}}</view>
+      <view class="cell-label">总题数</view>
+    </view>
+  </view>
+
+  <!-- 模考：查看正确答案 -->
+  <block wx:if="{{isMock && reviewList.length > 0}}">
+    <view class="review-toggle" bindtap="toggleReview">
+      <text class="toggle-icon">📖</text>
+      <text class="toggle-text">{{showReview ? '收起答案解析' : '查看正确答案'}}</text>
+      <text class="toggle-arrow">{{showReview ? '▲' : '▼'}}</text>
+    </view>
+
+    <view class="review-list" wx:if="{{showReview}}">
+      <block wx:for="{{reviewList}}" wx:key="qid" wx:for-item="r">
+        <view class="review-card {{r.right ? 'review-right' : 'review-wrong'}}">
+          <view class="rev-head">
+            <text class="rev-idx">第 {{r.idx}} 题</text>
+            <text class="rev-type">{{r.qtype}}</text>
+            <text class="rev-flag {{r.right ? 'flag-right' : 'flag-wrong'}}">{{r.right ? '✓ 正确' : '✗ 错误'}}</text>
+          </view>
+          <view class="rev-title">{{r.qtitle}}</view>
+          <view class="rev-options">
+            <block wx:for="{{r.optionLines}}" wx:key="code" wx:for-item="opt">
+              <view class="rev-opt {{opt.isOfficial ? 'opt-official' : ''}} {{opt.isUser && !opt.isOfficial ? 'opt-user-wrong' : ''}}">
+                <text class="rev-opt-code">{{opt.code}}.</text>
+                <text class="rev-opt-content">{{opt.content}}</text>
+                <text class="rev-opt-tag tag-official" wx:if="{{opt.isOfficial}}">正确答案</text>
+                <text class="rev-opt-tag tag-user" wx:if="{{opt.isUser && !opt.isOfficial}}">你选</text>
+              </view>
+            </block>
+          </view>
+          <view class="rev-foot">
+            <text>你的答案：<text class="ans-user {{r.right ? 'ans-right' : 'ans-wrong'}}">{{r.userText}}</text></text>
+            <text class="ans-sep">|</text>
+            <text>正确答案：<text class="ans-official">{{r.officialText}}</text></text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+
+  <!-- 正式考：不在本页直接渲染复盘，引导前往「我的成绩」查看完整答案与解析 -->
+  <view class="hint-card" wx:if="{{!isMock}}" bindtap="goHistory">
+    <text class="hint-icon">📖</text>
+    <view class="hint-body">
+      <view class="hint-title">查看完整复盘 ›</view>
+      <view class="hint-sub">前往「我的成绩」可逐题对照标准答案，巩固薄弱知识点。</view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-actions">
+    <view class="btn-secondary" bindtap="goHistory">我的成绩</view>
+    <view class="btn-primary" bindtap="goHome">返回首页</view>
+  </view>
+
 </view>

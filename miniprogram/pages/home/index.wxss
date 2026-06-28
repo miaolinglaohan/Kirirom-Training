@@ -118,13 +118,20 @@ page {
   margin: 24rpx 24rpx 0;
   background: #fff;
   border-radius: 16rpx;
-  padding: 40rpx;
-  text-align: center;
+  padding: 32rpx 40rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .empty-text {
   font-size: 26rpx;
   color: #aaa;
+}
+
+.empty-action {
+  font-size: 26rpx;
+  color: #1bcfad;
 }
 
 /* —— 两个大圆形按钮 —— */

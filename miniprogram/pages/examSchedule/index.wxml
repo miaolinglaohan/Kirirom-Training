@@ -25,7 +25,7 @@
         </view>
         <view class="card-row" wx:if="{{item.duration}}">
           <text class="row-label">答题时长</text>
-          <text class="row-value">{{item.duration / 60}} 分钟</text>
+          <text class="row-value">{{item.duration}} 分钟</text>
         </view>
         <view class="card-row" wx:if="{{item.questionCount}}">
           <text class="row-label">题目数量</text>

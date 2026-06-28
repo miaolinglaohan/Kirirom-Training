@@ -1,242 +1,158 @@
-// miniprogram/pages/study/study.js
-const util = require('../../utils/util.js');
-var app = getApp();
+// miniprogram/pages/review/review.js
+//
+// 复盘页（培训系统版）：
+//   - 直接读取 historys 集合中的快照渲染，不再二次查询 question 集合
+//   - 展示：题干 + 选项 + 用户作答 + 正确答案 + 对错 + 解析（如有）
+//   - 设计前提：内部培训用，复盘允许公开标准答案，便于员工复习巩固
+//
+// 选项配色规则：
+//   - 既是用户选 又是正确  → 绿色高亮（answered-right）
+//   - 是用户选 但错        → 红色高亮（answered-wrong）
+//   - 用户没选 但是正确    → 绿色虚框（official-only）
+//   - 其他                 → 普通灰白
+
+const app = getApp()
+
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-    percent: 0,
-    btnText: '下一题',
+    loading: true,
+    title: '',
+    createTime: '',
     rightNum: 0,
+    total: 0,
     idx: 0,
-    length: 0,
-    question: {
-
-    },
-    selectedOption: {
-      code: '',
-      content: '',
-      value: -1
-    },
-    errNum: 0,
-    rightNum: 0,
-    score_arr: [],
-    options_arr: []
+    percent: 0,
+    item: null,            // 当前题目快照
+    optionLines: [],       // [{code, content, isUser, isOfficial, state}]
+    userText: '-',
+    officialText: '-',
+    right: false,
+    isLast: false,
+    onlyWrong: false       // 由 mistakes 页跳过来时筛选模式
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-    console.log(options);
-    let id = options.id;
-
-    this.onQuery(id);
-    this.onGetOpenid();
-  },
-  onQuery: function(ordernum){
-    let that = this;
-    const db = wx.cloud.database();
-
-    db.collection('historys').doc(ordernum)
-    .get()
-    .then(res => {
-      console.log('[数据库] [查询记录] 成功: ', res)
-      let history = res.data;
-      that.setData({
-        history,
-        items: history.items,
-        length: history.items.length
-      },()=>{
-        that.queryQues(history.items[0]);
-      })
-    })
-  },
-  queryQues: function(id){
-    let that = this;
-    const db = wx.cloud.database();
-
-    db.collection('question').doc(id)
-    .get()
-    .then(res => {
-      console.log('[数据库] [查询记录] 成功: ', res)
-      let question = res.data;
-      let options = JSON.parse(question.options);
-      options.map((option)=>{
-        option.selected = false;
-      })
-      that.setData({
-        question,
-        options
-      })
-    })
+  onLoad(options) {
+    const id = options && options.id ? String(options.id) : ''
+    const onlyWrong = !!(options && options.onlyWrong === '1')
+    const startIdx = options && options.idx != null ? Number(options.idx) : 0
+    if (!id) {
+      wx.showToast({ icon: 'none', title: '缺少记录 ID' })
+      return
+    }
+    this.setData({ onlyWrong })
+    this._startIdx = isNaN(startIdx) ? 0 : startIdx
+    this.loadHistory(id)
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
-  },
-  generate: function(){
-    return util.formatTime(new Date());
-  },
-  selectOption: function(e){
-    console.log(e.currentTarget.dataset);
-    let selectedOption = JSON.parse(e.currentTarget.dataset.value);
-
-  },
-  goHome: function(){
-      let url = '/pages/home/index';
-      wx.switchTab({
-        url: url
-      })
-  },
-  generate: function(){
-    return util.formatTime(new Date());
-  },
-  doNext: function(){
-    console.log('doNext')
-    
-    
-    
-    let idx = this.data.idx;
-    let length = this.data.length;
-    idx++;
-
-    let options = this.data.options;
-    let isRight = true;
-    for (const option of options) {
-      console.log(option);
-      if(option.selected == true && option.value == 0){
-        isRight = false;
-        break;
+  loadHistory(id) {
+    const db = wx.cloud.database()
+    db.collection('historys').doc(id).get().then(res => {
+      const h = res.data || {}
+      const rawItems = Array.isArray(h.items) ? h.items : []
+      // 兼容：极老历史可能 items 是字符串数组（_id），无法渲染
+      const items = rawItems.filter(x => x && typeof x === 'object' && x.title)
+      if (items.length === 0) {
+        this.setData({
+          loading: false,
+          legacy: true,
+          title: (h.subject && h.subject.name) || '历史记录'
+        })
+        return
       }
-    }
-    let rightNum = this.data.rightNum;
-    let errNum = this.data.errNum;
-    if(isRight){
-      rightNum++;
-    }else{
-      errNum++;
-    }
-    let score_arr = this.data.score_arr;
-    let options_arr = this.data.options_arr;
-    score_arr[this.data.idx] = isRight;
-    options_arr[this.data.idx] = options;
-
-    let items = this.data.items;
-    
-    let percent = ((idx+1)/length)*100;
-    if(idx == length){
+      const total = items.length
+      const subjectName = (h.subject && h.subject.name) || '考试'
+      // 构造 qid → correctCodes 映射
+      const officialMap = {}
+      ;(h.answersOfficial || []).forEach(a => {
+        const codes = (a.correctCodes || []).map(c => String(c).toUpperCase())
+        officialMap[a.qid] = codes
+      })
       this.setData({
-        rightNum,
-        errNum,
-        score_arr,
-        options_arr
-      },()=>{
-        this.goHome();
+        loading: false,
+        items,
+        userAnswers: h.userAnswers || {},
+        scoreArr: Array.isArray(h.score_arr) ? h.score_arr : [],
+        officialMap,
+        title: subjectName,
+        createTime: h.createTime || '',
+        rightNum: h.rightNum || 0,
+        total
+      }, () => {
+        let startIdx = this._startIdx || 0
+        if (startIdx < 0 || startIdx >= total) startIdx = 0
+        this.renderIdx(startIdx)
       })
-      return;
+    }).catch(err => {
+      console.error('[review] 查询 historys 失败', err)
+      wx.showToast({ icon: 'none', title: '加载失败' })
+      this.setData({ loading: false })
+    })
+  },
 
-    }
+  // 渲染第 idx 题
+  renderIdx(idx) {
+    const items = this.data.items || []
+    if (idx < 0 || idx >= items.length) return
+    const q = items[idx]
 
-    if(length-idx == 1){
-      this.setData({
-        btnText: '完成'
-      })
-      wx.showToast({
-        icon: 'none',
-        title: '已经是最后一题了'
-      })
-    }
+    const userAns = (this.data.userAnswers && this.data.userAnswers[q._id]) || []
+    const userSet = {}
+    ;(Array.isArray(userAns) ? userAns : [userAns]).forEach(c => {
+      if (c) userSet[String(c).toUpperCase()] = true
+    })
 
+    const officialCodes = (this.data.officialMap && this.data.officialMap[q._id]) || []
+    const officialSet = {}
+    officialCodes.forEach(c => { officialSet[String(c).toUpperCase()] = true })
 
-    let id = items[idx];
-    this.queryQues(id);
+    const optionLines = (q.options || []).map(opt => {
+      const code = String(opt.code).toUpperCase()
+      const isUser = !!userSet[code]
+      const isOfficial = !!officialSet[code]
+      let state = 'plain'
+      if (isUser && isOfficial) state = 'answered-right'
+      else if (isUser && !isOfficial) state = 'answered-wrong'
+      else if (!isUser && isOfficial) state = 'official-only'
+      return {
+        code: opt.code,
+        content: opt.content,
+        isUser,
+        isOfficial,
+        state
+      }
+    })
+
+    const userKeys = Object.keys(userSet).sort()
+    const officialKeys = officialCodes.slice().sort()
+    const right = !!(this.data.scoreArr && this.data.scoreArr[idx])
+    const total = this.data.total || items.length
 
     this.setData({
-      rightNum,
-      errNum,
-      score_arr,
-      options_arr,
       idx,
-      percent,
-      selectedOption: {
-        code: '',
-        content: '',
-        value: -1
-      }
-    },()=>{
-      
+      item: q,
+      optionLines,
+      userText: userKeys.length ? userKeys.join('、') : '未作答',
+      officialText: officialKeys.length ? officialKeys.join('、') : '-',
+      right,
+      isLast: idx === items.length - 1,
+      percent: total ? Math.round(((idx + 1) / total) * 100) : 0
     })
   },
-  onGetOpenid: function() {
-    let that = this;
-    // 调用云函数
-    wx.cloud.callFunction({
-      name: 'login',
-      data: {},
-      success: res => {
-        console.log('[云函数] [login]: ', res)
-        app.globalData.openid = res.result.openid
-        that.setData({
-          openid: res.result.openid
-        })
-        // wx.navigateTo({
-        //   url: '../userConsole/userConsole',
-        // })
-      },
-      fail: err => {
-        console.error('[云函数] [login] 调用失败', err)
-        wx.navigateTo({
-          url: '../deployFunctions/deployFunctions',
-        })
-      }
-    })
+
+  goPrev() {
+    if (this.data.idx > 0) this.renderIdx(this.data.idx - 1)
+  },
+
+  goNext() {
+    const items = this.data.items || []
+    if (this.data.idx < items.length - 1) {
+      this.renderIdx(this.data.idx + 1)
+    } else {
+      this.goBack()
+    }
+  },
+
+  goBack() {
+    wx.navigateBack({ delta: 1 })
   }
 })

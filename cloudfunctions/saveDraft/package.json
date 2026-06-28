@@ -1,0 +1,9 @@
+{
+  "name": "saveDraft",
+  "version": "1.0.0",
+  "description": "考试草稿保存：更新 answers、累计切后台次数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

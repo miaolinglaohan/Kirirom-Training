@@ -1,115 +1,254 @@
-page{
-    background-color: #f8f9fb;
-}
-.review .sortnumber{
-    padding: 10px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-}
-.review .sortnumber .left{
-    color: #b9bfc6;
-}
-.review .sortnumber  .right{
-    background-color: #d8f3e7;
-    border-radius: 10px;
-}
-.review .sortnumber .right text{
-    width: 20px;
-    height: 20px;
-    border-radius: 10px;
-    color: #fff;
-    background-color: #1bcfad;
-    display: inline-block;
-}
-.review .progress{
-    padding: 10px;
-}
-.review .question{
-    background-color: #f8f9fb;
-}
-.review .question .title{
-    background-color: #fff;
-    padding: 10px;
-    margin-bottom: 5px;
-}
-.review .question .type{
-    background-color: #fff;
-    margin: 5px 0;
-    height: 45px;
-    line-height: 45px;
-    vertical-align: middle;
-    padding-left: 10px;
-}
-.review .question .options{
-    background-color: #fff;
-    padding: 10px;
-    margin-bottom: 5px;
-}
-.review .question .options .option{
-    padding: 10px;
-    border-bottom: 1rpx solid #f8f9fb;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-}
-.review .question .options .option .icon image{
-    width: 20px;
-    height: 20px;
+/* pages/review/review.wxss */
+page { background: #f4f6f8; }
 
-}
-.review .question .options .option .content{
-    padding-left: 5px;
+.review-page {
+  padding: 24rpx 24rpx 200rpx 24rpx;
 }
 
-.review .btn-area{
-    margin-top: 10px;
-    display: flex;
-    flex-direction: row;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
+/* 顶部信息条 */
+.rv-header {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
 }
-.review .btn-area .button{
-    color: #fff;
-    text-align: center;
-    background-color: #1bcfad;
-    border-radius: 20px;
-    width:375rpx;
-    padding: 5px 15px;
+.rv-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #222;
 }
-.review .btn-area .gray{
-    background-color: #cccfd4;
-    color: #fff;
-    text-align: center;
-    border-radius: 20px;
-    width:250px;
-    padding: 10px 15px;
+.rv-sub {
+  margin-top: 8rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #888;
+  font-size: 24rpx;
 }
-.review .footer{
-    padding: 10px;
+.rv-score {
+  color: #1bcfad;
+  font-weight: 600;
 }
-.review .footer .btn-area{
-    display: flex;
-    flex-direction: row;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 10px 0;
-}
-.review .footer .btn-area .button{
-    color: #fff;
-    text-align: center;
-    background-color: #7b99fe;
-    border-radius: 20px;
-    width:250px;
-    padding: 10px 15px;
+.rv-progress {
+  margin-top: 16rpx;
 }
 
-.wrong{
-    background-color: #f9e5e0;
+/* 题号 / 对错 */
+.rv-meta {
+  margin-top: 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rv-idx {
+  color: #666;
+  font-size: 26rpx;
+}
+.rv-badge {
+  font-size: 24rpx;
+  padding: 4rpx 18rpx;
+  border-radius: 20rpx;
+}
+.rv-badge.ok {
+  background: #d8f5ee;
+  color: #1bcfad;
+}
+.rv-badge.bad {
+  background: #fde2e2;
+  color: #e74c3c;
+}
+
+/* 题卡 */
+.rv-card {
+  margin-top: 16rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.rv-qtitle {
+  font-size: 30rpx;
+  color: #222;
+  line-height: 1.5;
+}
+.rv-qtype {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #999;
+}
+
+.rv-options {
+  margin-top: 20rpx;
+}
+.rv-opt {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 20rpx;
+  border: 2rpx solid #ececec;
+  border-radius: 12rpx;
+  margin-bottom: 14rpx;
+  background: #fafafa;
+}
+.rv-opt-code {
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 44rpx;
+  text-align: center;
+  background: #ececec;
+  border-radius: 50%;
+  font-size: 24rpx;
+  color: #666;
+  margin-right: 18rpx;
+  flex-shrink: 0;
+}
+.rv-opt-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+}
+.rv-opt-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  margin-left: 12rpx;
+  flex-shrink: 0;
+}
+.tag-user, .tag-correct {
+  font-size: 20rpx;
+  padding: 2rpx 12rpx;
+  border-radius: 16rpx;
+  white-space: nowrap;
+}
+.tag-user {
+  background: #e8eefc;
+  color: #4a6cf7;
+}
+.tag-correct {
+  background: #d8f5ee;
+  color: #1bcfad;
+}
+
+/* 配色状态：用户选对（绿） / 用户选错（红） / 用户没选但是正确（绿色虚框） */
+.rv-opt.state-answered-right {
+  background: #f1faf7;
+  border-color: #1bcfad;
+}
+.rv-opt.state-answered-right .rv-opt-code {
+  background: #1bcfad;
+  color: #fff;
+}
+.rv-opt.state-answered-wrong {
+  background: #fdf2f0;
+  border-color: #e74c3c;
+}
+.rv-opt.state-answered-wrong .rv-opt-code {
+  background: #e74c3c;
+  color: #fff;
+}
+.rv-opt.state-official-only {
+  background: #f1faf7;
+  border-color: #1bcfad;
+  border-style: dashed;
+}
+.rv-opt.state-official-only .rv-opt-code {
+  background: #fff;
+  color: #1bcfad;
+  border: 2rpx solid #1bcfad;
+  line-height: 40rpx;
+}
+
+/* 总结区 */
+.rv-summary {
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx dashed #e3e3e3;
+}
+.rv-row {
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.8;
+}
+.rv-row-label {
+  color: #888;
+}
+.rv-row-val.green {
+  color: #1bcfad;
+  font-weight: 600;
+}
+.rv-row-val.red {
+  color: #e74c3c;
+  font-weight: 600;
+}
+.rv-comments {
+  margin-top: 16rpx;
+  background: #fffaf3;
+  border-left: 6rpx solid #ffb84d;
+  padding: 14rpx 18rpx;
+  border-radius: 8rpx;
+}
+.rv-comments-title {
+  font-size: 24rpx;
+  color: #b87b00;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+}
+.rv-comments-body {
+  font-size: 26rpx;
+  color: #6b5128;
+  line-height: 1.6;
+}
+
+/* 底部按钮 */
+.rv-foot {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  display: flex;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom)) 24rpx;
+  box-shadow: 0 -2rpx 8rpx rgba(0,0,0,0.04);
+}
+.rv-btn {
+  flex: 1;
+  margin: 0 12rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+}
+.rv-btn.primary {
+  background: #1bcfad;
+  color: #fff;
+}
+.rv-btn.ghost {
+  background: #f0f0f0;
+  color: #555;
+}
+.rv-btn.disabled {
+  opacity: 0.45;
+}
+
+/* 旧版兼容兜底 */
+.rv-legacy {
+  padding: 120rpx 60rpx;
+  text-align: center;
+}
+.rv-legacy-icon { font-size: 80rpx; }
+.rv-legacy-title { font-size: 32rpx; color: #333; margin-top: 20rpx; }
+.rv-legacy-tip { font-size: 26rpx; color: #999; margin-top: 16rpx; line-height: 1.6; }
+.rv-legacy-btn {
+  display: inline-block;
+  margin-top: 40rpx;
+  background: #1bcfad;
+  color: #fff;
+  padding: 16rpx 60rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+}
+
+.rv-loading {
+  text-align: center;
+  color: #888;
+  margin-top: 200rpx;
 }

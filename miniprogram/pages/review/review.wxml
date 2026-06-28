@@ -1,27 +1,74 @@
-<wxs src="./../tools.wxs" module="JSON" />
-<view class="review">
-    <view class="sortnumber">
-        <view class="left">正在诊断考点的掌握情况</view>
-        <view class="right">
-            <text>{{idx+1}}</text>/<text>{{length}}</text></view>
+<!-- pages/review/review.wxml -->
+<view class="review-page" wx:if="{{!loading && !legacy}}">
+
+  <!-- 顶部信息条 -->
+  <view class="rv-header">
+    <view class="rv-title">{{title}}</view>
+    <view class="rv-sub">
+      <text>{{createTime}}</text>
+      <text class="rv-score">得分 {{rightNum}}/{{total}}</text>
     </view>
-    <view class="progress">
-        <progress percent="{{percent}}" color="#1dcc70" active />
+    <view class="rv-progress">
+      <progress percent="{{percent}}" color="#1bcfad" stroke-width="3" active />
     </view>
-    <view class="question">
-        <view class="title">{{question.title}}</view>
-        <view class="type">{{question.typename}}</view>
-        <view class="options">
-            <view wx:for="{{options}}" wx:for-index="idx" wx:for-item="item" class="option"  data-value="{{JSON.stringify(item)}}" bindtap="selectOption">
-                <view class="icon">
-                    <image src="{{item.value == 1 ? '/images/radio-selected.png' : '/images/radio.png'}}" />
-                </view>
-                <view class="content">{{item.code}}: {{item.content}}</view>
-            </view>
+  </view>
+
+  <!-- 题号 / 对错条 -->
+  <view class="rv-meta">
+    <view class="rv-idx">第 {{idx+1}} / {{total}} 题</view>
+    <view class="rv-badge {{right ? 'ok' : 'bad'}}">{{right ? '✓ 正确' : '✗ 错误'}}</view>
+  </view>
+
+  <!-- 题目卡片 -->
+  <view class="rv-card" wx:if="{{item}}">
+    <view class="rv-qtitle">{{item.title}}</view>
+    <view class="rv-qtype" wx:if="{{item.typename}}">{{item.typename}}</view>
+
+    <view class="rv-options">
+      <view
+        wx:for="{{optionLines}}"
+        wx:key="code"
+        class="rv-opt state-{{opt.state}}"
+        wx:for-item="opt"
+      >
+        <view class="rv-opt-code">{{opt.code}}</view>
+        <view class="rv-opt-text">{{opt.content}}</view>
+        <view class="rv-opt-tags">
+          <view class="tag-user" wx:if="{{opt.isUser}}">您选</view>
+          <view class="tag-correct" wx:if="{{opt.isOfficial}}">正确</view>
         </view>
+      </view>
     </view>
-    <view class="btn-area" bindtap="doNext">
-        <view class="button">{{btnText}}</view>
+
+    <view class="rv-summary">
+      <view class="rv-row">
+        <text class="rv-row-label">您的答案：</text>
+        <text class="rv-row-val {{right ? 'green' : 'red'}}">{{userText}}</text>
+      </view>
+      <view class="rv-row">
+        <text class="rv-row-label">正确答案：</text>
+        <text class="rv-row-val green">{{officialText}}</text>
+      </view>
+      <view class="rv-comments" wx:if="{{item.comments}}">
+        <view class="rv-comments-title">解析</view>
+        <view class="rv-comments-body">{{item.comments}}</view>
+      </view>
     </view>
-    
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="rv-foot">
+    <view class="rv-btn ghost {{idx === 0 ? 'disabled' : ''}}" bindtap="goPrev">上一题</view>
+    <view class="rv-btn primary" bindtap="goNext">{{isLast ? '完成' : '下一题'}}</view>
+  </view>
 </view>
+
+<!-- 兼容：极老的 historys（items 是字符串数组，无快照） -->
+<view class="rv-legacy" wx:if="{{!loading && legacy}}">
+  <view class="rv-legacy-icon">📜</view>
+  <view class="rv-legacy-title">{{title}}</view>
+  <view class="rv-legacy-tip">该记录来自旧版系统，无题目快照，暂不支持复盘。</view>
+  <view class="rv-legacy-btn" bindtap="goBack">返回</view>
+</view>
+
+<view class="rv-loading" wx:if="{{loading}}">加载中…</view>
