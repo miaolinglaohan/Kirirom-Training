@@ -1,0 +1,9 @@
+{
+  "name": "hrSetEmployee",
+  "version": "1.0.0",
+  "description": "HR 修改员工 role / active / dept；HR 不能取消自己的 HR 资格防锁死",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

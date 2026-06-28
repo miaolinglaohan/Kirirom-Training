@@ -1,0 +1,9 @@
+{
+  "name": "hrSaveAssessment",
+  "version": "1.0.0",
+  "description": "HR 创建或更新考试，含 questionConfig 校验 + 题库题量预检",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

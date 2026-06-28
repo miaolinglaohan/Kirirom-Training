@@ -1,0 +1,98 @@
+<view class="page">
+  <view class="section">
+    <view class="row">
+      <view class="label">考试名称</view>
+      <input class="input" placeholder="例如：2025 Q2 通用考核" value="{{form.name}}" data-field="name" bindinput="onInput" />
+    </view>
+
+    <view class="row">
+      <view class="label">题库</view>
+      <picker
+        class="picker"
+        range="{{subjects}}"
+        range-key="name"
+        value="{{subjectIndex}}"
+        bindchange="onSubjectChange">
+        <view class="picker-text {{subjectIndex < 0 ? 'placeholder' : ''}}">
+          {{subjectIndex >= 0 ? subjects[subjectIndex].name : (loadingSubjects ? '加载中…' : '请选择题库')}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="row">
+      <view class="label">开始日期</view>
+      <picker mode="date" value="{{form.date}}" bindchange="onDateChange">
+        <view class="picker-text">{{form.date}}</view>
+      </picker>
+    </view>
+
+    <view class="row">
+      <view class="label">开始时间</view>
+      <picker mode="time" value="{{form.time}}" bindchange="onTimeChange">
+        <view class="picker-text">{{form.time}}</view>
+      </picker>
+    </view>
+
+    <view class="row">
+      <view class="label">时长（分钟）</view>
+      <input class="input" type="number" value="{{form.duration}}" data-field="duration" bindinput="onInput" />
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">题量与分值</view>
+
+    <view class="qrow">
+      <view class="qlabel">单选</view>
+      <view class="qinput">
+        <text class="hint">题</text>
+        <input class="num" type="number" value="{{form.singleCount}}" data-field="singleCount" bindinput="onInput" />
+      </view>
+      <view class="qinput">
+        <text class="hint">分/题</text>
+        <input class="num" type="number" value="{{form.singleScore}}" data-field="singleScore" bindinput="onInput" />
+      </view>
+    </view>
+
+    <view class="qrow">
+      <view class="qlabel">多选</view>
+      <view class="qinput">
+        <text class="hint">题</text>
+        <input class="num" type="number" value="{{form.multiCount}}" data-field="multiCount" bindinput="onInput" />
+      </view>
+      <view class="qinput">
+        <text class="hint">分/题</text>
+        <input class="num" type="number" value="{{form.multiScore}}" data-field="multiScore" bindinput="onInput" />
+      </view>
+    </view>
+
+    <view class="qrow">
+      <view class="qlabel">判断</view>
+      <view class="qinput">
+        <text class="hint">题</text>
+        <input class="num" type="number" value="{{form.judgeCount}}" data-field="judgeCount" bindinput="onInput" />
+      </view>
+      <view class="qinput">
+        <text class="hint">分/题</text>
+        <input class="num" type="number" value="{{form.judgeScore}}" data-field="judgeScore" bindinput="onInput" />
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="row">
+      <view class="label">目标部门</view>
+      <input class="input" placeholder="留空 = 全员；多个用逗号" value="{{form.targetDeptsText}}" data-field="targetDeptsText" bindinput="onInput" />
+    </view>
+    <view class="row">
+      <view class="label">列表可见</view>
+      <switch checked="{{form.visible}}" bindchange="onVisibleChange" />
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="submit" type="primary" loading="{{saving}}" disabled="{{saving}}" bindtap="onSubmit">
+      {{isEdit ? '保存修改' : '创建考试'}}
+    </button>
+  </view>
+</view>

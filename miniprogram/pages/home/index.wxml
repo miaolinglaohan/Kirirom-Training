@@ -79,6 +79,10 @@
       <view class="entry-icon icon-6">👤</view>
       <text class="entry-label">个人信息</text>
     </view>
+    <view class="entry-item" wx:if="{{isHr}}" bindtap="goHrHome">
+      <view class="entry-icon icon-hr">🛠</view>
+      <text class="entry-label">管理后台</text>
+    </view>
   </view>
 
   <!-- 题库分类（原有的练习入口） -->

@@ -1,0 +1,49 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 48rpx;
+  background: #f5f6fa;
+  box-sizing: border-box;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 12rpx 20rpx;
+}
+.title { font-size: 40rpx; font-weight: 600; color: #1a1a1a; }
+.add-btn { margin: 0; font-size: 24rpx; }
+
+.loading, .empty { text-align: center; padding: 60rpx 24rpx; color: #999; font-size: 28rpx; line-height: 1.6; }
+
+.list { display: flex; flex-direction: column; gap: 20rpx; }
+
+.item {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+
+.row1 { display: flex; align-items: center; gap: 12rpx; }
+.name { font-size: 30rpx; font-weight: 600; color: #1a1a1a; }
+.tag.hidden {
+  font-size: 20rpx;
+  padding: 2rpx 12rpx;
+  border-radius: 8rpx;
+  color: #fff;
+  background: #b0b0b0;
+}
+
+.row2 { margin-top: 8rpx; font-size: 24rpx; color: #666; }
+.row2 .sep { margin: 0 8rpx; color: #ccc; }
+
+.row3 {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #eef0f4;
+  display: flex;
+  justify-content: space-between;
+}
+.stat { text-align: center; flex: 1; }
+.stat .lbl { display: block; font-size: 22rpx; color: #999; }
+.stat .val { display: block; margin-top: 4rpx; font-size: 30rpx; font-weight: 600; color: #2d8cf0; }

@@ -12,6 +12,10 @@ Page({
       accuracy: 0
     },
 
+    // 当前登录员工是否为 HR（控制管理后台入口显隐）
+    isHr: false,
+
+
     // 当前考试通知卡片
     // status: pending(未开考) | ongoing(进行中) | submitted(已交卷) | expired(已截止)
     // Phase 0 占位，Phase 3 接入真实数据
@@ -25,7 +29,10 @@ Page({
   onShow() {
     app.guardAuth().then(emp => {
       if (!emp) return  // 未激活/已停用：已被 reLaunch 走
-      this.setData({ openid: app.globalData.openid || '' })
+      this.setData({
+        openid: app.globalData.openid || '',
+        isHr: emp.role === 'hr'
+      })
       this.loadExamList()
       this.loadStats()
       this.loadCurrentExam()
@@ -131,6 +138,10 @@ Page({
 
   goProfile() {
     wx.switchTab({ url: '/pages/profile/index' })
+  },
+
+  goHrHome() {
+    wx.navigateTo({ url: '/pages/hr/home/index' })
   },
 
   // —— 大按钮：模拟考试 ——

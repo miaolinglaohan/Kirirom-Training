@@ -1,0 +1,52 @@
+.page {
+  min-height: 100vh;
+  padding: 32rpx 24rpx 48rpx;
+  background: #f5f6fa;
+  box-sizing: border-box;
+}
+
+.header { padding: 16rpx 12rpx 28rpx; }
+.title { font-size: 44rpx; font-weight: 600; color: #1a1a1a; }
+.subtitle { margin-top: 8rpx; font-size: 26rpx; color: #888; }
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.card {
+  position: relative;
+  width: 48%;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 36rpx 24rpx 32rpx;
+  margin-bottom: 24rpx;
+  box-sizing: border-box;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.card.disabled { opacity: 0.62; }
+
+.icon { font-size: 60rpx; line-height: 1; margin-bottom: 16rpx; }
+.card-title { font-size: 32rpx; font-weight: 600; color: #1a1a1a; }
+.card-desc { margin-top: 8rpx; font-size: 24rpx; color: #888; }
+
+.badge {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  font-size: 20rpx;
+  color: #fff;
+  background: #b0b0b0;
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+}
+
+.footer-tip {
+  margin-top: 16rpx;
+  padding: 0 16rpx;
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.6;
+}

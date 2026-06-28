@@ -1,0 +1,32 @@
+<view class="page">
+  <view class="header">
+    <view class="title">考试管理</view>
+    <button class="add-btn" size="mini" type="primary" bindtap="onCreate">+ 新建</button>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">加载中…</view>
+  <view class="empty" wx:if="{{!loading && list.length === 0}}">暂无考试，点击右上角「+ 新建」开始创建</view>
+
+  <view class="list" wx:if="{{!loading}}">
+    <view class="item" wx:for="{{list}}" wx:key="_id" data-id="{{item._id}}" bindtap="onEdit">
+      <view class="row1">
+        <view class="name">{{item.name}}</view>
+        <view class="tag hidden" wx:if="{{item.visible === false}}">隐藏</view>
+      </view>
+      <view class="row2">
+        <text>科目：{{item.subjectName || item.subjectId}}</text>
+      </view>
+      <view class="row2">
+        <text>开始：{{item.startTimeText}}</text>
+        <text class="sep">·</text>
+        <text>时长 {{item.duration}}min</text>
+      </view>
+      <view class="row3">
+        <view class="stat"><text class="lbl">题量</text><text class="val">{{item.totalQuestions}}</text></view>
+        <view class="stat"><text class="lbl">总分</text><text class="val">{{item.fullScore}}</text></view>
+        <view class="stat"><text class="lbl">已报名</text><text class="val">{{item.enrolled}}</text></view>
+        <view class="stat"><text class="lbl">已交卷</text><text class="val">{{item.submitted}}</text></view>
+      </view>
+    </view>
+  </view>
+</view>

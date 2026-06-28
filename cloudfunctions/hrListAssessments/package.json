@@ -1,0 +1,9 @@
+{
+  "name": "hrListAssessments",
+  "version": "1.0.0",
+  "description": "HR 列出所有考试（含 hidden 和 expired）+ 报名/已提交人数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

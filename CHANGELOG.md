@@ -1,3 +1,45 @@
+### 20260628 · v0.3.1-hr-skeleton（Phase 3 子里程碑 2 · HR 管理后台骨架）
+
+> 在小程序内嵌一个轻量 HR 管理后台，先满足"凑合用"的运营需求（员工角色切换 + 考试 CRUD）。重 Web 后台（React + cloudbase web SDK）择机另起新项目。本 tag 不含题库 / 题目的小程序内增删改，仍需在云开发控制台或下版本（v0.3.2）处理。
+
+**核心改动 · 4 个 HR 云函数**
+
++ `hrListEmployees`：列出全体员工，按 `activatedAt` 降序，返回 `{_id, name, dept, role, active, openid}`
++ `hrSetEmployee`：白名单 patch（`role` / `active` / `dept`）；带 **自锁保护** —— HR 不能把自己降级或停用，返回 `SELF_LOCK`
++ `hrListAssessments`：返回所有考试（包括 `visible=false` 与已过期），并批量聚合 `examEnrollments` 得到每场考试的 `enrolled` / `submitted` 计数
++ `hrSaveAssessment`：新建 / 更新考试。**提交前题库预检**：按 typecode 在 `questions` 集合分桶计数，与 `questionConfig.{single,multi,judge}.count` 比对，不足返回 `NOT_ENOUGH_QUESTIONS` + `detail:[{typecode,need,have}]`；同步写老字段 `questionCount = totalQuestions` 保留兼容
+
+所有 HR 函数开头统一 `requireHr(OPENID)`：`employees.role === 'hr'` 且 `active !== false` 才放行，否则 `{ok:false, code:'FORBIDDEN'}`。
+
+**小程序端 · 5 个新页面**
+
++ `pages/hr/home`：管理后台首页，4 张入口卡片（员工管理 / 考试管理 / 题库管理 / 题目管理），后两张挂"敬请期待"角标
++ `pages/hr/employees`：员工列表，每行两个操作按钮 —— 升 HR / 降员工、启用 / 停用；当前账号自身的两个按钮全部禁用
++ `pages/hr/assessments`：考试列表，每张卡片显示题量 / 总分 / 已报名 / 已交卷统计；右上角"+ 新建"按钮，点击卡片进入编辑
++ `pages/hr/assessmentEdit`：表单页，题库 picker / 日期 picker / 时间 picker / 时长 / 3 种题型 count+score / 部门白名单 / 可见性开关；触发 `NOT_ENOUGH_QUESTIONS` 时弹模态对话框列出每个题型缺多少
++ `pages/hr/placeholder`：题库 / 题目管理的占位页（`?kind=subjects|questions`），告知"v0.3.2 上线，目前请在云开发控制台维护"
+
+**home 页入口**
+
++ `pages/home/index` 增加 `isHr` data；entry-grid 第 7 格 `wx:if="{{isHr}}"` 渲染"管理后台"入口（橙色背景，🛠 图标）；非 HR 用户看不到这个入口
+
+**前后双闸**
+
++ 前端：每个 HR 页 `onShow` 都用 `app.guardAuth()` 取员工对象，`role !== 'hr'` 直接 `wx.reLaunch` 回首页
++ 后端：4 个云函数全部用 `requireHr` 兜底，前端绕过也无效
+
+**首位 HR 引导**
+
++ 没有自动赋权逻辑：首次启用时在云开发控制台 → 数据库 → `employees` 集合，找到要做 HR 的那行，把 `role` 字段改为字符串 `"hr"`（默认值是 `"employee"` 或不存在），重新打开小程序即可看到管理后台入口
++ 后续可以由这位"种子 HR"在员工管理页给其他人升级
+
+**部署清单**
+
++ 上传 4 个新云函数：`hrListEmployees` / `hrSetEmployee` / `hrListAssessments` / `hrSaveAssessment`
++ 集合无 schema 变更（沿用 v0.3.0 的 `assessments` / `employees` / `examEnrollments`）
+
+---
+
 ### 20260628 · v0.3.0-judge-type（Phase 3 子里程碑 1 · 三题型 + 配置化分制）
 
 > Phase 3 拆成 4 个子 tag 逐步推进，本 tag 是第 1 个：把"每题 1 分"的固定模型换成"按题型分桶 + 配置化分值"，并为新题型铺好客户端 UI。HR 后台 + PDF 导出 + 水印放在后续子 tag 推进。

@@ -1,0 +1,43 @@
+<view class="page">
+  <view class="header">
+    <view class="title">员工管理</view>
+    <view class="subtitle">共 {{total}} 人</view>
+  </view>
+
+  <view class="empty" wx:if="{{!loading && list.length === 0}}">暂无员工</view>
+  <view class="loading" wx:if="{{loading}}">加载中…</view>
+
+  <view class="list" wx:if="{{!loading}}">
+    <view class="item" wx:for="{{list}}" wx:key="_id">
+      <view class="row1">
+        <view class="name">{{item.name}}</view>
+        <view class="tag hr" wx:if="{{item.role === 'hr'}}">HR</view>
+        <view class="tag off" wx:if="{{item.active === false}}">已停用</view>
+      </view>
+      <view class="row2">
+        <text class="dept">{{item.dept || '未分配部门'}}</text>
+        <text class="self" wx:if="{{me && item.openid === me.openid}}">· 当前账号</text>
+      </view>
+      <view class="actions">
+        <button
+          size="mini"
+          class="btn"
+          loading="{{busyId === item._id}}"
+          disabled="{{busyId === item._id || (me && item.openid === me.openid)}}"
+          data-id="{{item._id}}"
+          bindtap="onToggleRole">
+          {{item.role === 'hr' ? '降为员工' : '升为 HR'}}
+        </button>
+        <button
+          size="mini"
+          class="btn {{item.active === false ? 'primary' : 'warn'}}"
+          loading="{{busyId === item._id}}"
+          disabled="{{busyId === item._id || (me && item.openid === me.openid)}}"
+          data-id="{{item._id}}"
+          bindtap="onToggleActive">
+          {{item.active === false ? '启用' : '停用'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

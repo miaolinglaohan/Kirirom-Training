@@ -234,6 +234,7 @@ page {
 .icon-4 { background: #e6efff; }
 .icon-5 { background: #f0e6ff; }
 .icon-6 { background: #e6f7ff; }
+.icon-hr { background: #fff0e0; }
 
 .entry-label {
   font-size: 26rpx;

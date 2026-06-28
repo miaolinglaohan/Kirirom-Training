@@ -21,7 +21,12 @@
     "pages/examresult/examresult",
     "pages/note/note",
     "pages/review/review",
-    "pages/mistakes/index"
+    "pages/mistakes/index",
+    "pages/hr/home/index",
+    "pages/hr/employees/index",
+    "pages/hr/assessments/index",
+    "pages/hr/assessmentEdit/index",
+    "pages/hr/placeholder/index"
   ],
   "window": {
     "backgroundColor": "#F6F6F6",

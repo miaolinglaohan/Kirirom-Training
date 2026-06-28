@@ -1,0 +1,36 @@
+<view class="page">
+  <view class="header">
+    <view class="title">管理后台</view>
+    <view class="subtitle" wx:if="{{me}}">{{me.name}} · {{me.dept || '未分配部门'}}</view>
+  </view>
+
+  <view class="grid">
+    <view class="card" bindtap="goEmployees">
+      <view class="icon">🛠</view>
+      <view class="card-title">员工管理</view>
+      <view class="card-desc">查看 / 切换角色 / 启停</view>
+    </view>
+
+    <view class="card" bindtap="goAssessments">
+      <view class="icon">📋</view>
+      <view class="card-title">考试管理</view>
+      <view class="card-desc">新建 / 编辑 / 查看报名</view>
+    </view>
+
+    <view class="card disabled" bindtap="goSubjects">
+      <view class="icon">📚</view>
+      <view class="card-title">题库管理</view>
+      <view class="card-desc">维护 exam 集合</view>
+      <view class="badge">敬请期待</view>
+    </view>
+
+    <view class="card disabled" bindtap="goQuestions">
+      <view class="icon">❓</view>
+      <view class="card-title">题目管理</view>
+      <view class="card-desc">维护 questions 集合</view>
+      <view class="badge">敬请期待</view>
+    </view>
+  </view>
+
+  <view class="footer-tip">提示：题库与题目可暂在云开发控制台手动维护，v0.3.2 将上线小程序内编辑。</view>
+</view>

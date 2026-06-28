@@ -1,0 +1,8 @@
+<view class="page">
+  <view class="card">
+    <view class="emoji">🚧</view>
+    <view class="title">{{title}}</view>
+    <view class="tip">{{tip}}</view>
+    <button class="back" size="mini" bindtap="onBack">返回</button>
+  </view>
+</view>
