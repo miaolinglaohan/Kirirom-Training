@@ -41,7 +41,8 @@ Page({
 
   // —— 数据加载 ——
   loadExamList() {
-    wx.cloud.database().collection('exam').get({
+    // limit(50) 兼具：消除"全量查询告警" + 防极端情况下一级试卷被批量灌入时拉爆首页
+    wx.cloud.database().collection('exam').limit(50).get({
       success: res => {
         this.setData({ queryResult: res.data })
       },
@@ -52,10 +53,15 @@ Page({
   },
 
   loadStats() {
-    // Phase 0 占位实现：从 historys 集合数一下
-    // Phase 2 改为正经的 stats 云函数
+    // 占位"已答题"计数：按当前用户 _openid 过滤；正式 stats 云函数待 Phase 4
+    const openid = this.data.openid || app.globalData.openid || ''
+    if (!openid) {
+      // 还没拿到 openid 就别发了，避免触发全量扫表告警 + 数到别人头上
+      this.setData({ 'stats.answered': 0 })
+      return
+    }
     const db = wx.cloud.database()
-    db.collection('historys').count({
+    db.collection('historys').where({ _openid: openid }).count({
       success: res => {
         this.setData({ 'stats.answered': res.total || 0 })
       },
