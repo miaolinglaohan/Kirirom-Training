@@ -121,8 +121,8 @@
 }
 .btn { margin: 0; font-size: 26rpx; }
 .btn.add {
-  background: #e6efff;
-  color: #2d6cf0;
+  background: #e0f7f1;
+  color: #1bcfad;
 }
 
 .footer {
@@ -136,4 +136,4 @@
 }
 .footer .btn { flex: 1; font-size: 28rpx; height: 80rpx; line-height: 80rpx; }
 .btn.cancel { background: #eef0f4; color: #333; }
-.btn.primary { background: #2d8cf0; color: #fff; }
+.btn.primary { background: #1bcfad; color: #fff; }

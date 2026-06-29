@@ -27,12 +27,12 @@
   border-radius: 8rpx;
   color: #fff;
 }
-.tag.hr { background: #2d8cf0; }
+.tag.hr { background: #1bcfad; }
 .tag.admin { background: #f5a623; }
 .tag.off { background: #b0b0b0; }
 
 .row2 { margin-top: 8rpx; font-size: 24rpx; color: #888; }
-.row2 .self { color: #2d8cf0; margin-left: 4rpx; }
+.row2 .self { color: #1bcfad; margin-left: 4rpx; }
 
 .actions {
   margin-top: 16rpx;
@@ -45,5 +45,5 @@
   background: #eef0f4;
   color: #333;
 }
-.btn.primary { background: #2d8cf0; color: #fff; }
+.btn.primary { background: #1bcfad; color: #fff; }
 .btn.warn { background: #f56c6c; color: #fff; }

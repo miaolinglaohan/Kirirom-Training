@@ -1,3 +1,34 @@
+### 20260629 · v0.3.6-ui-unify（HR 后台配色统一为品牌绿）
+
+> 将 HR 后台原先"蓝调"（主色 `#2d8cf0` iView 蓝）全面替换为品牌绿色 `#1bcfad`，与员工端首页、图片三/图四的车辆管理系统保持视觉一致。此后 UI 风格冻结，不再大面积变色。
+
+**全局色板**
+
++ `app.wxss` 顶部追加详细色板注释，约定品牌主色 / dark / light bg / light border / 成功 / 警告 / 危险 / 题型 / 角色 / 文字等全部 token，供后续开发统一引用
+
+**HR 后台蓝→绿替换**
+
++ 主色 `#2d8cf0` / `#2d6cf0` → `#1bcfad`（按钮、tab active、统计数字、列表强调、role tag 等全部绿色化）
++ 浅蓝底 `#e8f3ff` / `#e6efff` → `#e0f7f1`
++ 浅蓝边 `#cce0ff` → `#a8e6d8`
++ 涉及 10 个 wxss：`hr/home` / `employees` / `subjects` / `subjectEdit` / `questions` / `questionEdit` / `assessments` / `assessmentEdit` / `assessmentScores` / `applicantReview` / `settings`
+
+**导航栏修复**
+
++ `hr/home/index.json` 删除 `navigationBarBackgroundColor: #f5f6fa`（之前浅灰底配白字不可读），继承全局绿色 navbar
+
+**双按钮区分**
+
++ `assessmentScores` 页面两导出按钮统一为绿：主按钮实心绿底白字（导出总分单）+ 次按钮白底绿字描边（导出全员答卷），避免同色按钮视觉混为一谈
+
+**不变内容**
+
++ 员工端全部页面（`home/exam/result/review/history/mistakes/profile/...`）已是绿色，不动
++ 题型 tag（单/多/判）、角色 admin 橙、删除红色、状态徽（已交卷/答题中/缺考）等语义色不动
++ tabBar 配色已是绿色，不动
+
+---
+
 ### 20260629 · v0.3.5-pdf-export（Phase 3 子里程碑 8 · PDF 导出业务接线）
 
 > v0.3.5 PDF 导出三连击的收官 tag。在 `pdf-core` 底座之上接两个业务面：考试总分单（一场考试一张表）和员工答卷复盘（一个人一本试卷）。所有 PDF 共享 `sysConfig` 里的水印 + 单位名 + 自动推导的考试日期作为落款。

@@ -84,7 +84,7 @@
   position: relative;
 }
 .tab.active {
-  color: #2d8cf0;
+  color: #1bcfad;
   font-weight: 600;
 }
 .tab.active::after {
@@ -94,7 +94,7 @@
   right: 30%;
   bottom: 0;
   height: 4rpx;
-  background: #2d8cf0;
+  background: #1bcfad;
   border-radius: 4rpx;
 }
 
@@ -170,7 +170,7 @@
 .score {
   font-size: 30rpx;
   font-weight: 600;
-  color: #2d8cf0;
+  color: #1bcfad;
 }
 
 /* 导出按钮 */
@@ -184,7 +184,7 @@
 .export-btn {
   flex: 1;
   margin: 0;
-  background: #2d8cf0;
+  background: #1bcfad;
   color: #fff;
   font-size: 26rpx;
   border-radius: 12rpx;
@@ -192,7 +192,9 @@
   padding-right: 0;
 }
 .export-btn-alt {
-  background: #1bcfad;
+  background: #fff;
+  color: #1bcfad;
+  border: 2rpx solid #1bcfad;
 }
 .export-btn[disabled] {
   background: #c5cdd6;

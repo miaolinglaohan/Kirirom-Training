@@ -39,7 +39,7 @@
   border-radius: 10rpx;
 }
 .tab.active {
-  background: #2d8cf0;
+  background: #1bcfad;
   color: #fff;
   font-weight: 600;
 }

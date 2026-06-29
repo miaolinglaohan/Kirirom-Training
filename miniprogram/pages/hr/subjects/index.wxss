@@ -69,7 +69,7 @@
   background: #eef0f4;
   color: #555;
 }
-.qc.total { background: #e6efff; color: #2d6cf0; font-weight: 600; }
+.qc.total { background: #e0f7f1; color: #1bcfad; font-weight: 600; }
 .qc.single { background: #e0f7f1; color: #1baa7a; }
 .qc.multi { background: #fff4e0; color: #d68b00; }
 .qc.judge { background: #f0e6ff; color: #7b3ff5; }
@@ -85,5 +85,5 @@
   background: #eef0f4;
   color: #333;
 }
-.btn.primary { background: #2d8cf0; color: #fff; }
+.btn.primary { background: #1bcfad; color: #fff; }
 .btn.warn { background: #f56c6c; color: #fff; }

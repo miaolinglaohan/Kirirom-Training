@@ -33,8 +33,8 @@ page { background: #f4f6f8; }
 .rv-role-tag {
   margin-left: 12rpx;
   font-size: 20rpx;
-  color: #2d8cf0;
-  background: #e8f3ff;
+  color: #1bcfad;
+  background: #e0f7f1;
   padding: 2rpx 14rpx;
   border-radius: 14rpx;
 }
@@ -109,7 +109,7 @@ page { background: #f4f6f8; }
   color: #e74c3c;
 }
 .rv-nav-cell.cur {
-  outline: 4rpx solid #2d8cf0;
+  outline: 4rpx solid #1bcfad;
 }
 
 /* ── 题号 / 对错 ────────────────────────────────── */
