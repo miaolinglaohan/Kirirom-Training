@@ -1,0 +1,9 @@
+{
+  "name": "hrListAssessmentScores",
+  "version": "1.0.0",
+  "description": "HR 查看某场考试的成绩单（应到 / 实到 / 缺考 / 进行中）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

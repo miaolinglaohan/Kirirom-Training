@@ -1,0 +1,174 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 48rpx;
+  background: #f5f6fa;
+  box-sizing: border-box;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 60rpx 24rpx;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 考试信息卡 */
+.head-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+.head-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.head-meta {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.5;
+}
+.head-depts {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* Summary */
+.summary-card {
+  margin-top: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+  display: flex;
+  justify-content: space-around;
+}
+.sum-cell {
+  flex: 1;
+  text-align: center;
+}
+.sum-cell .lbl {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+}
+.sum-cell .val {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.sum-cell .val.sub { color: #19be6b; }
+.sum-cell .val.prog { color: #ff9900; }
+.sum-cell .val.abs  { color: #999; }
+
+/* Tabs */
+.tabs {
+  margin-top: 24rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 26rpx;
+  color: #666;
+  position: relative;
+}
+.tab.active {
+  color: #2d8cf0;
+  font-weight: 600;
+}
+.tab.active::after {
+  content: '';
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: 0;
+  height: 4rpx;
+  background: #2d8cf0;
+  border-radius: 4rpx;
+}
+
+/* List */
+.list {
+  margin-top: 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+.item {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+.left { flex: 1; min-width: 0; }
+.name-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+.name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.dept {
+  font-size: 24rpx;
+  color: #999;
+}
+.role-tag {
+  display: inline-block;
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+  background: #fff3cd;
+  color: #d4a017;
+}
+.sub-line {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #666;
+  line-height: 1.4;
+}
+.sub-line.gray { color: #b0b0b0; }
+.sub-line .warn { color: #ed4014; }
+
+.right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6rpx;
+}
+.status {
+  font-size: 22rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+  color: #fff;
+}
+.status-submitted { background: #19be6b; }
+.status-progress  { background: #ff9900; }
+.status-absent    { background: #b0b0b0; }
+
+.score {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2d8cf0;
+}

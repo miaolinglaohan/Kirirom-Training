@@ -61,6 +61,12 @@ Page({
     wx.navigateTo({ url: '/pages/hr/assessmentEdit/index?id=' + id })
   },
 
+  // catchtap：避免冒泡触发 .item 的 onEdit
+  onScores(e) {
+    const id = e.currentTarget.dataset.id
+    wx.navigateTo({ url: '/pages/hr/assessmentScores/index?id=' + id })
+  },
+
   onPullDownRefresh() {
     this.loadList()
     wx.stopPullDownRefresh()

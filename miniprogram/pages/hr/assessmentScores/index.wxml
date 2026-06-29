@@ -1,0 +1,84 @@
+<view class="page">
+  <view class="loading" wx:if="{{loading}}">加载中…</view>
+
+  <block wx:if="{{!loading && assessment}}">
+    <!-- 考试信息卡 -->
+    <view class="head-card">
+      <view class="head-title">{{assessment.name}}</view>
+      <view class="head-meta">{{meta}}</view>
+      <view class="head-depts" wx:if="{{assessment.targetDepts && assessment.targetDepts.length > 0}}">
+        目标部门：{{assessment.targetDepts}}
+      </view>
+      <view class="head-depts" wx:else>目标部门：全员</view>
+    </view>
+
+    <!-- Summary -->
+    <view class="summary-card">
+      <view class="sum-cell">
+        <text class="lbl">应到</text>
+        <text class="val">{{summary.expected}}</text>
+      </view>
+      <view class="sum-cell">
+        <text class="lbl">已交卷</text>
+        <text class="val sub">{{summary.submitted}}</text>
+      </view>
+      <view class="sum-cell">
+        <text class="lbl">答题中</text>
+        <text class="val prog">{{summary.inProgress}}</text>
+      </view>
+      <view class="sum-cell">
+        <text class="lbl">缺考</text>
+        <text class="val abs">{{summary.absent}}</text>
+      </view>
+      <view class="sum-cell">
+        <text class="lbl">平均分</text>
+        <text class="val">{{avgScoreText}}</text>
+      </view>
+    </view>
+
+    <!-- Tabs -->
+    <view class="tabs">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="tab {{activeTab === item.key ? 'active' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTabTap"
+      >{{item.label}}</view>
+    </view>
+
+    <!-- 列表 -->
+    <view class="empty" wx:if="{{visibleList.length === 0}}">该分类下暂无记录</view>
+    <view class="list" wx:else>
+      <view
+        wx:for="{{visibleList}}"
+        wx:key="employeeId"
+        class="item"
+        data-idx="{{index}}"
+        bindtap="onTapApplicant"
+      >
+        <view class="row">
+          <view class="left">
+            <view class="name-line">
+              <text class="name">{{item.name || '(未填姓名)'}}</text>
+              <text class="dept" wx:if="{{item.dept}}">· {{item.dept}}</text>
+              <text class="role-tag" wx:if="{{item.role === 'hr' || item.role === 'admin'}}">{{item.role}}</text>
+            </view>
+            <view class="sub-line" wx:if="{{item.status === 'submitted'}}">
+              答对 {{item.rightNum}} / {{item.total}} · 交卷 {{item.submittedAtText}}
+              <text class="warn" wx:if="{{item.switchCount > 0}}"> · 切屏 {{item.switchCount}} 次</text>
+            </view>
+            <view class="sub-line" wx:elif="{{item.status === 'in_progress'}}">
+              开始于 {{item.startedAtText}}
+            </view>
+            <view class="sub-line gray" wx:else>未进入考场</view>
+          </view>
+          <view class="right">
+            <text class="status status-{{item.statusCls}}">{{item.statusText}}</text>
+            <text class="score" wx:if="{{item.scoreText}}">{{item.scoreText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

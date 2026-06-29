@@ -1,3 +1,101 @@
+### 20260628 · v0.3.3-scores（Phase 3 子里程碑 4 · 成绩中心）
+
+> Phase 3 收尾的第一块：HR 现在能在小程序里查每场考试的成绩单——应到 / 已交卷 / 答题中 / 缺考一目了然，不用再去云开发控制台翻 `examEnrollments`。PDF 导出单独留到下一个决策点（按 v2 主方案走浏览器 + jsPDF 路径）。
+
+**云函数 · 新增 `hrListAssessmentScores`**
+
++ 入参：`{ assessmentId }`；返回：`{ assessment, summary, applicants[] }`
++ 应到名单：`employees` 表中 `active != false` 的员工，按 `assessment.targetDepts` 过滤（空数组 = 全员，与 enterExam 的 NOT_IN_SCOPE 语义一致）；不按 role 过滤——HR / admin 同样可被指派参加考试
++ 与 `examEnrollments` left join：找不到记录 → `absent`；status='submitted' → `submitted` 并带回 score / fullScore / rightNum / total / submittedAt / switchCount；其它 → `in_progress`
++ 排除模考：`where({ isMock: _.neq(true) })`，模考不污染成绩单
++ Summary 派生：应到 / 已交卷 / 答题中 / 缺考 / 平均分（仅 submitted 参与，保留 1 位小数）
++ 服务端预排序：已交卷按分数倒序 → 答题中按 startedAt 倒序 → 缺考按姓名
+
+**小程序 · 新增 `pages/hr/assessmentScores`**
+
++ 顶部考试信息卡：考试名 / 开考时间 / 时长 / 题量 / 满分 / 目标部门（targetDepts 为空显示"全员"）
++ Summary 卡：应到（黑）/ 已交卷（绿）/ 答题中（橙）/ 缺考（灰）/ 平均分
++ 4 个 tab 过滤：全部 / 已交卷 / 答题中 / 缺考
++ 每行展示：姓名 + 部门 + 角色 tag（HR / admin 高亮黄）+ 状态徽章 + 分数 `score / fullScore`
++ submitted 副行：答对题数 / 总题数 + 交卷时间；切屏次数 > 0 时红色高亮
++ in_progress 副行：开始时间；absent 副行：灰色"未进入考场"
++ 点条目暂只 toast（复盘功能：HR 复盘他人考卷需 review 页适配，单独 issue 跟进）
+
+**入口接线 · `pages/hr/assessments`**
+
++ 每张考试卡片底部新增「成绩」按钮（`catchtap` 避免冒泡到 .item 的 onEdit）
++ 浅蓝胶囊样式，跟编辑入口视觉上区分
+
+**`miniprogram/app.json`**
+
++ 注册 `pages/hr/assessmentScores/index`
+
+**部署清单**
+
++ 新增上传：`hrListAssessmentScores` 云函数
++ 小程序端 3 个文件改动（`pages/hr/assessments` wxml/wxss/js）+ 1 个新页面（`pages/hr/assessmentScores`）+ `app.json`，直接预览即可
++ 数据库 schema 无变更
+
+**遗留 / 后续**
+
++ HR 端复盘他人考卷：当前 review 页只支持自己的 history 复盘，HR 通过 enrollmentId 复盘他人需要 review 页加 HR 守卫 + 用 enrollment 数据回填，列为 v0.3.4 候选
++ PDF 导出：按 v2 方案走浏览器 + jsPDF + 思源黑体子集，单独立项
+
+---
+
+### 20260628 · v0.3.2-hotfix-mock-into-mistakes（错题本统一收口）
+
+> 自测追问：模考的错题是否进了错题本？查了一圈数据流——错题本只读 `historys`，而 `submitExam` 用 `if (!r.isMock)` 把模考分支整段跳过，**模考错题确实没进错题本**。修。
+
+**云函数 · `submitExam`**
+
++ 把 `historys` 写入移出 `if (!r.isMock)` 守卫——模考和正式考都写一条
++ 新增字段 `isMock: r.isMock === true` 用于区分
++ 默认科目名按 `isMock` 区分为"模拟考试" / "正式考试"（subject 反查失败时的兜底）
+
+**小程序 · `pages/history/index.js`**
+
++ "我的考试记录"查询加 `isMock: _.neq(true)` 过滤——模考记录不污染考试记录列表（用 `neq(true)` 兼容旧记录无 `isMock` 字段的情况，保留下来）
+
+**未改动但顺手记录**
+
++ `pages/mistakes/index.js`：无需改动——它本就 `where({_openid})` 全收，现在自然能收到模考错题
++ `pages/home/index.js`：`loadStats` 统计 `historys.count()` 现在会把模考也算进"已答题"——这是合理的（培训系统语义下都算"做过题"）
+
+**部署清单**
+
++ 重新上传：`submitExam` 云函数
++ 小程序端 `pages/history/index.js` 改完直接预览
+
+---
+
+### 20260628 · v0.3.2-hotfix-mock-lenient（v0.3.2 后续修补）
+
+> 自测发现两个易触发的体验问题：① 模考报"题库题量不足"——但用户其实只是不需要全 10/5/5 分桶；② 首页"顺序练习/随机刷题"始终跳到第一个一级试卷，新建的考试看不见；③ "模拟考试"按钮把 `exam._id`（一级）当成 `subjectId` 传给 enterExam，新 HR 数据（题目 `examid = subjects._id`）一律抽不到题。
+
+**云函数 · `enterExam`：模考宽容化**
+
++ **模考默认配置覆盖三种题型**（关键修复）：原 `deriveConfigFromCount(10)` 会把 10 道全分配给单选 → cap 后只剩 1 道。现在前端不传 `questionConfig` 时，默认 `{single:10/1, multi:5/2, judge:5/1}`，cap 阶段再削到 pool 真实数量；这样 1单+1多+1判的题库会各抽 1 道，3 道全上
++ 取消"`totalNeed <= 0` 一律 EMPTY_CONFIG"对模考的拦截——模考的 count 在抽题前会被自动 cap 到 pool 真实数量
++ pool 取出后，按 typecode 聚合实际题量 `byCount`，把 `questionConfig.single/multi/judge.count` 各自 cap 到对应 `byCount`（HR 只放了 3 道单选时，请求 10 也能成功开考，实际抽 3）
++ `fullScore` 在 cap **之后**计算，反映真实抽题量
++ `NOT_ENOUGH_QUESTIONS` 现在只对正式考（`!isMock`）生效；模考已经在上面 cap 过，理论上不会触发
++ 新增 cap 后 `picked.length === 0` 兜底（题库类型完全错配的极端场景），统一抛 `NO_QUESTIONS`
+
+**小程序 · `pages/home/index.js`：入口跳转 + 题库选择重构**
+
++ 新增 `subjectsList` 数据 + `loadSubjectsList()`：从 `subjects` 集合拉全表（带 `_id: exists(true)` 走主键索引避免全扫告警），用 `queryResult` 拼出 `pid -> exam.name` 映射，每条 subject 生成 `label = "题库名（一级名）"`
++ `goExamList` / `goRandom`：单条直接进，多条用 `wx.showActionSheet` 让用户挑——不再"无脑跳第一条"
++ `goMockExam`：改用 `subjectsList`（不再用 `queryResult`），传给 enterExam 的 `subjectId` 现在是真正的 `subjects._id`，能匹配 `hrSaveQuestion` 写入的 `questions.examid`
++ ⚠️ 历史数据兼容性：旧种子题目（`questions.examid = exam._id` 的 legacy 2 级结构）从首页模考入口将不再可达——这本来就是占位数据，可接受
+
+**部署清单**
+
++ 重新上传：`enterExam` 云函数
++ 小程序端 `pages/home/index.js` 改完直接预览即可（无 wxml/wxss 变化）
+
+---
+
 ### 20260628 · v0.3.2-subject-question-crud（Phase 3 子里程碑 3 · 题库 + 题目 CRUD）
 
 > 把 v0.3.1 留下的"敬请期待"两张卡片落地：HR 现在可以直接在小程序里维护题库（subjects）和题目（questions），不再需要去云开发控制台手改文档。题库删除支持级联删题目，被考试引用时阻断；题目编辑页选项动态行 + 三题型自适应。

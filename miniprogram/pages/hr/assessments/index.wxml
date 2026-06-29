@@ -27,6 +27,9 @@
         <view class="stat"><text class="lbl">已报名</text><text class="val">{{item.enrolled}}</text></view>
         <view class="stat"><text class="lbl">已交卷</text><text class="val">{{item.submitted}}</text></view>
       </view>
+      <view class="row-actions">
+        <button class="action-btn" size="mini" data-id="{{item._id}}" catchtap="onScores">成绩</button>
+      </view>
     </view>
   </view>
 </view>
