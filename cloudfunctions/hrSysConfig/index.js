@@ -87,7 +87,16 @@ exports.main = async (event) => {
       return { ok: true, _id: key }
     } catch (err) {
       console.error('[hrSysConfig.set] error', err)
-      return { ok: false, code: 'DB_ERROR', message: err.errMsg || String(err) }
+      const msg = (err && (err.errMsg || err.message)) || String(err)
+      // 集合不存在 → 友好提示（云函数没法自动建集合，必须管理员手工建）
+      if (/-?502005/.test(msg) || /collection not exist/i.test(msg) || /DATABASE_COLLECTION_NOT_EXIST/i.test(msg)) {
+        return {
+          ok: false,
+          code: 'COLLECTION_NOT_EXIST',
+          message: '数据库集合 sysConfig 不存在，请到云开发控制台 → 数据库 → 新建集合 sysConfig（空集合即可）后再保存。'
+        }
+      }
+      return { ok: false, code: 'DB_ERROR', message: msg }
     }
   }
 

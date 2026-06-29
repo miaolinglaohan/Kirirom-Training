@@ -101,7 +101,13 @@ Page({
       const r = res.result || {}
       this.setData({ saving: false })
       if (!r.ok) {
-        wx.showToast({ icon: 'none', title: r.message || '保存失败' })
+        // 长错误提示（如集合不存在）用 modal，不会被截断
+        const msg = r.message || '保存失败'
+        if (msg.length > 14) {
+          wx.showModal({ title: '保存失败', content: msg, showCancel: false })
+        } else {
+          wx.showToast({ icon: 'none', title: msg })
+        }
         return
       }
       this.setData({ watermarkInitial: v })

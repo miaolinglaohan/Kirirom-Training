@@ -50,3 +50,35 @@
   color: #999;
   line-height: 1.6;
 }
+
+/* 临时：M2 PDF 测试入口，M3 完成后随入口一起移除 */
+.test-area {
+  margin: 16rpx 0 12rpx;
+  padding: 20rpx;
+  background: #fffbe6;
+  border: 2rpx dashed #f0c050;
+  border-radius: 12rpx;
+}
+.test-btn {
+  background: #f0c050;
+  color: #5a3d00;
+  font-size: 26rpx;
+  border-radius: 12rpx;
+  margin: 0;
+}
+.test-tip {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: #a07a00;
+  line-height: 1.5;
+}
+
+/* 隐藏 canvas：必须有非零尺寸才能拿到 node，但位置移出屏幕 */
+.pdf-canvas-hidden {
+  position: fixed;
+  left: -10000rpx;
+  top: -10000rpx;
+  width: 100rpx;
+  height: 100rpx;
+  pointer-events: none;
+}

@@ -1,3 +1,61 @@
+### 20260629 · v0.3.5-pdf-core（Phase 3 子里程碑 7 · PDF 底座）
+
+> 在不引入任何 PDF 第三方库（jsPDF / pdf-lib / pdfmake 全部排除）的前提下，自己用 Uint8Array 拼装一份合法 PDF 1.3，把 Canvas 渲染的内容封进去。本 tag 完成"底座 + 测试入口"，但还没接业务页（业务接线放在 `pdf-export` tag）。
+
+**新增工具层 `miniprogram/utils/pdf/`**
+
++ `miniPdf.js`（~150 行）：手写 PDF 1.3 容器
+  - 每页 3 个对象：Page / Contents（一句 `q W 0 0 H 0 0 cm /Im1 Do Q`）/ Image XObject（JPEG，DCTDecode）
+  - 对象编号、xref 偏移、trailer、startxref 全部精确计算
+  - 二进制 marker `%\xE2\xE3\xCF\xD3` 让阅读器认成二进制 PDF
+  - 字符串走 latin1 8-bit 直拷，不经过 TextEncoder（否则会变 UTF-8 破坏 PDF 语法）
+
++ `pdfCanvas.js`：A4 Canvas 工具
+  - `A4_PT = { w: 595, h: 842 }`，默认 scale=2 → 1190×1684 像素（144 DPI）
+  - `prepareCanvas(node)` 给传入的 type=2d canvas 设尺寸 + 返回 ctx
+  - `drawWhiteBg(ctx)` 画白底（JPEG 无 alpha，必须先垫白）
+  - `drawWatermark(ctx, text, w, h, opts)` 45° 斜向重复水印
+    - 横向步进自适应：`measureText(text).width + gapX`，避免长文字重叠
+    - 纵向步进 = `fontPx × lineMul`
+    - 砖砌错位排布（隔行偏移半步距），视觉上更像真水印
+    - 默认参数：fontPx=48 / alpha=0.05 / gapX=160 / lineMul=5
+  - `canvasToJpegBytes(canvas)` 走 `canvasToTempFilePath → readFile` 拿到 JPEG 字节
+
++ `pdfExport.js`：落盘与转发
+  - `buildAndSavePdf(pages, fileName)` → 拼 PDF + writeFile，返回 filePath
+  - `exportAndPreview(pages, fileName)` → 拼 + 落 + `wx.openDocument` 一条龙
+  - `sharePdfToChat(filePath)` 包装 `wx.shareFileMessage`
+  - 文件名 `sanitizeFileName` 兜底，禁止路径片段（`../`）
+  - Uint8Array → ArrayBuffer 用 byteOffset 判断后 slice，避免子视图陷阱
+
+**HR 首页 · 临时测试入口**
+
++ admin 可见黄色虚框区域 + 🧪「测试 PDF 导出」按钮 + loading 态
++ 隐藏 `<canvas type="2d" id="pdfTestCanvas">` 放在页面外（`left:-10000rpx`）
++ 流程：取水印 → 渲染 2 页 demo（标题 / 蓝框信息块 / 页脚 / 斜向水印）→ 导出 + 预览
++ 进入 `v0.3.5-pdf-export` 时会被移除
+
+**M1 顺手修补**
+
++ `hrSysConfig.set` 捕获 `-502005 / DATABASE_COLLECTION_NOT_EXIST`，返回明确的中文提示「请到云开发控制台 → 数据库 → 新建集合 sysConfig」
++ `pages/hr/settings` 保存失败时根据 message 长度自动选 toast 或 modal（toast 14 字截断会让长错误信息变成"数据库集合 sys…"）
+
+**M2 自测通过项**
+
++ PDF 能在小程序内预览 ✅
++ 单页 ~100KB 量级、2 页 ~250KB ✅
++ 水印 45° 斜向 / 半透明 / 自适应间距 ✅
++ 「…」菜单转发 / 保存到手机 ✅
++ 未配置水印时正常空白不报错 ✅
+
+**水印参数调节口子**（admin 后续若想微调，改 `miniprogram/utils/pdf/pdfCanvas.js` 里 `drawWatermark` 函数开头几行的 fontPx/alpha/gapX/lineMul 默认值即可）
+
+**下一步预告**
+
++ `v0.3.5-pdf-export`：在 `pages/hr/assessmentScores`（按考试导出总分单）和 `pages/hr/applicantReview`（按答卷导出个人答题册）各加一个「📄 导出 PDF」按钮，写两个渲染器 `pdfScoreSheet.js` / `pdfAnswerSheet.js`，并移除本 tag 加的测试入口
+
+---
+
 ### 20260629 · v0.3.5-sysconfig（Phase 3 子里程碑 6 · 系统设置铺底）
 
 > v0.3.5 PDF 导出由 3 个 tag 组成：`sysconfig` 做配置基础设施 / `pdf-core` 做 Canvas→PDF 的底层套件 / `pdf-export` 做两张表的最终接线。本 tag 只解决"水印文字哪里改"——为 admin 加一处可写的全局配置项，所有 PDF 导出共用这条字符串。

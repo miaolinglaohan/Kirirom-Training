@@ -36,5 +36,16 @@
     </view>
   </view>
 
+  <!-- 临时：M2 PDF 容器自测入口，M3 完成后会移除 -->
+  <view class="test-area" wx:if="{{me.role === 'admin'}}">
+    <button class="test-btn" bindtap="onTestPdf" loading="{{testing}}" disabled="{{testing}}">
+      🧪 测试 PDF 导出（M2 验收用，将移除）
+    </button>
+    <view class="test-tip">点击后会生成一张 2 页 demo PDF：白底 + 文字 + 半透明斜向水印，自动打开预览。</view>
+  </view>
+
   <view class="footer-tip">提示：题目管理需先进入对应题库，再点「查看题目」。</view>
+
+  <!-- 隐藏 canvas：PDF 导出的实际绘图容器（不可移除其 type/id） -->
+  <canvas type="2d" id="pdfTestCanvas" class="pdf-canvas-hidden"></canvas>
 </view>
