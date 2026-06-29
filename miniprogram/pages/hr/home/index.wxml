@@ -28,6 +28,12 @@
       <view class="card-title">题目管理</view>
       <view class="card-desc">通过题库进入题目维护</view>
     </view>
+
+    <view class="card" wx:if="{{me.role === 'admin'}}" bindtap="goSettings">
+      <view class="icon">⚙️</view>
+      <view class="card-title">系统设置</view>
+      <view class="card-desc">PDF 水印等全局配置（仅 admin）</view>
+    </view>
   </view>
 
   <view class="footer-tip">提示：题目管理需先进入对应题库，再点「查看题目」。</view>

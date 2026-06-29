@@ -1,3 +1,44 @@
+### 20260629 · v0.3.5-sysconfig（Phase 3 子里程碑 6 · 系统设置铺底）
+
+> v0.3.5 PDF 导出由 3 个 tag 组成：`sysconfig` 做配置基础设施 / `pdf-core` 做 Canvas→PDF 的底层套件 / `pdf-export` 做两张表的最终接线。本 tag 只解决"水印文字哪里改"——为 admin 加一处可写的全局配置项，所有 PDF 导出共用这条字符串。
+
+**数据库 · 新增 `sysConfig` 集合**
+
++ 主键 = 配置 key（如 `pdfWatermark`），文档结构 `{ value, updatedAt, updatedBy }`
++ 当前仅一个 key：`pdfWatermark`（PDF 半透明斜向水印的固定文字，长度 ≤ 60）
++ 任何 active 员工都能读（导出 PDF 时要用），只有 admin 能写
+
+**云函数 · 新增 `hrSysConfig`**
+
++ `action='get'`：`{ key }` → `{ value }`；不存在时返回空串；任何 active 员工可调
++ `action='set'`：`{ key, value }` → `{ ok: true }`；仅 admin（`FORBIDDEN_SET`）；长度 > 60 报 `TOO_LONG`；不在白名单的 key 报 `INVALID_KEY`
++ 写入路径走 try-get-then-update-or-add 的 upsert 模式，避免依赖云数据库 set with upsert（小程序端 SDK 兼容性差）
++ 错误码：`NO_OPENID / FORBIDDEN / INVALID_KEY / FORBIDDEN_SET / TOO_LONG / INVALID_ACTION / DB_ERROR`
+
+**小程序 · 新增 `pages/hr/settings`**
+
++ 仅 admin 可见入口（HR home 第 5 张卡，`wx:if="{{me.role === 'admin'}}"`）；非 admin 直接进 URL 会被前端 toast 拦回 HR home
++ 单输入项 textarea + 60 字符计数 + 恢复默认按钮（默认值 `基里隆项目部内部资料 · 严禁外传`）+ 保存按钮（loading 态防双击）
++ 仅在 value 实际变化时才提交，未改动时保存按钮 toast 提示「内容未变化」
+
+**入口接线**
+
++ `pages/hr/home/index.js` 加 `goSettings()`；`index.wxml` 新增 admin-only 卡片「⚙️ 系统设置」
++ `miniprogram/app.json` 注册 `pages/hr/settings/index`
+
+**部署清单**
+
++ 新增上传：`hrSysConfig` 云函数
++ 数据库手动新建集合：`sysConfig`（空集合即可，第一次 set 时云函数会自动 add）
++ 小程序端 1 个新页面（`pages/hr/settings` 四件套）+ `app.json` + `pages/hr/home/index.{js,wxml}`
+
+**下一步预告**
+
++ `v0.3.5-pdf-core`：手写 PDF 1.3 容器 + A4 Canvas 工具 + 文件保存/预览/转发链路（无业务接入）
++ `v0.3.5-pdf-export`：两张 PDF（考试总分单 / 个人答卷）真正接到对应 HR 页面
+
+---
+
 ### 20260629 · v0.3.4-applicant-review（Phase 3 子里程碑 5 · HR 复盘）
 
 > 接 v0.3.3-scores 的遗留：HR 在成绩单上点已交卷的员工 → 看到他的完整答卷 + 对错 + 解析。专门新建 HR 端复盘页，而不是扩员工端 review 页——HR 视角天然多一栏「这是谁、哪个部门、切屏几次」，与员工"自查"是不同场景，分开后两边都能独立迭代。

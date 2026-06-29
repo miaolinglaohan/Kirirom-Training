@@ -1,0 +1,9 @@
+{
+  "name": "hrSysConfig",
+  "version": "1.0.0",
+  "description": "系统级配置（如 PDF 水印）的读写。get 对所有已激活员工开放，set 仅 admin。",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

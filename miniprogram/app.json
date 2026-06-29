@@ -32,7 +32,8 @@
     "pages/hr/questions/index",
     "pages/hr/questionEdit/index",
     "pages/hr/assessmentScores/index",
-    "pages/hr/applicantReview/index"
+    "pages/hr/applicantReview/index",
+    "pages/hr/settings/index"
   ],
   "window": {
     "backgroundColor": "#F6F6F6",
