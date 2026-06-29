@@ -1,61 +1,156 @@
-## 介绍
-微信小程序，考试小程序，答题小程序，刷题小程序。有前后端完整源码和数据库，易于二次开发。还可用于考试预约，企业内部考核，内部培训等，职业考试刷题，基于云开发，部署简单，免服务器和域名备案。    
+# Kirirom Training · 月度摸底考试小程序
 
-                                                                                
-## 合作&&定制                                                                                        
-            
-如果您是某某培训机构，学校，政府，公司，事业单位，因为题库私密不能对外开放，需要单独搭建小程序的，**[欢迎点击主页查看联系方式](https://gitee.com/wulivictor)**，可以提供部署和定制开发服务。
-   
-                 
-## 小程序功能截图           
-| 主界面  | 题库分类 | 模拟考试 |   
+> 内部使用的月度摸底 / 培训考核微信小程序。在开源项目 `exam-mini-master` 的基础上做了大幅二次开发：增加员工 / HR / 管理员三级角色、考试场次（assessment）模型、报名（enrollment）与流转、HR 后台 CRUD、批阅与统计、以及完全手写、零第三方依赖的 PDF 导出体系。
 
-<img src = "https://images.gitee.com/uploads/images/2021/0902/094244_c98fbc5c_1947212.png" width = "30%">  
-<img src = "https://images.gitee.com/uploads/images/2021/0902/094251_99b3f179_1947212.png" width = "30%"> 
-<img src = "https://images.gitee.com/uploads/images/2021/0902/094257_9cf44a1b_1947212.png" width = "30%">  
+适用场景：企业 / 培训机构对内部员工进行周期性知识摸底考核，需要管理员后台维护题库、HR 后台组织考试场次、员工小程序端答题，并以 PDF 形式归档成绩与答卷。
 
-| 答题考试  | 考试成绩 | 我的错题 |
-    
-<img src = "https://images.gitee.com/uploads/images/2021/0902/094305_dda0d7e9_1947212.png" width = "30%">  
-<img src = "https://images.gitee.com/uploads/images/2021/0902/094311_8de94155_1947212.png" width = "30%">  
-<img src = "https://images.gitee.com/uploads/images/2021/0902/094322_343884b5_1947212.png" width = "30%">  
+---
 
-| 考试排名  | 我的成绩 | 个人信息 |
-   
-<img src = "https://images.gitee.com/uploads/images/2021/0902/094330_2cb1a4ab_1947212.png" width = "30%">  
-<img src = "https://images.gitee.com/uploads/images/2021/0902/094720_c97b2558_1947212.png" width = "30%">  
-<img src = "https://images.gitee.com/uploads/images/2021/0902/094357_20c12d7f_1947212.png" width = "30%">  
-    
-       
-## 后台截图  
+## 技术栈
 
-<img src = "https://images.gitee.com/uploads/images/2021/0902/095442_4a1f061f_1947212.png" width = "80%"> 
-<img src = "https://images.gitee.com/uploads/images/2021/0817/090039_6c0bf086_1947212.png" width = "80%"> 
-               
-## 适用场景     
-     1 ·企业招聘考试。候选人等候时面试可手机扫码参加笔试，系统实时生成结果，一个简单的考核就可让面试官提前了解候选人的能力
-     情况。在大规模校园聘会上公布考试地址，考生现场完成考试，现场出分，主办方可快速筛选合格考生参加面试，大大缩短招聘周期和成本。
+- 微信小程序（原生 WXML / WXSS / JS，未使用任何前端框架）
+- 微信云开发：云函数（Node.js）+ 云数据库（MongoDB-like）+ 临时文件存储
+- 手写 PDF 1.3 容器 + Canvas 2D 渲染（不引入任何 PDF / 字体 / 图像第三方库）
+- `dayjs` 仅作为时间格式化的小工具
 
-     2 ·企事业举办活动，知识竞赛，可以在某一个时间段发布活动，供用户参加比赛，前几名可以获得奖品。
+---
 
-     3 ·培训认证考试。培训机构结业认证考核，行业从业资格认证，能力认证考核等，题答答提供从考生报名到参加考试的全流程功能。
-     无限制题库刷题，错题训练，随机题序，答案解析，错题本重练，让刷题不止追求量，也有质的保障，帮助考生更熟练地掌握知识点，
-     提高考试通过率。       
-	    
-## 小程序自助搭建教程   
-    https://developers.weixin.qq.com/community/develop/article/doc/0000221e880be024941ca52fa51813
+## 目录结构
 
-如果失效的话，可以看这个 [部署教程](deploy.md) 
-## 后台管理系统自助搭建教程
-    https://developers.weixin.qq.com/community/develop/article/doc/000e84e25186c00a74fcd372a5b813
-    
-## 特点
-+ 答题分单题模式和列表模式    
-+ 查看分数
-+ 查看答案   
-+ 错题提醒
-+ 查看答题历史记录
-+ 查看错题记录
-+ 生成海报   
-+ 选择题支持单选、多选 
-+ 支持图片题库    
+```
+exam-mini-master/
+├── miniprogram/              # 小程序端
+│   ├── pages/
+│   │   ├── home / exam / examresult / history / mistakes / score ...
+│   │                          # 员工端：首页、答题、成绩、错题、历史等
+│   │   └── hr/                # HR / 管理员后台
+│   │       ├── home/                # 后台主页（卡片入口）
+│   │       ├── employees/           # 员工管理
+│   │       ├── subjects/ + subjectEdit/
+│   │       ├── questions/ + questionEdit/
+│   │       ├── assessments/ + assessmentEdit/
+│   │       ├── assessmentScores/    # 单场成绩 + PDF 导出
+│   │       ├── applicantReview/     # 单人答卷批阅 + PDF 导出
+│   │       └── settings/            # 系统设置（水印 / 单位名称）
+│   ├── utils/
+│   │   ├── pdf/
+│   │   │   ├── miniPdf.js           # 手写 PDF 1.3 容器
+│   │   │   ├── pdfCanvas.js         # A4 144DPI Canvas 工具 + 水印
+│   │   │   ├── pdfExport.js         # 保存 / 预览 / 转发
+│   │   │   ├── pdfScoreSheet.js     # 总分单渲染器
+│   │   │   └── pdfAnswerSheet.js    # 答卷渲染器（单人 / 批量）
+│   │   ├── dayjs.min.js
+│   │   └── util.js
+│   ├── app.js / app.json / app.wxss
+│   └── images/
+│
+├── cloudfunctions/           # 云函数（每个文件夹一个）
+│   ├── login / whoAmI / activate           # 登录与激活
+│   ├── enterExam / saveDraft / submitExam  # 答题流程
+│   ├── listMyAssessments                   # 员工端考试列表
+│   ├── hrListEmployees / hrSetEmployee
+│   ├── hrListSubjects / hrSaveSubject / hrDeleteSubject
+│   ├── hrListQuestions / hrSaveQuestion / hrDeleteQuestion
+│   ├── hrListAssessments / hrSaveAssessment
+│   ├── hrListAssessmentScores              # 成绩列表（HR）
+│   ├── hrGetApplicantReview                # 单人批阅详情
+│   ├── hrFakeScores                        # 仅开发期：造测试分数
+│   ├── hrSysConfig                         # 系统设置 KV（admin 可写）
+│   ├── initDB / getServerTime / echo / sum # 工具
+│   └── callback / openapi
+│
+├── data/                     # 初始种子数据 / 示例 JSON
+├── docs/                     # 阶段性落地文档（Phase1 / Phase2 / Phase3）
+├── images/
+├── CHANGELOG.md              # 所有 tag 与对应变更说明
+├── deploy.md                 # 来自原项目的部署教程
+├── 月度摸底考试改造方案.md
+├── 月度摸底考试改造方案-v2.md
+├── project.config.json
+└── README.md                 # 本文件
+```
+
+---
+
+## 角色模型
+
+通过 `employees` 集合上的 `role` 字段区分：
+
+| role | 入口 | 权限 |
+|------|------|------|
+| `employee` | 小程序首页 | 报名、答题、看自己的成绩与错题 |
+| `hr` | HR 后台 | 员工管理、题库、考试场次、批阅、导出 |
+| `admin` | HR 后台 + 系统设置 | HR 全部权限 + 写 `sysConfig`（水印 / 单位名称） |
+
+所有云函数都做双保险：**前端隐藏入口 + 云函数侧再次校验调用方 role**。
+
+---
+
+## PDF 导出体系
+
+完全自研，**不引入任何第三方 PDF 库**：
+
+- `miniPdf.js`：直接拼装 PDF 1.3 字节流（catalog / pages / per-page JPEG XObject），输出 `Uint8Array`
+- `pdfCanvas.js`：在小程序 `type=2d` 离屏 canvas 上按 A4 / 144 DPI（1190 × 1684 px）作画，含 45° 水印
+- `pdfScoreSheet.js`：单场总分单（表头、统计、分段排名、签发栏）
+- `pdfAnswerSheet.js`：
+  - `buildAnswerSheetPages(canvas, data)` — 单人答卷
+  - `buildBatchAnswerSheetPages(canvas, batchData)` — 全员答卷批量导出，**换人强制翻页 + 全局连续页码 + 末页一份落款**
+- `pdfExport.js`：写临时文件 → `wx.openDocument` 预览 / 转发
+
+入口：HR 后台 → 单场成绩页（导出总分单 / 导出全员答卷）、单人批阅页（导出本人答卷）；水印 / 单位名称在「系统设置」配置。
+
+---
+
+## 本地开发指南
+
+1. **导入项目**：用 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html) 打开仓库根目录。AppID 在 `project.config.json` 中按需替换为你自己的小程序 AppID。
+
+2. **开通云开发**：在开发者工具左上角点「云开发」，新建一个云开发环境，把环境 ID 写入 `miniprogram/app.js` 中 `wx.cloud.init({ env: 'xxx' })`。
+
+3. **上传云函数**：右键 `cloudfunctions/` 下每个函数文件夹 → 「上传并部署：云端安装依赖」。第一次部署可以全选一次性传。
+
+4. **创建集合**：在云控制台手动新建以下集合（详细 schema 见 `docs/数据库设计.md`）：
+
+   `employees` / `subjects` / `questions` / `assessments` / `enrollments` / `historys` / `notes` / `profiles` / `sysConfig`
+
+5. **导入种子数据**（可选）：`data/` 目录下提供了 `subjects.json`、`questions.json`、`assessments.sample.json` 等，云控制台 → 集合 → 「导入」即可。
+
+6. **设置自己为 admin**：在 `employees` 集合手动把自己那条记录的 `role` 改成 `admin`，即可看到「系统设置」入口；先在系统设置里把水印文字 / 单位名称写好，再去测试 PDF 导出。
+
+---
+
+## 版本时间线
+
+完整变更说明见 [`CHANGELOG.md`](./CHANGELOG.md)。tag 一览（按时间）：
+
+| Tag | 主题 |
+|-----|------|
+| `v0.1-phase1` | Phase 1：员工端基础答题流程 |
+| `v0.2-phase2` | Phase 2：考试场次 / 报名 / 提交流转 |
+| `v0.3.0-judge-type` | 判断题题型 |
+| `v0.3.1-hr-skeleton` | HR 后台骨架 |
+| `v0.3.2-subject-question-crud` | 题库 / 科目 CRUD |
+| `v0.3.2-hotfix` | 题库相关 hotfix |
+| `v0.3.3-scores` | 成绩列表 / 统计 |
+| `v0.3.4-applicant-review` | 单人答卷批阅 |
+| `v0.3.5-sysconfig` | 系统设置 KV（水印 / 单位名） |
+| `v0.3.5-pdf-core` | 手写 PDF 1.3 容器 + Canvas 工具 |
+| `v0.3.5-pdf-export` | PDF 导出业务接线（总分单 / 单人 / 全员） |
+
+---
+
+## 二次开发约定
+
+- 每个里程碑都打 tag，并同步在 `CHANGELOG.md` 增加段落。CHANGELOG 顺序：**最新的写在最上方**。
+- **不引入第三方 PDF / 字体 / 图像处理库**，所有渲染走 Canvas 2D + 手写容器。
+- 角色守卫遵循「前端隐藏 + 云函数再校验」的双保险，任何新加的 HR 云函数都要先在入口校验 `role in ('hr','admin')`。
+- 文案默认中文；时间显示统一走 `dayjs`，日期格式 `YYYY年M月D日`。
+
+---
+
+## 致谢与许可
+
+本项目脱胎自 Gitee 开源项目 [`exam-mini-master`](https://gitee.com/wulivictor)（原作者：wulivictor）。Phase 1 之后的功能与 PDF 导出体系为本仓库自研。
+
+许可参见根目录 [`LICENSE`](./LICENSE)。
