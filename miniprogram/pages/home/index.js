@@ -4,7 +4,8 @@ const app = getApp()
 Page({
   data: {
     openid: '',
-    queryResult: [],
+    queryResult: [],          // 一级 exam 列表（顺序/随机练习用）
+    subjectsList: [],         // 二级 subjects 列表（模拟考试用，标签拼"题库名（一级名）"）
 
     // 统计条数据（Phase 0 占位，Phase 2 后接入真实数据）
     stats: {
@@ -34,6 +35,7 @@ Page({
         isHr: emp.role === 'hr' || emp.role === 'admin'
       })
       this.loadExamList()
+      this.loadSubjectsList()
       this.loadStats()
       this.loadCurrentExam()
     })
@@ -55,6 +57,32 @@ Page({
         fail: err => {
           console.error('[home] exam 查询失败：', err)
         }
+      })
+  },
+
+  // 二级 subjects 列表：模拟考试入口要按"题库"挑，而不是"一级试卷"
+  // 同时联表把 pid -> 一级名 拼上，UI 显示"题库名（一级名）"
+  loadSubjectsList() {
+    const db = wx.cloud.database()
+    db.collection('subjects')
+      .where({ _id: db.command.exists(true) })
+      .limit(200)
+      .get()
+      .then(res => {
+        const subs = res.data || []
+        // 用已加载的 queryResult（exam）拼出 pid -> name 映射；若 exam 还没加载完，pid 直接当后缀
+        const examMap = {}
+        ;(this.data.queryResult || []).forEach(e => { examMap[e._id] = e.name })
+        const list = subs.map(s => ({
+          _id: s._id,
+          pid: s.pid,
+          name: s.name,
+          label: examMap[s.pid] ? `${s.name}（${examMap[s.pid]}）` : s.name
+        }))
+        this.setData({ subjectsList: list })
+      })
+      .catch(err => {
+        console.error('[home] subjects 查询失败：', err)
       })
   },
 
@@ -117,23 +145,43 @@ Page({
 
   // —— 入口跳转 ——
   goExamList() {
-    // 顺序练习：跳到第一个 exam 的 subjects 列表，没有则提示
-    if (this.data.queryResult.length === 0) {
+    // 顺序练习：单条直接进，多条让用户挑
+    const list = this.data.queryResult || []
+    if (list.length === 0) {
       wx.showToast({ icon: 'none', title: '暂无可练习题库' })
       return
     }
-    const first = this.data.queryResult[0]
-    wx.navigateTo({ url: '/pages/subject/index?id=' + first._id })
+    if (list.length === 1) {
+      wx.navigateTo({ url: '/pages/subject/index?id=' + list[0]._id })
+      return
+    }
+    wx.showActionSheet({
+      itemList: list.map(x => x.name || x._id),
+      success: r => {
+        const picked = list[r.tapIndex]
+        wx.navigateTo({ url: '/pages/subject/index?id=' + picked._id })
+      }
+    })
   },
 
   goRandom() {
-    if (this.data.queryResult.length === 0) {
+    // 随机刷题：同样支持多条选择
+    const list = this.data.queryResult || []
+    if (list.length === 0) {
       wx.showToast({ icon: 'none', title: '暂无可练习题库' })
       return
     }
-    // 随机刷题 = 走 simple 页（已有逻辑）
-    const first = this.data.queryResult[0]
-    wx.navigateTo({ url: '/pages/simple/index?id=' + first._id })
+    if (list.length === 1) {
+      wx.navigateTo({ url: '/pages/simple/index?id=' + list[0]._id })
+      return
+    }
+    wx.showActionSheet({
+      itemList: list.map(x => x.name || x._id),
+      success: r => {
+        const picked = list[r.tapIndex]
+        wx.navigateTo({ url: '/pages/simple/index?id=' + picked._id })
+      }
+    })
   },
 
   goNote() {
@@ -158,24 +206,23 @@ Page({
 
   // —— 大按钮：模拟考试 ——
   goMockExam() {
-    // 直接走真正的模考流程（云函数 enterExam，isMock=true，写 examEnrollments 不写 historys）
-    if (this.data.queryResult.length === 0) {
+    // 模拟考试针对的是"题库"（二级），不是"一级试卷"。
+    // enterExam 云函数的 subjectId 必须对得上 questions.examid（= subjects._id）。
+    const list = this.data.subjectsList || []
+    if (list.length === 0) {
       wx.showToast({ icon: 'none', title: '暂无可用题库' })
       return
     }
-    // 题库只有一个就直接进；多个走选择页
-    if (this.data.queryResult.length === 1) {
-      const first = this.data.queryResult[0]
+    if (list.length === 1) {
       wx.navigateTo({
-        url: '/pages/exam/exam?mock=1&subjectId=' + encodeURIComponent(first._id)
+        url: '/pages/exam/exam?mock=1&subjectId=' + encodeURIComponent(list[0]._id)
       })
       return
     }
-    // 多题库：让用户先选一个
     wx.showActionSheet({
-      itemList: this.data.queryResult.map(x => x.name || x._id),
+      itemList: list.map(x => x.label),
       success: r => {
-        const picked = this.data.queryResult[r.tapIndex]
+        const picked = list[r.tapIndex]
         wx.navigateTo({
           url: '/pages/exam/exam?mock=1&subjectId=' + encodeURIComponent(picked._id)
         })

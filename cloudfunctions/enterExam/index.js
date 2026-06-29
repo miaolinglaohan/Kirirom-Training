@@ -149,12 +149,20 @@ exports.main = async (event) => {
       subjectId = String(event.subjectId || '').trim()
       if (!subjectId) return { ok: false, code: 'MISSING_SUBJECT', message: '模考缺少题库参数' }
       durationMin = Number(event.duration) > 0 ? Number(event.duration) : DEFAULT_MOCK_DURATION_MIN
-      // 模考兼容：优先 event.questionConfig，其次旧 event.questionCount，最后默认值
+      // 模考兼容：优先 event.questionConfig；其次旧 event.questionCount（一律视为单选）；
+      // 最后走"默认覆盖三种题型"——配合下方 cap 逻辑，自动削到 pool 真实数量
       if (event.questionConfig) {
         questionConfig = normalizeConfig(event.questionConfig)
+      } else if (Number(event.questionCount) > 0) {
+        questionConfig = deriveConfigFromCount(Number(event.questionCount))
       } else {
-        const n = Number(event.questionCount) > 0 ? Number(event.questionCount) : DEFAULT_MOCK_QUESTION_COUNT
-        questionConfig = deriveConfigFromCount(n)
+        // Phase 3 fix: 模考默认就给三种题型都安排上限值，cap 阶段自动削；
+        // 这样 HR 只放了 1 单 / 1 多 / 1 判，也能各抽 1 道；放满则上限 10 / 5 / 5
+        questionConfig = {
+          single: { count: 10, score: 1 },
+          multi:  { count: 5,  score: 2 },
+          judge:  { count: 5,  score: 1 }
+        }
       }
       startedAt = new Date(now)
       deadline = new Date(now + durationMin * 60 * 1000)
@@ -197,10 +205,12 @@ exports.main = async (event) => {
       enrollmentId = assessmentId + '_' + OPENID
     }
 
-    const fullScore = computeFullScore(questionConfig)
-    const totalNeed = questionConfig.single.count + questionConfig.multi.count + questionConfig.judge.count
-    if (totalNeed <= 0) {
-      return { ok: false, code: 'EMPTY_CONFIG', message: '考试题量配置为空，请联系 HR' }
+    // Phase 3 fix: 正式考校验 totalNeed > 0；模考宽容（counts 可能在抽题阶段被 cap 到 pool 真实数量）
+    if (!isMock) {
+      const totalNeed = questionConfig.single.count + questionConfig.multi.count + questionConfig.judge.count
+      if (totalNeed <= 0) {
+        return { ok: false, code: 'EMPTY_CONFIG', message: '考试题量配置为空，请联系 HR' }
+      }
     }
 
     // ── 2) 防重入：检查 enrollment 是否已存在
@@ -239,8 +249,25 @@ exports.main = async (event) => {
       return { ok: false, code: 'NO_QUESTIONS', message: '该题库暂无题目，请联系 HR' }
     }
 
+    // Phase 3 fix: 模考宽容 —— 把每个类型的请求数 cap 到题库实际拥有的数量
+    // 这样 HR 在题库里只放了 3 道单选时，模考请求 10 单选 + 5 多选 + 5 判断也能成功开考（实际抽 3 道）
+    if (isMock) {
+      const byCount = { '01': 0, '02': 0, '03': 0 }
+      pool.forEach(q => {
+        const tc = String(q.typecode || '01')
+        if (byCount[tc] !== undefined) byCount[tc]++
+      })
+      if (questionConfig.single.count > byCount['01']) questionConfig.single.count = byCount['01']
+      if (questionConfig.multi.count  > byCount['02']) questionConfig.multi.count  = byCount['02']
+      if (questionConfig.judge.count  > byCount['03']) questionConfig.judge.count  = byCount['03']
+    }
+
+    // Phase 3: 总分 = Σ (count × score) —— 在 cap 之后计算，反映真实抽题量
+    const fullScore = computeFullScore(questionConfig)
+
     const { picked, shortages } = bucketPick(pool, questionConfig)
-    if (shortages.length > 0) {
+    // 正式考严格校验题量不足；模考已经在上方 cap 过，理论上不会 short
+    if (!isMock && shortages.length > 0) {
       return {
         ok: false,
         code: 'NOT_ENOUGH_QUESTIONS',
@@ -249,6 +276,10 @@ exports.main = async (event) => {
       }
     }
     const total = picked.length
+    if (total === 0) {
+      // cap 后所有桶都为 0（题库类型与请求类型完全错配），或正式考但所有 count 都为 0
+      return { ok: false, code: 'NO_QUESTIONS', message: '该题库暂无可用题目，请联系 HR' }
+    }
 
     // ── 4) 剥离答案
     const questions = []

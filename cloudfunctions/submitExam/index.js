@@ -131,10 +131,12 @@ exports.main = async (event) => {
       }
     })
 
-    // ── 非模考：写一条 historys，兼容既有列表/详情页
-    if (!r.isMock) {
-      // 取关联科目名，便于历史页展示
-      let subject = { _id: '', name: '正式考试' }
+    // ── 写 historys（模考 + 正式考都写；错题本统一从 historys 拿数据）
+    //    模考记录用 isMock:true 打标，history 页（"我的考试记录"）过滤掉模考避免噪声，
+    //    mistakes 页（错题本）则不过滤，能自然收到模考错题。
+    {
+      // 取关联科目名，便于历史页/错题本展示
+      let subject = { _id: '', name: r.isMock ? '模拟考试' : '正式考试' }
       try {
         // 通过任一题目反查 subjectId
         const firstQ = (r.questions && r.questions[0]) || null
@@ -163,7 +165,7 @@ exports.main = async (event) => {
         score_arr: perQuestion.map(p => p.right ? 1 : 0),
         rightNum,
         createTime: formatTime(submittedAt),
-        // 新增追加字段，标识来自正式考试
+        // 新增追加字段，标识来自考试系统
         enrollmentId,
         assessmentId: r.assessmentId,
         total,
@@ -176,7 +178,9 @@ exports.main = async (event) => {
         // 用户作答快照（用于复盘"您的选择"展示）
         userAnswers,
         // 官方答案快照（培训系统：复盘展示标准答案，供员工对照学习）
-        answersOfficial: r.answersOfficial || []
+        answersOfficial: r.answersOfficial || [],
+        // 区分模考与正式考：history 页据此过滤
+        isMock: r.isMock === true
       }
 
       try {

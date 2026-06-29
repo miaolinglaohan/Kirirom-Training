@@ -22,8 +22,12 @@ Page({
 
   query(openid) {
     const db = wx.cloud.database()
+    const _ = db.command
+    // "我的考试记录"只展示正式考——过滤掉 isMock:true（模考错题进了错题本，但不污染考试记录列表）
+    // 兼容旧记录（无 isMock 字段）：用 neq(true) 把它们也保留进来
     db.collection('historys').where({
-      _openid: openid
+      _openid: openid,
+      isMock: _.neq(true)
     }).orderBy('createTime', 'desc').get({
       success: res => {
         const arrayObject = res.data || []
