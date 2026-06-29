@@ -354,7 +354,7 @@ function drawQuestionBlock(ctx, yStart, b) {
     // 浅蓝灰底色 + 左侧色条
     ctx.fillStyle = '#f5f7fa';
     ctx.fillRect(PAD_X, cmtY, CONTENT_W, cmtH);
-    ctx.fillStyle = '#2d8cf0';
+	    ctx.fillStyle = '#1bcfad';
     ctx.fillRect(PAD_X, cmtY, 4, cmtH);
 
     ctx.fillStyle = '#444';

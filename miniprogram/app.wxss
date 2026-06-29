@@ -1,29 +1,7 @@
 /**app.wxss**/
 
-/* ============================================================================
- * 全局色板（v0.3.6 起约定，UI 统一为品牌绿主题）
- * 所有页面 wxss 在写新样式时请优先沿用以下色值，不要再引入新的蓝色/绿色变体。
- *
- *  品牌主色（绿）  : #1bcfad   navbar / 主按钮 / tab active / 列表强调
- *  主色 - dark    : #14b39a   渐变末端、按下态
- *  主色 - light bg: #e0f7f1   active 浅底、入口图标底
- *  主色 - light br: #a8e6d8   active 边框
- *
- *  成功 / 已通过  : #19be6b   状态徽（已交卷）
- *  警告 / 进行中  : #ff9900   状态徽（答题中）
- *  危险 / 删除    : #f56c6c   删除按钮、错误态文字 #e74c3c
- *  错误态浅底     : #fde2e2
- *
- *  题型 - 单选    : #1baa7a on #e0f7f1
- *  题型 - 多选    : #d68b00 on #fff4e0
- *  题型 - 判断    : #7b3ff5 on #f0e6ff
- *  角色 - admin   : #f5a623
- *
- *  页面底色       : #f5f6fa （HR 后台） / #f5f5f7 （员工端）
- *  卡片           : #fff   圆角 16rpx   阴影 0 2rpx 12rpx rgba(0,0,0,.04)
- *  文字           : #333 主 / #666 次 / #888 弱 / #aaa 占位 / #ccc 极弱
- *  分割线         : #f0f0f0 / #ececec
- * ============================================================================ */
+/* v0.3.6 UI palette: brand-green #1bcfad, success #19be6b, warn #ff9900, danger #f56c6c.
+   See CHANGELOG.md v0.3.6-ui-unify for full token table. */
 
 .container {
   display: flex;

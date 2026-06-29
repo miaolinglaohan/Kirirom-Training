@@ -126,7 +126,7 @@ function drawMeta(ctx, x, y, widthPx, metaText) {
 /** 画表头。返回新的 y。 */
 function drawTableHeader(ctx, x, y, widthPx) {
   const innerW = widthPx - 2 * PAD_X;
-  ctx.fillStyle = '#2d8cf0';
+  ctx.fillStyle = '#1bcfad';
   ctx.fillRect(x, y, innerW, HEADER_H);
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 26px sans-serif';
