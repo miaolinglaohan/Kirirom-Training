@@ -1,17 +1,24 @@
 <wxs src="./../tools.wxs" module="JSON" />
 <view class="page-question">
     <view class="questions">
-    <block wx:for="{{questions}}" wx:key="id" wx:for-index="idx" wx:for-item="question">
+    <block wx:for="{{questions}}" wx:key="_id" wx:for-index="idx" wx:for-item="question">
     <view class="question-container">
         <view class="question">
             <view class="title">{{idx+1}}，{{question.title}}</view>
         </view>
         <view class="options">
-            <radio-group class="radio-group" bindchange="radioChange">
-            <label class="radio" wx:for="{{question.options}}" wx:key="code">
-                <radio value="{{idx+'|'+JSON.stringify(item)+'|'+JSON.stringify(question)}}"/>{{item.code}}，{{item.content}}
+            <!-- 单选 / 判断 -->
+            <radio-group wx:if="{{question.typecode !== '02'}}" class="radio-group" bindchange="radioChange" data-idx="{{idx}}" data-question="{{question}}">
+            <label class="radio" wx:for="{{question.options}}" wx:key="code" wx:for-item="opt">
+                <radio value="{{opt.code}}"/>{{opt.code}}，{{opt.content}}
             </label>
             </radio-group>
+            <!-- 多选 -->
+            <checkbox-group wx:if="{{question.typecode === '02'}}" class="radio-group" bindchange="checkboxChange" data-idx="{{idx}}" data-question="{{question}}">
+            <label class="radio" wx:for="{{question.options}}" wx:key="code" wx:for-item="opt">
+                <checkbox value="{{opt.code}}"/>{{opt.code}}，{{opt.content}}
+            </label>
+            </checkbox-group>
         </view>
     </view>
     </block>

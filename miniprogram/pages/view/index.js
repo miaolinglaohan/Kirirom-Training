@@ -181,11 +181,11 @@ Page({
   },    
   getQuestion: function(id){
     const db = wx.cloud.database()
-    db.collection('question').doc(id).get({
+    db.collection('questions').doc(id).get({
       success: res => {
         console.log('[数据库] [查询记录] 成功: ', res)
         let question = res.data;
-        let options = JSON.parse(question.options)
+        let options = question.options
         let rightCode;
         console.log(res.data);
         let format_options = options.map(function(item){

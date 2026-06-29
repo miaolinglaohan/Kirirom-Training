@@ -14,8 +14,9 @@ Page({
     idx: 0,
     buttontext: '下一个',
     score: 0,
-    score_arr:[0,0,0,0,0,0,0,0,0,0],
-    code_arr:['M','M','M','M','M','M','M','M','M','M'],
+    score_arr: [],
+    code_arr: [],
+    total: 0,
     options: []
   },
 
@@ -23,33 +24,13 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    let idx = this.data.idx;
-    this.generate().then(res=>{
-      let arr = res;
-      this.setData({
-        arr
-      }, function() {
-        // this is setData callback
-        this.getQuestion(arr[idx]);
-      })
-    });
-
-    this.getSubject().then(res=>{
-      console.log('subject');
-      console.log(res);
-      this.setData({
-        subject: res
-      })
-    })
-
-    this.getExam().then(res=>{
-      console.log('exam');
-      console.log(res);
-      this.setData({
-        exam: res
-      })
-    })    
-
+    let id = options.id;
+    if (!id) {
+      wx.showToast({ icon: 'none', title: '缺少参数' });
+      return;
+    }
+    this.setData({ id });
+    this.loadQuestions(id);
   },
 
   /**
@@ -100,88 +81,105 @@ Page({
   onShareAppMessage: function () {
 
   },
-  generate: function(){
-    return new Promise(function (resolve, reject) {
-      resolve(wx.getStorageSync('arr'))
-    }).catch(res=>{
-      console.log('catch',res)
+  loadQuestions: function(id){
+    const db = wx.cloud.database()
+    // 先尝试直接查 questions（id 为 subject._id 时直接命中）
+    db.collection('questions').where({ examid: id }).get().then(res => {
+      let questions = res.data;
+      if (questions && questions.length > 0) {
+        this._startQuiz(questions);
+        return;
+      }
+      // id 可能是 exam._id，中转查 subjects → 取第一个 subject → 再查 questions
+      return db.collection('subjects').where({ pid: id }).get();
+    }).then(res => {
+      if (!res) return; // 第一次查询已命中
+      let subjects = res.data;
+      if (!subjects || subjects.length === 0) {
+        wx.showToast({ icon: 'none', title: '该题库下暂无科目' });
+        return;
+      }
+      return db.collection('questions').where({ examid: subjects[0]._id }).get();
+    }).then(res => {
+      if (!res) return;
+      let questions = res.data;
+      if (!questions || questions.length === 0) {
+        wx.showToast({ icon: 'none', title: '该题库下暂无题目' });
+        return;
+      }
+      this._startQuiz(questions);
+    }).catch(err => {
+      wx.showToast({ icon: 'none', title: '加载题目失败' });
+      console.error('[simple] 查询失败: ', err);
+    })
+  },
+
+  _startQuiz: function(questions){
+    let arr = questions.map(q => q._id);
+    // 随机打乱
+    arr.sort(() => Math.random() - 0.5);
+    let total = arr.length;
+    // 动态题量：最多 50 题
+    if (total > 50) { arr = arr.slice(0, 50); total = 50; }
+    let score_arr = new Array(total).fill(0);
+    let code_arr = new Array(total).fill('M');
+    this.setData({ arr, total, score_arr, code_arr }, () => {
+      this.getQuestion(arr[0]);
     });
   },
-  getSubject: function(){
-    return new Promise(function (resolve, reject) {
-      resolve(wx.getStorageSync('subject'))
-    }).catch(res=>{
-      console.log('catch',res)
-    });
-  },
-  getExam: function(){
-    return new Promise(function (resolve, reject) {
-      resolve(wx.getStorageSync('exam'))
-    }).catch(res=>{
-      console.log('catch',res)
-    });
-  },  
   radioChange: function(e) {
-    console.log('radio发生change事件，携带value值为：', e.detail.value);
-    console.log(e);
-    let score_arr = this.data.score_arr;
-    let code_arr = this.data.code_arr;
-    let quid_arr = this.data.quid_arr;
-    let idx = this.data.idx;
-    let score = this.data.score;
-    score += parseInt(e.detail.value);
-    console.log('20191221');
-    console.log(JSON.parse(e.detail.value));
-    score_arr[idx] = parseInt(JSON.parse(e.detail.value).value);
-    code_arr[idx] = JSON.parse(e.detail.value).code;
-    // quid_arr[idx] = JSON.parse(e.detail.value).qid;
-    console.log(score_arr);
-    console.log(code_arr);
+    let code = e.detail.value;
+    let { score_arr, code_arr, idx, question } = this.data;
+    let opt = (question.options || []).find(o => o.code === code);
+    let point = (opt && parseInt(opt.value) === 1) ? 1 : 0;
+    score_arr[idx] = point;
+    code_arr[idx] = code;
+    let sum = score_arr.reduce((x,y) => x + y, 0);
     wx.setStorageSync('score_arr', score_arr);
     wx.setStorageSync('code_arr', code_arr);
-    this.setData({
-      score,
-      score_arr,
-      code_arr
-    });
-  },  
+    this.setData({ score_arr, code_arr, score: sum });
+  },
+
+  checkboxChange: function(e) {
+    let codes = e.detail.value || [];
+    let { score_arr, code_arr, idx, question } = this.data;
+    // 完全选对才 1 分
+    let correctCodes = (question.options || [])
+      .filter(o => parseInt(o.value) === 1)
+      .map(o => o.code).sort();
+    let userSorted = codes.slice().sort();
+    let right = correctCodes.length === userSorted.length
+      && correctCodes.every((c, i) => c === userSorted[i]);
+    score_arr[idx] = right ? 1 : 0;
+    code_arr[idx] = codes.join('');
+    let sum = score_arr.reduce((x,y) => x + y, 0);
+    wx.setStorageSync('score_arr', score_arr);
+    wx.setStorageSync('code_arr', code_arr);
+    this.setData({ score_arr, code_arr, score: sum });
+  },
   onNextTap: function(){
     let _this = this;
-    let score = this.data.score;
-    let arr = this.data.arr;
-    let score_arr = this.data.score_arr;
-    let code_arr = this.data.code_arr;
-
-    let idx = this.data.idx;
+    let { score, arr, score_arr, code_arr, idx, question, total } = this.data;
     if(score_arr[idx] == 0){
-      let openid = this.data.openid;
-      let quid = arr[idx];
-      let question = this.data.question;
-
       this.add(question);
     }
     if(code_arr[idx]=='M'){
       wx.showActionSheet({
         itemList: ['放弃该题', '容我三思'],
         success (res) {
-          console.log(res.tapIndex);
-          if(res.tapIndex == 1){
-            return;
-          }else{
-            _this.getNewOne();
-          }
+          if(res.tapIndex == 1){ return; }
+          else { _this.getNewOne(); }
         },
-        fail (res) {
-          console.log(res.errMsg)
-        }
+        fail (res) { console.log(res.errMsg) }
       })
     }else{
       _this.getNewOne();
     }
-       
   },
   add: function(question){
     let {exam ,subject } = this.data;
+    // exam/subject 可能未加载，跳过记录
+    if (!exam || !subject) return;
     let time = util.formatTime(new Date(Date.now()));
     const db = wx.cloud.database()
     db.collection('record').add({
@@ -206,66 +204,45 @@ Page({
     })
   },
   getNewOne: function(){
-    let score = this.data.score;
-    let arr = this.data.arr;
-    let score_arr = this.data.score_arr;
-    let code_arr = this.data.code_arr;
-
-    let idx = this.data.idx;
-
+    let { score, arr, score_arr, code_arr, idx, total } = this.data;
     let buttontext = this.data.buttontext;
     idx++;
-    if(idx==9){
+    if(idx == total - 1){
       buttontext = '提交';
     }
-    if(idx==10){
-      let _this = this;
-      let sum = score_arr.reduce((x,y)=>x+y)
+    if(idx == total){
+      let sum = score_arr.reduce((x,y)=>x+y);
       this.bindgoscore(sum);
       return;
-      wx.showModal({
-        showCancel: false,
-        title: '提示',
-        content: '您本次答题分数为'+sum,
-        success (res) {
-          if (res.confirm) {
-            console.log('用户点击确定')
-            _this.bindgoview();
-          } else if (res.cancel) {
-            console.log('用户点击取消')
-          }
-        }
-      })
-      return;
     }
-    this.setData({
-      idx,
-      buttontext
-    })
-    
+    this.setData({ idx, buttontext });
     this.getQuestion(arr[idx]);
   },
   bindgoscore: function(score){
-    let url = '/pages/score/index?score='+score;
-    wx.navigateTo({
-      url: url
-    })
-  },
-  bindgoview: function(){
-    let url = '/pages/view/index';
-    wx.navigateTo({
-      url: url
-    })
+    let { total, score_arr, arr } = this.data;
+    let rightNum = score_arr.filter(v => v === 1).length;
+    let errNum = total - rightNum;
+    // 存入全局供 examresult 复盘用
+    app.globalData.lastExamResult = {
+      isMock: true,
+      total, rightNum, errNum,
+      score: rightNum, fullScore: total,
+      reviewList: []
+    };
+    let url = '/pages/examresult/examresult?length=' + total
+      + '&rightNum=' + rightNum + '&errNum=' + errNum
+      + '&ordernum=simple&isMock=1';
+    wx.redirectTo({ url: url })
   },
   getQuestion: function(_id){
     const db = wx.cloud.database()
-    db.collection('question').doc(_id).get({
+    db.collection('questions').doc(_id).get({
       success: res => {
         console.log('[数据库] [查询记录] 成功: ', res)
         let question = res.data;
         this.setData({
           question: question,
-          options: JSON.parse(question.options)
+          options: question.options
         })
       },
       fail: err => {

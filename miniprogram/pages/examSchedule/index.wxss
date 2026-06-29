@@ -124,7 +124,7 @@ page {
 
 .countdown-value {
   font-size: 44rpx;
-  color: #1bcfad;
+  color: #07c160;
   font-weight: 600;
   font-family: Consolas, monospace;
 }
@@ -143,7 +143,7 @@ page {
 }
 
 .action-ongoing {
-  background: #1bcfad;
+  background: #07c160;
   color: #fff;
   font-weight: 600;
 }

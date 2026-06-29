@@ -39,7 +39,7 @@ page {
 .topbar-left .qpos {
   font-size: 40rpx;
   font-weight: 600;
-  color: #1bcfad;
+  color: #07c160;
 }
 .topbar-left .qsep {
   margin: 0 4rpx;
@@ -52,7 +52,7 @@ page {
   margin-left: 16rpx;
   padding: 4rpx 14rpx;
   background-color: #e8f9f5;
-  color: #1bcfad;
+  color: #07c160;
   font-size: 22rpx;
   border-radius: 16rpx;
 }
@@ -92,7 +92,7 @@ page {
 }
 .progress-inner {
   height: 100%;
-  background: linear-gradient(90deg, #1bcfad 0%, #1dcc70 100%);
+  background: linear-gradient(90deg, #07c160 0%, #1dcc70 100%);
   transition: width 0.3s;
 }
 
@@ -114,7 +114,7 @@ page {
   display: inline-block;
   margin-right: 12rpx;
   padding: 4rpx 14rpx;
-  background-color: #1bcfad;
+  background-color: #07c160;
   color: #fff;
   font-size: 22rpx;
   border-radius: 8rpx;
@@ -142,7 +142,7 @@ page {
 }
 .option-selected {
   background-color: #e8f9f5;
-  border-color: #1bcfad;
+  border-color: #07c160;
 }
 .opt-icon {
   width: 44rpx;
@@ -155,7 +155,7 @@ page {
   line-height: 1;
 }
 .option-selected .opt-mark {
-  color: #1bcfad;
+  color: #07c160;
 }
 .opt-body {
   flex: 1;
@@ -192,7 +192,7 @@ page {
 .judge-btn:last-child  { margin-right: 0; }
 .judge-btn-selected {
   background-color: #e8f9f5;
-  border-color: #1bcfad;
+  border-color: #07c160;
 }
 .judge-mark {
   font-size: 56rpx;
@@ -201,7 +201,7 @@ page {
   margin-bottom: 12rpx;
 }
 .judge-btn-selected .judge-mark {
-  color: #1bcfad;
+  color: #07c160;
 }
 .judge-text {
   font-size: 36rpx;
@@ -209,7 +209,7 @@ page {
   color: #333;
 }
 .judge-btn-selected .judge-text {
-  color: #1bcfad;
+  color: #07c160;
 }
 
 /* ── 底部操作栏 ── */
@@ -243,11 +243,11 @@ page {
 }
 .nav-btn-jump {
   background-color: #fff;
-  border: 2rpx solid #1bcfad;
-  color: #1bcfad;
+  border: 2rpx solid #07c160;
+  color: #07c160;
 }
 .nav-btn-submit {
-  background-color: #1bcfad;
+  background-color: #07c160;
   color: #fff;
   font-weight: 600;
 }
@@ -317,7 +317,7 @@ page {
   margin-right: 8rpx;
   vertical-align: middle;
 }
-.legend-done { background-color: #1bcfad; }
+.legend-done { background-color: #07c160; }
 .legend-todo { background-color: #ecf0f3; }
 .legend-cur  { background-color: #f39c12; }
 
@@ -335,7 +335,7 @@ page {
   font-size: 28rpx;
 }
 .jump-cell-todo { background-color: #ecf0f3; color: #666; }
-.jump-cell-done { background-color: #1bcfad; color: #fff; }
+.jump-cell-done { background-color: #07c160; color: #fff; }
 .jump-cell-cur  { background-color: #f39c12; color: #fff; font-weight: 600; }
 
 .jump-submit {
@@ -343,7 +343,7 @@ page {
   height: 88rpx;
   line-height: 88rpx;
   text-align: center;
-  background-color: #1bcfad;
+  background-color: #07c160;
   color: #fff;
   font-size: 30rpx;
   border-radius: 44rpx;

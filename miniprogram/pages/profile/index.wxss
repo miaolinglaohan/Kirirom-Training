@@ -10,7 +10,7 @@ page {
 
 /* 用户卡片 */
 .user-card {
-  background: linear-gradient(135deg, #1bcfad 0%, #14b39a 100%);
+  background: linear-gradient(135deg, #07c160 0%, #06a04f 100%);
   padding: 60rpx 40rpx 60rpx;
   display: flex;
   align-items: center;
@@ -30,7 +30,7 @@ page {
 .avatar-text {
   font-size: 56rpx;
   font-weight: 600;
-  color: #1bcfad;
+  color: #07c160;
 }
 
 .user-info {
@@ -83,7 +83,7 @@ page {
 
 .copy-btn {
   margin-top: 24rpx;
-  background: #1bcfad;
+  background: #07c160;
   color: #fff;
   text-align: center;
   font-size: 28rpx;
@@ -92,7 +92,7 @@ page {
 }
 
 .copy-btn:active {
-  background: #14b39a;
+  background: #06a04f;
 }
 
 /* 菜单列表 */
@@ -130,7 +130,7 @@ page {
 }
 
 .admin-item .menu-label {
-  color: #1bcfad;
+  color: #07c160;
   font-weight: 500;
 }
 

@@ -9,7 +9,7 @@ page {
 
 /* —— 顶部分数 —— */
 .topBG {
-  background: linear-gradient(135deg, #1bd0ad 0%, #1bcfad 100%);
+  background: linear-gradient(135deg, #1bd0ad 0%, #07c160 100%);
   padding: 60rpx 30rpx 50rpx;
   text-align: center;
   color: #fff;
@@ -68,7 +68,7 @@ page {
   font-weight: 600;
   color: #333;
 }
-.cell-num.cell-right { color: #1bcfad; }
+.cell-num.cell-right { color: #07c160; }
 .cell-num.cell-wrong { color: #e74c3c; }
 .cell-label {
   font-size: 24rpx;
@@ -94,7 +94,7 @@ page {
 .toggle-text {
   flex: 1;
   font-size: 30rpx;
-  color: #1bcfad;
+  color: #07c160;
   font-weight: 600;
 }
 .toggle-arrow {
@@ -111,7 +111,7 @@ page {
   border-radius: 16rpx;
   padding: 24rpx 28rpx;
   margin-bottom: 20rpx;
-  border-left: 8rpx solid #1bcfad;
+  border-left: 8rpx solid #07c160;
 }
 .review-card.review-wrong {
   border-left-color: #e74c3c;
@@ -139,7 +139,7 @@ page {
   font-size: 26rpx;
   font-weight: 600;
 }
-.flag-right { color: #1bcfad; }
+.flag-right { color: #07c160; }
 .flag-wrong { color: #e74c3c; }
 
 .rev-title {
@@ -189,7 +189,7 @@ page {
   align-self: center;
 }
 .tag-official {
-  background-color: #1bcfad;
+  background-color: #07c160;
   color: #fff;
 }
 .tag-user {
@@ -203,9 +203,9 @@ page {
   padding-top: 10rpx;
   border-top: 1rpx dashed #ecf0f3;
 }
-.ans-user.ans-right { color: #1bcfad; font-weight: 600; }
+.ans-user.ans-right { color: #07c160; font-weight: 600; }
 .ans-user.ans-wrong { color: #e74c3c; font-weight: 600; }
-.ans-official { color: #1bcfad; font-weight: 600; }
+.ans-official { color: #07c160; font-weight: 600; }
 .ans-sep { color: #ccc; margin: 0 12rpx; }
 
 /* —— 正式考提示卡 —— */
@@ -217,7 +217,7 @@ page {
   display: flex;
   align-items: flex-start;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-  border-left: 8rpx solid #1bcfad;
+  border-left: 8rpx solid #07c160;
 }
 .hint-icon {
   font-size: 36rpx;
@@ -291,7 +291,7 @@ page {
   margin: 0 12rpx;
 }
 .btn-primary {
-  background-color: #1bcfad;
+  background-color: #07c160;
   color: #fff;
   font-weight: 600;
 }

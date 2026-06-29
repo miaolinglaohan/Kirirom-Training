@@ -1,4 +1,5 @@
 // pages/question/index.js
+const app = getApp()
 Page({
 
   /**
@@ -7,64 +8,77 @@ Page({
   data: {
     idx: 0,
     score: 0,
-    score_arr:[0,0,0,0,0,0,0,0,0,0],
-    code_arr:['M','M','M','M','M','M','M','M','M','M'],
+    score_arr: [],
+    code_arr: [],
+    total: 0,
     sortcode: '01'
   },
   radioChange: function(e) {
-    console.log('radio发生change事件，携带value值为：', e.detail.value);
+    let idx = e.currentTarget.dataset.idx;
+    let code = e.detail.value;
     let score_arr = this.data.score_arr;
     let code_arr = this.data.code_arr;
-    let arr = e.detail.value.split('|');
-    let idx = arr[0];
-    let option = JSON.parse(arr[1]);
-    let question = JSON.parse(arr[2]);
-    
-    let score = this.data.score;
-    score += parseInt(e.detail.value);
-    score_arr[idx] = parseInt(option.value);
-    code_arr[idx] = option.code;
-    console.log(score_arr);
-    console.log(code_arr);
+    // 单选题：选对得 1 分
+    let question = e.currentTarget.dataset.question;
+    let opt = (question.options || []).find(o => o.code === code);
+    let point = (opt && parseInt(opt.value) === 1) ? 1 : 0;
+    score_arr[idx] = point;
+    code_arr[idx] = code;
+    let sum = score_arr.reduce((x,y) => x + y, 0);
     wx.setStorageSync('score_arr', score_arr);
     wx.setStorageSync('code_arr', code_arr);
-    this.setData({
-      score,
-      score_arr,
-      code_arr
-    });
-  },  
-  bindSubmitTap: function(){
+    this.setData({ score_arr, code_arr, score: sum });
+  },
+
+  checkboxChange: function(e) {
+    let idx = e.currentTarget.dataset.idx;
+    let codes = e.detail.value || [];
+    let question = e.currentTarget.dataset.question;
+    // 多选：完全选对才得 1 分
+    let correctCodes = (question.options || [])
+      .filter(o => parseInt(o.value) === 1)
+      .map(o => o.code)
+      .sort();
+    let userSorted = codes.slice().sort();
+    let right = correctCodes.length === userSorted.length
+      && correctCodes.every((c, i) => c === userSorted[i]);
     let score_arr = this.data.score_arr;
-    let sum = score_arr.reduce((x,y)=>x+y)
-    // this.bindgoscore(sum);
-    // return;
+    let code_arr = this.data.code_arr;
+    score_arr[idx] = right ? 1 : 0;
+    code_arr[idx] = codes.join('');
+    let sum = score_arr.reduce((x,y) => x + y, 0);
+    wx.setStorageSync('score_arr', score_arr);
+    wx.setStorageSync('code_arr', code_arr);
+    this.setData({ score_arr, code_arr, score: sum });
+  },
+  bindSubmitTap: function(){
+    let { total, score_arr } = this.data;
+    let rightNum = score_arr.filter(v => v === 1).length;
+    let errNum = total - rightNum;
     let _this = this;
     wx.showModal({
       showCancel: false,
       title: '温馨提醒',
-      content: '您当前得分为：'+ sum,
+      content: '您当前得分为：'+ rightNum + ' / ' + total,
       success (res) {
         if (res.confirm) {
-          _this.bindgolistview()
-        } else if (res.cancel) {
-
+          _this.bindgoscore(rightNum, total, errNum);
         }
       }
     })
   },
-  bindgoscore: function(score){
-    let url = '/pages/score/index?score='+score;
-    wx.navigateTo({
-      url: url
-    })
-  },  
-  bindgolistview: function(){
-    let url = '/pages/list/index';
-    wx.navigateTo({
-      url: url
-    })
-  },  
+  bindgoscore: function(rightNum, total, errNum){
+    app.globalData.lastExamResult = {
+      isMock: true,
+      total, rightNum, errNum,
+      score: rightNum, fullScore: total,
+      reviewList: []
+    };
+    let url = '/pages/examresult/examresult?length=' + total
+      + '&rightNum=' + rightNum + '&errNum=' + errNum
+      + '&ordernum=list&isMock=1';
+    wx.redirectTo({ url: url })
+  },
   /**
    * 生命周期函数--监听页面加载
    */
@@ -86,13 +100,18 @@ Page({
       success: res => {
         console.log('[数据库] [查询记录] 成功: ', res)
         let arrayObject = res.data;
+        let total = arrayObject.length;
         let arr = [];
         arrayObject.forEach(element => {
-          element.options = JSON.parse(element.options);
-          arr.push(element.id);
+          arr.push(element._id);
         });
+        let score_arr = new Array(total).fill(0);
+        let code_arr = new Array(total).fill('M');
         this.setData({
-          questions: arrayObject
+          questions: arrayObject,
+          total,
+          score_arr,
+          code_arr
         },function(){
           wx.setStorageSync('questions', arrayObject);
           wx.setStorageSync('arr', arr);

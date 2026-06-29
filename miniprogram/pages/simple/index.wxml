@@ -1,20 +1,30 @@
 <wxs src="./../tools.wxs" module="JSON" />
 <view class="page-simple">
     <view class="sortnumber"> 
-    <text class="current">{{idx+1}}</text>/<text class="total">10</text>
+    <text class="current">{{idx+1}}</text>/<text class="total">{{total}}</text>
     </view>
     <view class="question">
         <view class="title"><text>{{idx+1}}、{{question.title}}</text></view>
         <view class="type">{{question.typename}}</view>
         <view class="options">
-            <radio-group class="radio-group" bindchange="radioChange">
-            <label class="radio" wx:for="{{options}}" wx:key="id">
+            <!-- 单选 / 判断 -->
+            <radio-group wx:if="{{question.typecode !== '02'}}" class="radio-group" bindchange="radioChange">
+            <label class="radio" wx:for="{{options}}" wx:key="code">
                 <view class="option-content">
-                    <radio value="{{JSON.stringify(item)}}" checked="{{item.checked}}"></radio>
+                    <radio value="{{item.code}}" checked="{{item.checked}}"></radio>
                     <text class="content">{{item.code}}，{{item.content}}</text>
                 </view>
             </label>
             </radio-group>
+            <!-- 多选 -->
+            <checkbox-group wx:if="{{question.typecode === '02'}}" class="radio-group" bindchange="checkboxChange">
+            <label class="radio" wx:for="{{options}}" wx:key="code">
+                <view class="option-content">
+                    <checkbox value="{{item.code}}" checked="{{item.checked}}"></checkbox>
+                    <text class="content">{{item.code}}，{{item.content}}</text>
+            </view>
+            </label>
+            </checkbox-group>
         </view>
     </view>
     <view class="btn-area">

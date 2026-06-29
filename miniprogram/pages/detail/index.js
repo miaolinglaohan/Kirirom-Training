@@ -95,7 +95,7 @@ Page({
         if(records.length>0){
           record = records[0];
           question = record.question;
-          options = JSON.parse(question.options);
+          options = question.options;
           format_options = options.map(function(item){
             item.checked = item.value == 1 ? true : false;
             return item;
@@ -217,7 +217,7 @@ Page({
     
     record = records[idx];
     question = record.question;
-    options = JSON.parse(question.options);
+    options = question.options;
     format_options = options.map(function(item){
       item.checked = item.value == 1 ? true : false;
       return item;

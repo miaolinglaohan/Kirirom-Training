@@ -147,11 +147,11 @@ Page({
   },    
   getQuestion: function(_id){
     const db = wx.cloud.database()
-    db.collection('question').doc(_id).get({
+    db.collection('questions').doc(_id).get({
       success: res => {
         console.log('[数据库] [查询记录] 成功: ', res)
         let question = res.data;
-        let options = JSON.parse(question.options);
+        let options = question.options;
         let format_options = options.map(function(item){
           item.checked = item.value == 1 ? true : false;
           

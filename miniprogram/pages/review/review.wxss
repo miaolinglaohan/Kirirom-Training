@@ -26,7 +26,7 @@ page { background: #f4f6f8; }
   font-size: 24rpx;
 }
 .rv-score {
-  color: #1bcfad;
+  color: #07c160;
   font-weight: 600;
 }
 .rv-progress {
@@ -51,7 +51,7 @@ page { background: #f4f6f8; }
 }
 .rv-badge.ok {
   background: #d8f5ee;
-  color: #1bcfad;
+  color: #07c160;
 }
 .rv-badge.bad {
   background: #fde2e2;
@@ -126,16 +126,16 @@ page { background: #f4f6f8; }
 }
 .tag-correct {
   background: #d8f5ee;
-  color: #1bcfad;
+  color: #07c160;
 }
 
 /* 配色状态：用户选对（绿） / 用户选错（红） / 用户没选但是正确（绿色虚框） */
 .rv-opt.state-answered-right {
   background: #f1faf7;
-  border-color: #1bcfad;
+  border-color: #07c160;
 }
 .rv-opt.state-answered-right .rv-opt-code {
-  background: #1bcfad;
+  background: #07c160;
   color: #fff;
 }
 .rv-opt.state-answered-wrong {
@@ -148,13 +148,13 @@ page { background: #f4f6f8; }
 }
 .rv-opt.state-official-only {
   background: #f1faf7;
-  border-color: #1bcfad;
+  border-color: #07c160;
   border-style: dashed;
 }
 .rv-opt.state-official-only .rv-opt-code {
   background: #fff;
-  color: #1bcfad;
-  border: 2rpx solid #1bcfad;
+  color: #07c160;
+  border: 2rpx solid #07c160;
   line-height: 40rpx;
 }
 
@@ -191,10 +191,10 @@ page { background: #f4f6f8; }
 }
 .rv-judge-btn.state-answered-right {
   background: #f1faf7;
-  border-color: #1bcfad;
+  border-color: #07c160;
 }
 .rv-judge-btn.state-answered-right .rv-judge-text {
-  color: #1bcfad;
+  color: #07c160;
 }
 .rv-judge-btn.state-answered-wrong {
   background: #fdf2f0;
@@ -205,11 +205,11 @@ page { background: #f4f6f8; }
 }
 .rv-judge-btn.state-official-only {
   background: #f1faf7;
-  border-color: #1bcfad;
+  border-color: #07c160;
   border-style: dashed;
 }
 .rv-judge-btn.state-official-only .rv-judge-text {
-  color: #1bcfad;
+  color: #07c160;
 }
 
 /* 总结区 */
@@ -227,7 +227,7 @@ page { background: #f4f6f8; }
   color: #888;
 }
 .rv-row-val.green {
-  color: #1bcfad;
+  color: #07c160;
   font-weight: 600;
 }
 .rv-row-val.red {
@@ -272,7 +272,7 @@ page { background: #f4f6f8; }
   font-size: 28rpx;
 }
 .rv-btn.primary {
-  background: #1bcfad;
+  background: #07c160;
   color: #fff;
 }
 .rv-btn.ghost {
@@ -294,7 +294,7 @@ page { background: #f4f6f8; }
 .rv-legacy-btn {
   display: inline-block;
   margin-top: 40rpx;
-  background: #1bcfad;
+  background: #07c160;
   color: #fff;
   padding: 16rpx 60rpx;
   border-radius: 40rpx;

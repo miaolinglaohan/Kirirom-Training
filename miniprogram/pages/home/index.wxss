@@ -31,7 +31,7 @@ page {
 
 .stat-value {
   font-size: 48rpx;
-  color: #1bcfad;
+  color: #07c160;
   font-weight: 600;
   margin: 8rpx 0;
 }
@@ -50,11 +50,11 @@ page {
 /* —— 考试通知卡片 —— */
 .exam-card {
   margin: 24rpx 24rpx 0;
-  background: linear-gradient(135deg, #1bcfad 0%, #14b39a 100%);
+  background: linear-gradient(135deg, #07c160 0%, #06a04f 100%);
   border-radius: 16rpx;
   padding: 32rpx;
   color: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(27, 207, 173, 0.25);
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.25);
 }
 
 .exam-card-header {
@@ -93,7 +93,7 @@ page {
 }
 
 .status-pending { background: rgba(255, 255, 255, 0.25); }
-.status-ongoing { background: #fff; color: #1bcfad; font-weight: 600; }
+.status-ongoing { background: #fff; color: #07c160; font-weight: 600; }
 .status-submitted { background: rgba(255, 255, 255, 0.15); }
 .status-expired { background: rgba(0, 0, 0, 0.2); }
 
@@ -131,7 +131,7 @@ page {
 
 .empty-action {
   font-size: 26rpx;
-  color: #1bcfad;
+  color: #07c160;
 }
 
 /* —— 两个大圆形按钮 —— */
@@ -168,8 +168,8 @@ page {
 }
 
 .big-btn-green {
-  background: linear-gradient(135deg, #2bd47d 0%, #1bcfad 100%);
-  box-shadow: 0 12rpx 30rpx rgba(43, 212, 125, 0.4);
+  background: linear-gradient(135deg, #07c160 0%, #06a04f 100%);
+  box-shadow: 0 12rpx 30rpx rgba(7, 193, 96, 0.4);
 }
 
 .big-btn:active {
@@ -279,7 +279,7 @@ page {
 .exam-list-num {
   width: 44rpx;
   height: 44rpx;
-  background: #1bcfad;
+  background: #07c160;
   color: #fff;
   border-radius: 50%;
   text-align: center;

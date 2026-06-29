@@ -18,14 +18,14 @@ page{
     height: 20px;
     border-radius: 10px;
     color: #fff;
-    background-color: #1bcfad;
+    background-color: #07c160;
 }
 .page-simple .sortnumber .total{
     width: 20px;
     height: 20px;
     border-radius: 10px;
     color: #fff;
-    background-color: #1bcfad;
+    background-color: #07c160;
 }
 .page-simple .question{
     
@@ -87,7 +87,7 @@ page{
     align-items: center;
 }
 .page-simple .btn-area .btn{
-    background-color: #1bcfad;
+    background-color: #07c160;
     width: 375rpx;
     border-radius: 35px;
     padding: 5px 10px;

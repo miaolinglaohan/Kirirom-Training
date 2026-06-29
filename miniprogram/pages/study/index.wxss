@@ -36,7 +36,7 @@
     text-align: left;
 }
 .page-history .historys .history .sortnum{
-    background-color: #1bcfad;
+    background-color: #07c160;
     color: #fff;
     border-radius: 50%;
     width: 20px;

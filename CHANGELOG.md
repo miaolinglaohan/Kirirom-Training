@@ -1,4 +1,27 @@
-### 20260629 · v0.3.6-ui-unify（HR 后台配色统一为品牌绿）
+### 20260629 · v0.3.7-color-fix（品牌绿调整为微信绿 + 原项目遗留 bug 修复）
+
+> 将全局品牌绿从 `#1bcfad`（青绿）调整为 `#07c160`（微信经典绿），覆盖导航栏、员工端首页、我的页面及所有子页面的绿色元素。同时修复原开源项目中 4 个长期未被触达的遗留 bug。
+
+**品牌绿替换 #1bcfad → #07c160**
+
++ `app.json`：`navigationBarBackgroundColor` → `#07c160`
++ `pages/home/index.wxss`：统计数字 / 考试卡片渐变 / 大圆按钮 / 序号圆点等 8 处
++ `pages/profile/index.wxss`：用户卡片渐变 / 头像文字 / 按钮 / 管理入口等 5 处
++ 员工端全页面序号小圆圈统一：`history` / `entry` / `study` / `subject` / `simple` / `note` / `detail` / `examresult`
++ 员工端其余绿色元素：`activate`（提交按钮）、`exam`（进度条/选项卡/按钮 15 处）、`examSchedule`（2 处）、`mistakes`（正确率 2 处）、`review`（选项态/导航/按钮 20 处）
++ 暗色调 `#14b39a` → `#06a04f`，旧阴影 `rgba(27,207,173,·)` → `rgba(7,193,96,·)`
+
+**原项目遗留 bug 修复**
+
++ **集合名不一致**：`simple/index.js` / `look/index.js` / `view/index.js` 中 `db.collection('question')` → `'questions'`（与数据库实际集合名对齐）
++ **JSON.parse(options) 崩溃**：6 个页面（`simple/question/look/view/detail`）对已是原生数组的 `options` 字段调用 `JSON.parse()` 导致静默失败，全部移除
++ **随机刷题数据入口缺失**：`simple/index.js` 原 `onLoad` 仅读 storage 不查库，改为 exam ID → subjects → questions 中转查找
++ **列表模式多选题变单选**：`question/index.wxml` 原写死 `<radio>`，改为按 `typecode` 条件渲染 `<radio-group>` / `<checkbox-group>`
++ **题量硬编码 10**：`simple/index.js` + `question/index.js` 的 `score_arr` / `code_arr` 改为按实际题目数动态初始化
++ **提交后页面跳转错误**：`question/index.js` 原跳 `/pages/list/index`（不存在），统一改为 `/pages/examresult/examresult`（与单题模式一致）；`simple/index.js` 同步调整
++ **question/index.js 缺失 getApp**：补充 `const app = getApp()`
+
+---
 
 > 将 HR 后台原先"蓝调"（主色 `#2d8cf0` iView 蓝）全面替换为品牌绿色 `#1bcfad`，与员工端首页、图片三/图四的车辆管理系统保持视觉一致。此后 UI 风格冻结，不再大面积变色。
 

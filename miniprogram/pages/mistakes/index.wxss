@@ -86,12 +86,12 @@ page { background: #f4f6f8; }
 }
 .tag-right {
   background: #d8f5ee;
-  color: #1bcfad;
+  color: #07c160;
 }
 .mk-arrow {
   margin-left: auto;
   font-size: 24rpx;
-  color: #1bcfad;
+  color: #07c160;
 }
 
 .mk-loading {
