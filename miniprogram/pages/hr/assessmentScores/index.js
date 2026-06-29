@@ -123,15 +123,20 @@ Page({
     this.setData({ visibleList: list })
   },
 
-  // 点击已交卷条目跳转复盘（复用员工端 review 页：传 enrollmentId 当 id 用）
-  // TODO: review 页目前是按 historys.id 复盘，HR 通过 enrollmentId 复盘需要 review 页适配。
-  //       v0.3.3 先不接，留作下一版增强；当前 tap 仅 toast 提示。
+  // 点击已交卷条目 → 跳转 HR 复盘页（v0.3.4 起接入）
+  // 答题中 / 缺考仍 toast 提示，无内容可复盘
   onTapApplicant(e) {
     const idx = e.currentTarget.dataset.idx
     const p = this.data.visibleList[idx]
     if (!p) return
     if (p.status === 'submitted') {
-      wx.showToast({ icon: 'none', title: '复盘功能后续版本提供' })
+      if (!p.enrollmentId) {
+        wx.showToast({ icon: 'none', title: '该记录缺少 enrollmentId' })
+        return
+      }
+      wx.navigateTo({
+        url: '/pages/hr/applicantReview/index?id=' + encodeURIComponent(p.enrollmentId)
+      })
     } else if (p.status === 'in_progress') {
       wx.showToast({ icon: 'none', title: p.name + ' 答题进行中' })
     } else {

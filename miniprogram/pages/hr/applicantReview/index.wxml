@@ -1,0 +1,103 @@
+<!-- pages/hr/applicantReview/index.wxml -->
+<view class="rv-loading" wx:if="{{loading}}">加载中…</view>
+
+<view class="review-page" wx:if="{{!loading}}">
+
+  <!-- 顶栏：员工信息 + 成绩 -->
+  <view class="rv-header">
+    <view class="rv-title-row">
+      <text class="rv-title">{{employeeName || '(未知员工)'}}</text>
+      <text class="rv-dept" wx:if="{{employeeDept}}">· {{employeeDept}}</text>
+      <text class="rv-role-tag" wx:if="{{employeeRole === 'hr' || employeeRole === 'admin'}}">{{employeeRole}}</text>
+      <text class="rv-mock-tag" wx:if="{{isMock}}">模考</text>
+    </view>
+    <view class="rv-assessment">{{assessmentName}}</view>
+    <view class="rv-sub">
+      <text>交卷 {{submittedAtText}}</text>
+      <text class="rv-score">{{score}} / {{fullScore}}（答对 {{rightNum}}/{{total}}）</text>
+    </view>
+    <view class="rv-warn" wx:if="{{switchCount > 0}}">⚠ 答题中切屏 {{switchCount}} 次</view>
+  </view>
+
+  <!-- 题目导航网格 -->
+  <view class="rv-nav" wx:if="{{navList.length > 0}}">
+    <view class="rv-nav-title">题目导航</view>
+    <view class="rv-nav-grid">
+      <view
+        wx:for="{{navList}}"
+        wx:key="idx"
+        class="rv-nav-cell {{item.right ? 'ok' : 'bad'}} {{idx === item.idx ? 'cur' : ''}}"
+        data-idx="{{item.idx}}"
+        bindtap="onTapNav"
+      >{{item.label}}</view>
+    </view>
+  </view>
+
+  <!-- 当前题号 / 对错条 -->
+  <view class="rv-meta" wx:if="{{item}}">
+    <view class="rv-idx">第 {{idx+1}} / {{total}} 题</view>
+    <view class="rv-badge {{right ? 'ok' : 'bad'}}">{{right ? '✓ 正确' : '✗ 错误'}}</view>
+  </view>
+
+  <!-- 题卡 -->
+  <view class="rv-card" wx:if="{{item}}">
+    <view class="rv-qtitle">{{item.title}}</view>
+    <view class="rv-qtype" wx:if="{{item.typename}}">{{item.typename}}</view>
+
+    <!-- 判断题：大按钮 UI -->
+    <view class="rv-judge" wx:if="{{isJudge}}">
+      <view
+        wx:for="{{optionLines}}"
+        wx:key="code"
+        class="rv-judge-btn state-{{opt.state}}"
+        wx:for-item="opt"
+      >
+        <text class="rv-judge-text">{{opt.content}}</text>
+        <view class="rv-judge-tags">
+          <view class="tag-user" wx:if="{{opt.isUser}}">他选</view>
+          <view class="tag-correct" wx:if="{{opt.isOfficial}}">正确</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 单选 / 多选 -->
+    <view class="rv-options" wx:else>
+      <view
+        wx:for="{{optionLines}}"
+        wx:key="code"
+        class="rv-opt state-{{opt.state}}"
+        wx:for-item="opt"
+      >
+        <view class="rv-opt-code">{{opt.code}}</view>
+        <view class="rv-opt-text">{{opt.content}}</view>
+        <view class="rv-opt-tags">
+          <view class="tag-user" wx:if="{{opt.isUser}}">他选</view>
+          <view class="tag-correct" wx:if="{{opt.isOfficial}}">正确</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="rv-summary">
+      <view class="rv-row">
+        <text class="rv-row-label">他的答案：</text>
+        <text class="rv-row-val {{right ? 'green' : 'red'}}">{{userText}}</text>
+      </view>
+      <view class="rv-row">
+        <text class="rv-row-label">正确答案：</text>
+        <text class="rv-row-val green">{{officialText}}</text>
+      </view>
+      <view class="rv-comments" wx:if="{{item.comments}}">
+        <view class="rv-comments-title">解析</view>
+        <view class="rv-comments-body">{{item.comments}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="rv-empty" wx:if="{{navList.length === 0}}">该答卷没有题目快照（多见于早期种子数据 / 假数据）</view>
+
+  <!-- 底部按钮 -->
+  <view class="rv-foot" wx:if="{{item}}">
+    <view class="rv-btn ghost {{idx === 0 ? 'disabled' : ''}}" bindtap="goPrev">上一题</view>
+    <view class="rv-btn primary" bindtap="goNext">{{isLast ? '完成' : '下一题'}}</view>
+  </view>
+</view>

@@ -1,3 +1,41 @@
+### 20260629 · v0.3.4-applicant-review（Phase 3 子里程碑 5 · HR 复盘）
+
+> 接 v0.3.3-scores 的遗留：HR 在成绩单上点已交卷的员工 → 看到他的完整答卷 + 对错 + 解析。专门新建 HR 端复盘页，而不是扩员工端 review 页——HR 视角天然多一栏「这是谁、哪个部门、切屏几次」，与员工"自查"是不同场景，分开后两边都能独立迭代。
+
+**云函数 · 新增 `hrGetApplicantReview`**
+
++ 入参：`{ enrollmentId }`；返回：`{ assessment, employee, enrollment, questions, answersOfficial, userAnswers }`
++ HR / admin 鉴权：普通员工调用直接 `FORBIDDEN`
++ 只允许 `status === 'submitted'` 的 enrollment（答题中/缺考没意义 → `NOT_SUBMITTED`）
++ employee / assessment 反查容错：被删除/离职时返回占位，主流程不阻断
++ 数据全部来自 `examEnrollments` 文档已固化的快照（questions / answersOfficial / answers / scoreDetail / switchCount …）——v0.3.2 hotfix 已让 submitExam 把这些字段都写入了 enrollment，HR 视角可以一次取齐
+
+**小程序 · 新增 `pages/hr/applicantReview`**
+
++ 顶栏：员工姓名 + 部门 + 角色 tag + 模考 tag + 考试名 + 交卷时间 + 得分 + 答对题数；`switchCount > 0` 时显示红色「⚠ 答题中切屏 N 次」
++ 题目导航网格：每题一个色块（绿=对 / 红=错），可点击直接跳到该题——HR 主要场景是"找出他错在哪"，导航网格比顺序翻页快得多
++ 题卡渲染逻辑与员工端 `pages/review` 完全一致：选项三态高亮 answered-right / answered-wrong / official-only；判断题用大按钮 UI；显示解析（如题目带 `comments` 字段）
++ 用语 HR 化：员工端"您的答案"→ HR 端"他的答案"、"您选"→"他选"
++ 数据在 onShow 时一次性请求并缓存到页面实例上（`this._questions / _userAnswers / _officialMap / _rightFlags`），翻题只走 setData 不再调云
+
+**入口接线**
+
++ `pages/hr/assessmentScores/index.js` `onTapApplicant`：submitted 条目 → `navigateTo /pages/hr/applicantReview?id=enrollmentId`；in_progress / absent 保持原 toast
++ `miniprogram/app.json` 注册 `pages/hr/applicantReview/index`
+
+**部署清单**
+
++ 新增上传：`hrGetApplicantReview` 云函数
++ 小程序端 1 个新页面（`pages/hr/applicantReview` 四件套）+ `app.json` + `pages/hr/assessmentScores/index.js`（1 处方法替换）
++ 数据库 schema / 现有 enrollment 数据无任何变更
+
+**遗留 / 后续**
+
++ 普通员工端 `pages/review` 仍走 `historys.doc(id).get()` 客户端直查——本次没动它（避免改动面扩散），后续若考虑收紧 historys 安全规则再统一收口
++ 切屏次数仅展示，没有"高切屏自动驳回"逻辑，按需在后续版本加成绩复核流
+
+---
+
 ### 20260628 · v0.3.3-scores（Phase 3 子里程碑 4 · 成绩中心）
 
 > Phase 3 收尾的第一块：HR 现在能在小程序里查每场考试的成绩单——应到 / 已交卷 / 答题中 / 缺考一目了然，不用再去云开发控制台翻 `examEnrollments`。PDF 导出单独留到下一个决策点（按 v2 主方案走浏览器 + jsPDF 路径）。

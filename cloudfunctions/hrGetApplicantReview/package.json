@@ -1,0 +1,9 @@
+{
+  "name": "hrGetApplicantReview",
+  "version": "1.0.0",
+  "description": "HR 查看某条 enrollment 的完整复盘（题目快照 + 用户作答 + 官方答案）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

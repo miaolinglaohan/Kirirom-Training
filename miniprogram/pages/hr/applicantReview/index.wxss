@@ -1,0 +1,347 @@
+/* pages/hr/applicantReview/index.wxss
+ * 题卡 / 选项的配色与 pages/review/review.wxss 保持一致；
+ * HR 视角增加：顶栏员工信息、切屏告警、题目导航网格。
+ */
+page { background: #f4f6f8; }
+
+.review-page {
+  padding: 24rpx 24rpx 200rpx 24rpx;
+}
+
+/* ── 顶栏 ───────────────────────────────────────── */
+.rv-header {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.rv-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.rv-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #222;
+}
+.rv-dept {
+  color: #888;
+  font-size: 26rpx;
+  margin-left: 10rpx;
+}
+.rv-role-tag {
+  margin-left: 12rpx;
+  font-size: 20rpx;
+  color: #2d8cf0;
+  background: #e8f3ff;
+  padding: 2rpx 14rpx;
+  border-radius: 14rpx;
+}
+.rv-mock-tag {
+  margin-left: 12rpx;
+  font-size: 20rpx;
+  color: #b87b00;
+  background: #fff3e0;
+  padding: 2rpx 14rpx;
+  border-radius: 14rpx;
+}
+.rv-assessment {
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  color: #555;
+}
+.rv-sub {
+  margin-top: 8rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #888;
+  font-size: 24rpx;
+}
+.rv-score {
+  color: #1bcfad;
+  font-weight: 600;
+}
+.rv-warn {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #e74c3c;
+  background: #fdf2f0;
+  padding: 8rpx 14rpx;
+  border-radius: 8rpx;
+  display: inline-block;
+}
+
+/* ── 题目导航网格 ───────────────────────────────── */
+.rv-nav {
+  margin-top: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.rv-nav-title {
+  font-size: 24rpx;
+  color: #888;
+  margin-bottom: 12rpx;
+}
+.rv-nav-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+.rv-nav-cell {
+  width: 64rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+.rv-nav-cell.ok {
+  background: #d8f5ee;
+  color: #1bcfad;
+}
+.rv-nav-cell.bad {
+  background: #fde2e2;
+  color: #e74c3c;
+}
+.rv-nav-cell.cur {
+  outline: 4rpx solid #2d8cf0;
+}
+
+/* ── 题号 / 对错 ────────────────────────────────── */
+.rv-meta {
+  margin-top: 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rv-idx {
+  color: #666;
+  font-size: 26rpx;
+}
+.rv-badge {
+  font-size: 24rpx;
+  padding: 4rpx 18rpx;
+  border-radius: 20rpx;
+}
+.rv-badge.ok {
+  background: #d8f5ee;
+  color: #1bcfad;
+}
+.rv-badge.bad {
+  background: #fde2e2;
+  color: #e74c3c;
+}
+
+/* ── 题卡 ───────────────────────────────────────── */
+.rv-card {
+  margin-top: 16rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.rv-qtitle {
+  font-size: 30rpx;
+  color: #222;
+  line-height: 1.5;
+}
+.rv-qtype {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #999;
+}
+
+.rv-options { margin-top: 20rpx; }
+.rv-opt {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 20rpx;
+  border: 2rpx solid #ececec;
+  border-radius: 12rpx;
+  margin-bottom: 14rpx;
+  background: #fafafa;
+}
+.rv-opt-code {
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 44rpx;
+  text-align: center;
+  background: #ececec;
+  border-radius: 50%;
+  font-size: 24rpx;
+  color: #666;
+  margin-right: 18rpx;
+  flex-shrink: 0;
+}
+.rv-opt-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+}
+.rv-opt-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  margin-left: 12rpx;
+  flex-shrink: 0;
+}
+.tag-user, .tag-correct {
+  font-size: 20rpx;
+  padding: 2rpx 12rpx;
+  border-radius: 16rpx;
+  white-space: nowrap;
+}
+.tag-user {
+  background: #e8eefc;
+  color: #4a6cf7;
+}
+.tag-correct {
+  background: #d8f5ee;
+  color: #1bcfad;
+}
+
+.rv-opt.state-answered-right {
+  background: #f1faf7;
+  border-color: #1bcfad;
+}
+.rv-opt.state-answered-right .rv-opt-code {
+  background: #1bcfad;
+  color: #fff;
+}
+.rv-opt.state-answered-wrong {
+  background: #fdf2f0;
+  border-color: #e74c3c;
+}
+.rv-opt.state-answered-wrong .rv-opt-code {
+  background: #e74c3c;
+  color: #fff;
+}
+.rv-opt.state-official-only {
+  background: #f1faf7;
+  border-color: #1bcfad;
+  border-style: dashed;
+}
+.rv-opt.state-official-only .rv-opt-code {
+  background: #fff;
+  color: #1bcfad;
+  border: 2rpx solid #1bcfad;
+  line-height: 40rpx;
+}
+
+/* 判断题 */
+.rv-judge {
+  margin-top: 20rpx;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.rv-judge-btn {
+  flex: 1;
+  margin: 0 12rpx;
+  padding: 36rpx 20rpx;
+  background: #fafafa;
+  border: 2rpx solid #ececec;
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.rv-judge-btn:first-child { margin-left: 0; }
+.rv-judge-btn:last-child  { margin-right: 0; }
+.rv-judge-text {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+.rv-judge-tags { display: flex; gap: 8rpx; }
+.rv-judge-btn.state-answered-right {
+  background: #f1faf7;
+  border-color: #1bcfad;
+}
+.rv-judge-btn.state-answered-right .rv-judge-text { color: #1bcfad; }
+.rv-judge-btn.state-answered-wrong {
+  background: #fdf2f0;
+  border-color: #e74c3c;
+}
+.rv-judge-btn.state-answered-wrong .rv-judge-text { color: #e74c3c; }
+.rv-judge-btn.state-official-only {
+  background: #f1faf7;
+  border-color: #1bcfad;
+  border-style: dashed;
+}
+.rv-judge-btn.state-official-only .rv-judge-text { color: #1bcfad; }
+
+/* ── 总结区 ─────────────────────────────────────── */
+.rv-summary {
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx dashed #e3e3e3;
+}
+.rv-row {
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.8;
+}
+.rv-row-label { color: #888; }
+.rv-row-val.green { color: #1bcfad; font-weight: 600; }
+.rv-row-val.red   { color: #e74c3c; font-weight: 600; }
+.rv-comments {
+  margin-top: 16rpx;
+  background: #fffaf3;
+  border-left: 6rpx solid #ffb84d;
+  padding: 14rpx 18rpx;
+  border-radius: 8rpx;
+}
+.rv-comments-title {
+  font-size: 24rpx;
+  color: #b87b00;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+}
+.rv-comments-body {
+  font-size: 26rpx;
+  color: #6b5128;
+  line-height: 1.6;
+}
+
+/* ── 底部按钮 ───────────────────────────────────── */
+.rv-foot {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  display: flex;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom)) 24rpx;
+  box-shadow: 0 -2rpx 8rpx rgba(0,0,0,0.04);
+}
+.rv-btn {
+  flex: 1;
+  margin: 0 12rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+}
+.rv-btn.primary { background: #1bcfad; color: #fff; }
+.rv-btn.ghost   { background: #f0f0f0; color: #555; }
+.rv-btn.disabled { opacity: 0.45; }
+
+.rv-empty {
+  margin-top: 80rpx;
+  text-align: center;
+  color: #aaa;
+  font-size: 26rpx;
+}
+.rv-loading {
+  text-align: center;
+  color: #888;
+  margin-top: 200rpx;
+}
