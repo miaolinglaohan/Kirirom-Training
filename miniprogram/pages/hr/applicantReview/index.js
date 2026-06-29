@@ -15,6 +15,8 @@
 //   - 题目导航网格：每题一格，按对错染色，可点击跳转，方便 HR 直接跳到错题
 
 const app = getApp()
+const pdfExport = require('../../../utils/pdf/pdfExport')
+const pdfAnswerSheet = require('../../../utils/pdf/pdfAnswerSheet')
 
 function fmtTime(ts) {
   if (!ts) return ''
@@ -41,6 +43,11 @@ Page({
     total: 0,
     switchCount: 0,
     isMock: false,
+
+    // 当前登录人（用于 PDF 页脚 generatedBy）
+    me: null,
+    // PDF 导出 loading 态
+    exporting: false,
 
     // 题目导航网格 [{idx, label, right}]
     navList: [],
@@ -82,6 +89,7 @@ Page({
         setTimeout(() => wx.reLaunch({ url: '/pages/home/index' }), 800)
         return
       }
+      this.setData({ me: emp })
       // 只在首次进入时加载（页内翻题用 setData，不再请求云端）
       if (!this._loaded) this.loadReview()
     })
@@ -127,6 +135,15 @@ Page({
       this._userAnswers = userAnswers
       this._officialMap = officialMap
       this._rightFlags = rightFlags
+      // 派生 PDF 落款日期：用本人交卷那天（个人答卷的"考试日期"语义）
+      const subTs = r.enrollment && r.enrollment.submittedAt
+      this._examDateText = ''
+      if (subTs) {
+        const d = new Date(subTs)
+        if (!isNaN(d.getTime())) {
+          this._examDateText = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'
+        }
+      }
 
       this.setData({
         loading: false,
@@ -221,5 +238,97 @@ Page({
 
   goBack() {
     wx.navigateBack({ delta: 1 })
+  },
+
+  // -------------------------------------------------------------------------
+  // 导出 PDF · 本人答卷
+  // 流程：读水印 + 单位名 → 拿 canvas → 调 pdfAnswerSheet 渲染 → exportAndPreview
+  // -------------------------------------------------------------------------
+
+  _getPdfCanvasNode() {
+    return new Promise((resolve, reject) => {
+      wx.createSelectorQuery().in(this)
+        .select('#pdfCanvas')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          if (res && res[0] && res[0].node) resolve(res[0].node)
+          else reject(new Error('找不到 #pdfCanvas'))
+        })
+    })
+  },
+
+  async _loadSysConfig(key) {
+    try {
+      const r = await wx.cloud.callFunction({
+        name: 'hrSysConfig',
+        data: { action: 'get', key: key }
+      })
+      if (r && r.result && !r.result.error) return r.result.value || ''
+    } catch (e) {
+      console.warn('[applicantReview.exportPdf] load sysConfig fail, key=' + key + ':', e)
+    }
+    return ''
+  },
+
+  async onExportPdf() {
+    if (this.data.exporting) return
+    if (!this._loaded || !(this._questions || []).length) {
+      wx.showToast({ icon: 'none', title: '答卷数据未加载' })
+      return
+    }
+    this.setData({ exporting: true })
+    wx.showLoading({ title: '生成 PDF…', mask: true })
+    try {
+      const [watermark, unitName] = await Promise.all([
+        this._loadSysConfig('pdfWatermark'),
+        this._loadSysConfig('unitName')
+      ])
+      const canvas = await this._getPdfCanvasNode()
+
+      const d = this.data
+
+      const pages = await pdfAnswerSheet.buildAnswerSheetPages(canvas, {
+        assessment: { name: d.assessmentName || '' },
+        employee: {
+          name: d.employeeName || '',
+          dept: d.employeeDept || '',
+          role: d.employeeRole || ''
+        },
+        enrollment: {
+          score:           d.score || 0,
+          fullScore:       d.fullScore || 0,
+          rightNum:        d.rightNum || 0,
+          total:           d.total || (this._questions || []).length,
+          submittedAtText: d.submittedAtText || '',
+          switchCount:    d.switchCount || 0,
+          isMock:         !!d.isMock
+        },
+        questions:    this._questions || [],
+        userAnswers:  this._userAnswers || {},
+        officialMap:  this._officialMap || {},
+        rightFlags:   this._rightFlags || [],
+        watermark:    watermark,
+        unitName:     unitName,
+        examDateText: this._examDateText || '',
+        generatedBy:  (d.me && d.me.name) || ''
+      })
+
+      const safeAName = (d.assessmentName || 'assessment').replace(/[\\/:*?"<>|\s]/g, '_')
+      const safeEName = (d.employeeName || 'employee').replace(/[\\/:*?"<>|\s]/g, '_')
+      const fileName = safeAName + '_' + safeEName + '_答卷_' + Date.now() + '.pdf'
+      wx.hideLoading()
+      const fp = await pdfExport.exportAndPreview(pages, fileName)
+      console.log('[applicantReview.exportPdf] saved at', fp)
+    } catch (e) {
+      wx.hideLoading()
+      console.error('[applicantReview.exportPdf]', e)
+      wx.showModal({
+        title: 'PDF 导出失败',
+        content: (e && e.message) || String(e),
+        showCancel: false
+      })
+    } finally {
+      this.setData({ exporting: false })
+    }
   }
 })

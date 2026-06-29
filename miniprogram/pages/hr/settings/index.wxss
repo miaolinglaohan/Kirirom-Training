@@ -35,14 +35,14 @@
 .input {
   width: 100%;
   box-sizing: border-box;
-  min-height: 120rpx;
+  height: 96rpx;          /* 固定 ~1.5 行，避免 textarea 默认高度过大 */
   padding: 16rpx 18rpx;
   border: 2rpx solid #e4e7ed;
   border-radius: 12rpx;
   font-size: 28rpx;
   color: #1a1a1a;
   background: #fafbfc;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .counter {

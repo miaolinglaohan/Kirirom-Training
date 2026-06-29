@@ -1,3 +1,68 @@
+### 20260629 · v0.3.5-pdf-export（Phase 3 子里程碑 8 · PDF 导出业务接线）
+
+> v0.3.5 PDF 导出三连击的收官 tag。在 `pdf-core` 底座之上接两个业务面：考试总分单（一场考试一张表）和员工答卷复盘（一个人一本试卷）。所有 PDF 共享 `sysConfig` 里的水印 + 单位名 + 自动推导的考试日期作为落款。
+
+**sysConfig 扩容**
+
++ `hrSysConfig` 白名单新增 `unitName`（单位名称，长度 ≤ 60）
++ admin 端 `pages/hr/settings` 第二张卡：单位名输入 + 计数 + 恢复默认（默认值"中国安能集团第二工程局有限公司基里隆项目部"）+ 保存
++ textarea 固定高 96rpx（之前 `auto-height` 会被微信渲染成几屏高，体验糟糕）
++ 保存校验修 bug：`xxxInitial` 此前取的是"显示值"（含默认值兜底），导致 DB 空记录时输入框预填默认值也会被判为"未变化"无法落库；改为 `xxxInitial` 取真实 DB 值（可能为 `''`），UI 显示值另算
+
+**新增 · `pdfScoreSheet.js`（按场考试总分单）**
+
++ A4 144 DPI · 单表多页 · 自然分页 · 末页落款
++ 列：序号 / 姓名 / 部门 / 状态 / 提交日期 / 分数；总宽 990px，居中布局
++ 仅展示 `status === 'submitted'` 的员工；过滤逻辑放在渲染器内，避免调用方各搞一套
++ 状态列 `合格 / 不合格`，按 80 分判，色彩同 review（绿 #19be6b / 红 #c0392b）
++ 分数列单值，去掉 "/100"（列宽 100px 装不下）
++ 提交日期只显示 `YYYY-MM-DD`，去掉时分秒（之前会被列宽截断成 "2026-06-29 08…"）
++ 落款：单位名（28px bold）+ 考试日期 `YYYY年M月D日`（26px）右下角；位置改为"表格末行下方 32px"，不再贴底
++ 末页空间不够时自动追加一张空白落款页
++ 页脚右侧：`<考试名> · 总分单`
+
+**新增 · `pdfAnswerSheet.js`（单人答卷复盘）**
+
++ 首页头：考试名（44 bold） + 副信息（姓名·部门·交卷时间·切屏次数）+ 成绩行（得分 X/Y · 答对 N/M）+ 分割线
++ 题块（动态高度，自动测量后分页）：
+  - 标题行 `第 N 题 · 类型` + 右上对错徽章（✓正确 / ✗错误）
+  - 题干（按 `\n` 段落 + 字符贪心断行，尊重原文换行）
+  - 选项盒按 4 态染色：`answered-right`（绿底）/ `answered-wrong`（红底）/ `official-only`（绿虚框，漏选）/ `plain`（灰）
+  - 选项右上小色块标签：`他选`（红）/ `正确`（绿）可叠加
+  - 答案行：左 `他的答案`（按对错染色）/ 右 `正确答案`（绿）
+  - 解析（可选）：浅蓝灰底 + 左色条
++ 末页落款同总分单口径
++ 页脚右侧：`<考试名> · <员工名> 答卷`
+
+**新增 · `pdfAnswerSheet.buildBatchAnswerSheetPages`（全员答卷合并）**
+
++ 输入 `persons[]`（每人一份 `{employee, enrollment, questions, userAnswers, officialMap, rightFlags}`）
++ 每人独立分页 → 换人强制换页 → 全局连续页码 → 整本 PDF 末页才出现一份落款（不够位置则追加空白末页）
++ 页脚右侧文案随当前页所属员工切换
++ `onProgress(cur, total)` 回调供调用方刷 loading 标题
+
+**页面接线**
+
++ `pages/hr/assessmentScores`：顶部卡片改双按钮并排
+  - 蓝色「📄 导出本场总分单」（任何 tab 可用）
+  - 绿色「📚 导出全员答卷」（在 `全部 / 已交卷` tab + 有已交卷数据时启用；`答题中 / 缺考` tab 下置灰）
+  - 全员答卷流程：串行调 `hrGetApplicantReview` 拉每人完整数据 →（>20 人时弹确认框）→ 调 `buildBatchAnswerSheetPages` →`生成 PDF X/Y` 进度反馈 → 预览
++ `pages/hr/applicantReview`：顶部加绿色「📄 导出答卷」按钮，调单人渲染器
+  - 落款日期取 `enrollment.submittedAt`（这人交卷那天），而不是考试开考时间，更贴合"个人答卷"语义
+
+**HR 首页清理**
+
++ 移除 `v0.3.5-pdf-core` 时加的临时 M2 测试入口（黄色虚框 + 🧪 按钮 + `#pdfTestCanvas` + `onTestPdf` + `_loadWatermark` + 相关样式）
++ HR home WXML / JS / WXSS 都已瘦身
+
+**v0.3.5 整体收尾**
+
++ 三连击 tag 链：`sysconfig`（配置基础设施）→ `pdf-core`（Canvas→PDF 底座）→ `pdf-export`（业务接线 + 收尾）
++ 全程零第三方 PDF 库，~150 行 `miniPdf.js` + 两个渲染器，运行时只生成 JPEG + Uint8Array
++ 已通过用户验收：单人答卷 PDF、全员答卷 PDF、总分单 PDF、水印/单位名/日期全链路落地
+
+---
+
 ### 20260629 · v0.3.5-pdf-core（Phase 3 子里程碑 7 · PDF 底座）
 
 > 在不引入任何 PDF 第三方库（jsPDF / pdf-lib / pdfmake 全部排除）的前提下，自己用 Uint8Array 拼装一份合法 PDF 1.3，把 Canvas 渲染的内容封进去。本 tag 完成"底座 + 测试入口"，但还没接业务页（业务接线放在 `pdf-export` tag）。

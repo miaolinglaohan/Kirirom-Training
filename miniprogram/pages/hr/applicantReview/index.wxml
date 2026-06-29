@@ -17,6 +17,11 @@
       <text class="rv-score">{{score}} / {{fullScore}}（答对 {{rightNum}}/{{total}}）</text>
     </view>
     <view class="rv-warn" wx:if="{{switchCount > 0}}">⚠ 答题中切屏 {{switchCount}} 次</view>
+    <view class="rv-export-row">
+      <button class="rv-export-btn" bindtap="onExportPdf" loading="{{exporting}}" disabled="{{exporting}}">
+        📄 导出答卷（PDF）
+      </button>
+    </view>
   </view>
 
   <!-- 题目导航网格 -->
@@ -100,4 +105,7 @@
     <view class="rv-btn ghost {{idx === 0 ? 'disabled' : ''}}" bindtap="goPrev">上一题</view>
     <view class="rv-btn primary" bindtap="goNext">{{isLast ? '完成' : '下一题'}}</view>
   </view>
+
+  <!-- 隐藏 canvas：PDF 渲染容器 -->
+  <canvas type="2d" id="pdfCanvas" class="pdf-canvas-hidden"></canvas>
 </view>

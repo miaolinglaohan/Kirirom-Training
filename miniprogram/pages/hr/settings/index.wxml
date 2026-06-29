@@ -7,7 +7,7 @@
     <view class="section">
       <view class="section-title">PDF 水印文字</view>
       <view class="section-desc">
-        所有导出的 PDF 都会自动叠加这段半透明斜向水印（45°、灰色 12%、200px 间隔重复）。
+        所有导出的 PDF 都会自动叠加这段半透明斜向水印（45°、灰色、自适应平铺）。
         长度上限 60 字符，不支持换行/占位符（{name} 等暂未支持）。
       </view>
 
@@ -17,13 +17,34 @@
         bindinput="onInputWatermark"
         maxlength="60"
         placeholder="例如：基里隆项目部内部资料 · 严禁外传"
-        auto-height
       />
-      <view class="counter">{{counter}}</view>
+      <view class="counter">{{wmCounter}}</view>
 
       <view class="actions">
-        <button class="btn-ghost" size="mini" bindtap="onResetDefault">恢复默认</button>
-        <button class="btn-primary" size="mini" loading="{{saving}}" bindtap="onSave">保存</button>
+        <button class="btn-ghost" size="mini" bindtap="onResetWatermark">恢复默认</button>
+        <button class="btn-primary" size="mini" loading="{{wmSaving}}" bindtap="onSaveWatermark">保存</button>
+      </view>
+    </view>
+
+    <!-- 单位名称 -->
+    <view class="section">
+      <view class="section-title">单位名称</view>
+      <view class="section-desc">
+        会显示在 PDF 总分单右下角（落款），长度上限 40 字符，不支持换行。
+      </view>
+
+      <textarea
+        class="input"
+        value="{{unitName}}"
+        bindinput="onInputUnit"
+        maxlength="40"
+        placeholder="例如：基里隆Ⅰ&Ⅲ水电站运维项目部"
+      />
+      <view class="counter">{{unCounter}}</view>
+
+      <view class="actions">
+        <button class="btn-ghost" size="mini" bindtap="onResetUnit">恢复默认</button>
+        <button class="btn-primary" size="mini" loading="{{unSaving}}" bindtap="onSaveUnit">保存</button>
       </view>
     </view>
 

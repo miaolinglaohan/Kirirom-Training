@@ -10,6 +10,14 @@
         目标部门：{{assessment.targetDepts}}
       </view>
       <view class="head-depts" wx:else>目标部门：全员</view>
+      <view class="export-row">
+        <button class="export-btn" bindtap="onExportPdf" loading="{{exporting}}" disabled="{{exporting || exportingAll}}">
+          📄 导出本场总分单（PDF）
+        </button>
+        <button class="export-btn export-btn-alt" bindtap="onExportAllAnswers" loading="{{exportingAll}}" disabled="{{!canExportAll || exporting || exportingAll}}">
+          📚 导出全员答卷（PDF）
+        </button>
+      </view>
     </view>
 
     <!-- Summary -->
@@ -81,4 +89,7 @@
       </view>
     </view>
   </block>
+
+  <!-- 隐藏 canvas：PDF 渲染容器，不要移除其 type/id -->
+  <canvas type="2d" id="pdfCanvas" class="pdf-canvas-hidden"></canvas>
 </view>

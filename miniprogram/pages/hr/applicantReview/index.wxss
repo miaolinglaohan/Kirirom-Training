@@ -345,3 +345,35 @@ page { background: #f4f6f8; }
   color: #888;
   margin-top: 200rpx;
 }
+
+/* 导出 PDF 按钮（HR 复盘页头部） */
+.rv-export-row {
+  margin-top: 20rpx;
+  display: flex;
+  justify-content: flex-end;
+}
+.rv-export-btn {
+  margin: 0;
+  font-size: 26rpx;
+  background: #1bcfad;
+  color: #fff;
+  border-radius: 32rpx;
+  padding: 0 28rpx;
+  line-height: 64rpx;
+  height: 64rpx;
+}
+.rv-export-btn[disabled] {
+  opacity: 0.6;
+  color: #fff;
+  background: #1bcfad;
+}
+
+/* PDF 渲染用隐藏 canvas（绝对定位到视口外，仍可绘制） */
+.pdf-canvas-hidden {
+  position: fixed;
+  left: -10000rpx;
+  top: -10000rpx;
+  width: 595px;
+  height: 842px;
+  pointer-events: none;
+}

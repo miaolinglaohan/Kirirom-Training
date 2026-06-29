@@ -24,7 +24,8 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
 const ALLOWED_KEYS = {
-  pdfWatermark: { maxLength: 60 }
+  pdfWatermark: { maxLength: 60 },
+  unitName:     { maxLength: 40 }   // 单位名称：会印在 PDF 总分单右下角
 }
 
 async function requireActive(OPENID) {
