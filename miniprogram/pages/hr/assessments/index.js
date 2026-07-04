@@ -58,6 +58,16 @@ Page({
 
   onEdit(e) {
     const id = e.currentTarget.dataset.id
+    const item = this.data.list.find(x => x._id === id)
+    // 已结束/已提前结束的考试不允许编辑（防止改时间"复活"）
+    if (item && item.endedAt) {
+      wx.showToast({ icon: 'none', title: '该考试已提前结束，不可编辑' })
+      return
+    }
+    if (item && item.status === 'expired') {
+      wx.showToast({ icon: 'none', title: '该考试已结束，不可编辑' })
+      return
+    }
     wx.navigateTo({ url: '/pages/hr/assessmentEdit/index?id=' + id })
   },
 
@@ -91,6 +101,13 @@ Page({
             const ret = res.result || {}
             if (ret.ok) {
               wx.showToast({ icon: 'success', title: '已结束' })
+              // 即时更新本地状态：标记 endedAt + status 变 expired，按钮立即变灰
+              const list = this.data.list.map(x => {
+                if (x._id !== id) return x
+                return { ...x, endedAt: new Date().toISOString(), status: 'expired' }
+              })
+              this.setData({ list })
+              // 再异步拉取一次保证与服务端一致
               this.loadList()
             } else if (ret.code === 'ALREADY_ENDED') {
               wx.showToast({ icon: 'none', title: '该考试已结束过' })

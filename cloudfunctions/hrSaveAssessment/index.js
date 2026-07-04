@@ -176,6 +176,20 @@ exports.main = async (event) => {
       if (!existing || !existing.data) {
         return { ok: false, code: 'NOT_FOUND', message: '要更新的考试不存在' }
       }
+      // 已提前结束的考试不允许再编辑（防止改时间"复活"）
+      if (existing.data.endedAt) {
+        return { ok: false, code: 'ALREADY_ENDED', message: '该考试已提前结束，不可编辑' }
+      }
+      // 已过期（按有效窗口算）的考试也不允许编辑
+      const exStart = new Date(existing.data.startTime || 0).getTime()
+      const exValidHours = Number(existing.data.validHours) || 0
+      const exDuration = (existing.data.duration || 0) * 60 * 1000
+      const exValidUntil = exValidHours > 0
+        ? exStart + exValidHours * 60 * 60 * 1000
+        : exStart + exDuration
+      if (Date.now() > exValidUntil) {
+        return { ok: false, code: 'EXPIRED', message: '该考试已结束，不可编辑' }
+      }
       docBody.updatedAt = new Date()
       docBody.updatedBy = g.me._id
       await db.collection('assessments').doc(_id).update({ data: docBody })

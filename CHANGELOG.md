@@ -1,3 +1,33 @@
+### 20260704 · v0.4.4-end-lockfix（已结束考试编辑锁修复）
+
+> 修复 v0.4.3 的两个 bug：① 已结束的考试点卡片仍能进编辑页，改时间后"复活"；② 点"结束"后按钮不变灰，仍可再次编辑。
+
+**Bug 1 · 已结束考试可编辑复活**
+
+- 根因：`onEdit`（点卡片）无状态守卫，进入编辑页改时间存回去就复活
+- 修复 `pages/hr/assessments/index.js` `onEdit`：
+  - `endedAt` 存在 → toast「该考试已提前结束，不可编辑」
+  - `status === 'expired'` → toast「该考试已结束，不可编辑」
+- 服务端兜底 `hrSaveAssessment`：
+  - 更新前查 `existing.endedAt` → 返回 `ALREADY_ENDED`
+  - 更新前查有效窗口 `now > validUntil` → 返回 `EXPIRED`
+  - 双保险：前端绕过直接调云函数也拦得住
+- `assessmentEdit/index.js` `showErr` 补 `ALREADY_ENDED` / `EXPIRED` 错误码：弹模态提示后 `navigateBack`
+
+**Bug 2 · 点"结束"后按钮不变灰**
+
+- 根因：`onEnd` 成功后只调 `loadList()` 异步刷新，本地状态未即时更新；WXML 禁用条件只判 `status`，没判 `endedAt`
+- 修复 `onEnd`：成功后立即 `setData` 把本地 `endedAt` + `status='expired'` 写上，按钮即时变灰；再异步 `loadList` 保证与服务端一致
+- 修复 WXML：`disabled` 和 `.action-disabled` 条件加上 `item.endedAt`
+
+**部署清单**
+
++ 重新上传 1 个云函数：`hrSaveAssessment`
++ 小程序端 2 个页面：`pages/hr/assessments`（onEdit + onEnd + WXML）、`pages/hr/assessmentEdit`（showErr）
++ 数据库无变更
+
+---
+
 ### 20260704 · v0.4.3-end-assessment（HR 提前结束考试）
 
 > 考试管理列表每场考试加"结束"按钮，与"成绩"按钮并列对称。HR 可把进行中/候考的考试提前结束（员工立即无法进场），已截止/隐藏的考试按钮变灰不可用。已交卷成绩不受影响。

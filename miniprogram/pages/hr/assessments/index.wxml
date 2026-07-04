@@ -30,9 +30,9 @@
       <view class="row-actions">
         <button class="action-btn" size="mini" data-id="{{item._id}}" catchtap="onScores">成绩</button>
         <button
-          class="action-btn action-end {{item.status === 'expired' || item.status === 'hidden' ? 'action-disabled' : ''}}"
+          class="action-btn action-end {{item.status === 'expired' || item.status === 'hidden' || item.endedAt ? 'action-disabled' : ''}}"
           size="mini"
-          disabled="{{item.status === 'expired' || item.status === 'hidden'}}"
+          disabled="{{item.status === 'expired' || item.status === 'hidden' || item.endedAt}}"
           data-id="{{item._id}}"
           catchtap="onEnd"
         >结束</button>

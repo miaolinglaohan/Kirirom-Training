@@ -237,6 +237,15 @@ Page({
       wx.showToast({ icon: 'none', title: '无 HR 权限' })
       return
     }
+    if (r.code === 'ALREADY_ENDED' || r.code === 'EXPIRED') {
+      wx.showModal({
+        title: '无法编辑',
+        content: r.message || '该考试已结束，不可编辑',
+        showCancel: false,
+        success: () => wx.navigateBack()
+      })
+      return
+    }
     wx.showToast({ icon: 'none', title: r.message || r.msg || '保存失败' })
   }
 })
