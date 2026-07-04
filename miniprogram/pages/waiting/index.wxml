@@ -1,0 +1,59 @@
+<view class="waiting-page">
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">加载中...</view>
+
+  <!-- 考试不存在 / 不可见 -->
+  <view class="empty" wx:elif="{{notFound}}">
+    <view class="empty-icon">📭</view>
+    <view class="empty-title">未找到该考试</view>
+    <view class="empty-desc">考试可能已被删除、不可见或不在你的部门范围内</view>
+    <view class="back-btn" bindtap="onBack">返回</view>
+  </view>
+
+  <!-- 候考主体 -->
+  <block wx:elif="{{assessment}}">
+    <view class="card">
+      <!-- 考试名 -->
+      <view class="exam-header">
+        <text class="exam-icon">📢</text>
+        <text class="exam-name">{{name}}</text>
+      </view>
+
+      <!-- 大号倒计时 -->
+      <view class="countdown-area {{canEnter ? 'countdown-done' : ''}}">
+        <text class="countdown-label">{{canEnter ? '已到开考时间' : '距离开考'}}</text>
+        <text class="countdown-value">{{countdownText}}</text>
+      </view>
+
+      <!-- 考试信息 -->
+      <view class="info-list">
+        <view class="info-row">
+          <text class="info-label">📅 开考时间</text>
+          <text class="info-value">{{startTimeText}}</text>
+        </view>
+        <view class="info-row" wx:if="{{durationText}}">
+          <text class="info-label">⏱ 答题时长</text>
+          <text class="info-value">{{durationText}}</text>
+        </view>
+        <view class="info-row" wx:if="{{questionsText}}">
+          <text class="info-label">📝 题目数量</text>
+          <text class="info-value">{{questionsText}}</text>
+        </view>
+        <view class="info-row" wx:if="{{fullScoreText}}">
+          <text class="info-label">💯 满分</text>
+          <text class="info-value">{{fullScoreText}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">👥 目标部门</text>
+          <text class="info-value">{{deptText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 进入考场按钮 -->
+    <view class="enter-btn {{canEnter ? 'enter-btn-active' : ''}}" bindtap="onEnterExam">
+      <text wx:if="{{canEnter}}">▶ 立即进入考场</text>
+      <text wx:else>等待开考中…</text>
+    </view>
+  </block>
+</view>

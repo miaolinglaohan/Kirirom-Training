@@ -1,3 +1,34 @@
+### 20260704 · v0.4.0-waiting（Phase 4 · 候考页）
+
+> Phase 2 已把首页通知卡的 ongoing/pending 两态接通 `listMyAssessments` 真实数据，但 pending（未开考）态点击只能跳考试安排页，缺一个"原地倒计时等开考"的候考页。本 tag 补齐 v2 方案中候考这一缺口，闭环员工考前流程：首页/考试安排页点未开考的考试 → 候考页倒计时 → 归零按钮亮起 → 手动进考场。
+
+**新增 · `pages/waiting` 候考页**
+
++ 取数复用 `listMyAssessments` 云函数（已返回 name/startMs/endMs/duration/totalQuestions/fullScore/targetDepts 全部字段），**不新建云函数、不动数据库 schema**
++ 入参 `?id=assessmentId`，从 `list` 中筛对应那条；找不到（被删/不可见/部门不符）显示空态 + 返回按钮
++ 大号倒计时（64px Consolas 等宽），用服务端 `now` 校准 `serverOffset`（与 examSchedule 一致），防止改本地时间作弊
++ 倒计时归零 → 按钮由灰变绿、文案"等待开考中…"→"▶ 立即进入考场"；**手动点击进考场**，不自动跳（员工可能还没准备好）
++ 考试信息卡：开考时间 / 答题时长 / 题目数量 / 满分 / 目标部门（空数组显示"全员"）
++ `onUnload` 清 `setInterval`，防 timer 泄漏
++ 跳考场走 `/pages/exam/exam?assessmentId=xxx`，`enterExam` 会再校验一次时间/状态（防绕过）
+
+**首页 `pages/home` 调整**
+
++ `onTapExamCard`：pending 态由"跳 examSchedule"改为"跳 `/pages/waiting/index?id=xxx`"
++ `loadCurrentExam`：pending 态 `actionText` 由"查看详情"改为"进入候考"
+
+**考试安排页 `pages/examSchedule` 调整**
+
++ `onTapExam`：pending 态由 `wx.showToast「考试尚未开始」`改为"跳 `/pages/waiting/index?id=xxx`"
++ ongoing / expired 态行为不变
+
+**注册与部署**
+
++ `app.json` 新增 `pages/waiting/index`
++ 无新增云函数、无数据库 schema 变更，直接预览即可
+
+---
+
 ### 20260629 · v0.3.7-color-fix（品牌绿调整为微信绿 + 原项目遗留 bug 修复）
 
 > 将全局品牌绿从 `#1bcfad`（青绿）调整为 `#07c160`（微信经典绿），覆盖导航栏、员工端首页、我的页面及所有子页面的绿色元素。同时修复原开源项目中 4 个长期未被触达的遗留 bug。

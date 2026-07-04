@@ -4,6 +4,7 @@
     "pages/profile/index",
     "pages/activate/index",
     "pages/examSchedule/index",
+    "pages/waiting/index",
     "pages/subject/index",
     "pages/entry/index",
     "pages/question/index",

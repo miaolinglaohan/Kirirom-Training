@@ -134,7 +134,7 @@ Page({
           timeText,
           status: pick.status,
           statusText: pick.status === 'ongoing' ? '进行中' : '未开考',
-          actionText: pick.status === 'ongoing' ? '立即进入考场' : '查看详情'
+          actionText: pick.status === 'ongoing' ? '立即进入考场' : '进入候考'
         }
       })
     }).catch(err => {
@@ -248,8 +248,8 @@ Page({
         url: '/pages/exam/exam?assessmentId=' + encodeURIComponent(cur._id)
       })
     } else {
-      // 未开考：跳到考试安排页看详情
-      wx.navigateTo({ url: '/pages/examSchedule/index' })
+      // 未开考：跳候考页倒计时
+      wx.navigateTo({ url: '/pages/waiting/index?id=' + encodeURIComponent(cur._id) })
     }
   },
 

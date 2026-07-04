@@ -118,7 +118,8 @@ Page({
   onTapExam(e) {
     const item = e.currentTarget.dataset.item
     if (item.status === 'pending') {
-      wx.showToast({ icon: 'none', title: '考试尚未开始' })
+      // 未开考：跳候考页倒计时
+      wx.navigateTo({ url: '/pages/waiting/index?id=' + encodeURIComponent(item._id) })
       return
     }
     if (item.status === 'expired') {
