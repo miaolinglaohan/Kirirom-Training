@@ -10,7 +10,7 @@ page {
 
 /* 用户卡片 */
 .user-card {
-  background: linear-gradient(135deg, #07c160 0%, #06a04f 100%);
+  background: linear-gradient(135deg, #07c160 0%, #07c160 100%);
   padding: 60rpx 40rpx 60rpx;
   display: flex;
   align-items: center;

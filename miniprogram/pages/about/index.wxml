@@ -1,4 +1,5 @@
 <view class="page-about">
     <view class="title">关于我们</view>
-    <view class="desc">本小程序主要用于提供在线模拟考试，在线答题测评用，具体请联系小程序开发者  <view class="wechat">music9866</view></view>
+    <view class="desc">本小程序主要用于基里隆Ⅰ&Ⅲ水电站运维项目部内部学习培训，提供在线学习刷题、模拟考试及组织开展线上培训考试。</view>
+    <view class="wechat">by柬埔寨基里隆Ⅰ&Ⅲ水电站运维项目部</view>
 </view>

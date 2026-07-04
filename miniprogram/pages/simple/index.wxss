@@ -19,6 +19,12 @@ page{
     border-radius: 10px;
     color: #fff;
     background-color: #07c160;
+        /* 新增下面两行实现居中 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* 修改这里调整文字尺寸，按需改数值，比如10px、9px */
+        font-size: 14px;
 }
 .page-simple .sortnumber .total{
     width: 20px;
@@ -26,6 +32,11 @@ page{
     border-radius: 10px;
     color: #fff;
     background-color: #07c160;
+        /* 居中配置和上面保持一致 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
 }
 .page-simple .question{
     

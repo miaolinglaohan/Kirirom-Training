@@ -1,5 +1,5 @@
 <view class="home-page">
-  <!-- 顶部统计条 -->
+  <!-- 顶部统计条
   <view class="stats-bar">
     <view class="stat-item">
       <view class="stat-label">已答题数</view>
@@ -12,7 +12,7 @@
       <view class="stat-value">{{stats.accuracy}}%</view>
       <view class="stat-sub">总体</view>
     </view>
-  </view>
+  </view> -->
 
   <!-- 考试通知卡片 -->
   <view class="exam-card" wx:if="{{currentExam}}" bindtap="onTapExamCard">
@@ -33,7 +33,7 @@
   </view>
 
   <view class="empty-exam-card" wx:else bindtap="onTapExamCard">
-    <text class="empty-text">本月暂无摸底考试安排</text>
+    <text class="empty-text">目前暂无考试</text>
     <text class="empty-action">查看考试安排 ›</text>
   </view>
 

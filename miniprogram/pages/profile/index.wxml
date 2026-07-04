@@ -11,18 +11,18 @@
         <text wx:if="{{employee.role === 'admin'}}" class="role-tag">  ·  管理员</text>
       </view>
       <view class="user-meta" wx:else>
-        <text class="hint">请联系 HR 完成激活</text>
+        <text class="hint">请联系管理员完成激活</text>
       </view>
     </view>
   </view>
 
   <!-- openid 卡片 -->
   <view class="section">
-    <view class="section-title">我的小程序 ID</view>
+    <view class="section-title">我的小程序openID</view>
     <view class="openid-box">
       <text class="openid-text" selectable="true">{{openid || '加载中...'}}</text>
     </view>
-    <view class="copy-btn" bindtap="copyOpenid">复制 ID</view>
+    <view class="copy-btn" bindtap="copyOpenid">复制openID</view>
   </view>
 
   <!-- 功能列表 -->
@@ -41,5 +41,5 @@
     </view>
   </view>
 
-  <view class="footer">基里隆项目部业务培训考试 · KIRIROM TRAINING</view>
+  <view class="footer">基里隆项目部培训考试系统·KIRIROM TRAINING</view>
 </view>

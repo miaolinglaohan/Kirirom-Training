@@ -39,8 +39,8 @@
     background-color: #07c160;
     color: #fff;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     text-align: center;
 
 }
