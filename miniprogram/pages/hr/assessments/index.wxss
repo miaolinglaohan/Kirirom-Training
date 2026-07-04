@@ -64,3 +64,15 @@
   border: 1rpx solid #a8e6d8;
 }
 .action-btn::after { border: none; }
+
+/* 结束按钮：红色警示色 */
+.action-btn.action-end {
+  background: #fff0ed;
+  color: #c0392b;
+  border: 1rpx solid #f5c6c0;
+}
+.action-btn.action-end.action-disabled {
+  background: #f5f5f5;
+  color: #bbb;
+  border: 1rpx solid #e8e8e8;
+}

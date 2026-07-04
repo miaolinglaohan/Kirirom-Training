@@ -67,6 +67,47 @@ Page({
     wx.navigateTo({ url: '/pages/hr/assessmentScores/index?id=' + id })
   },
 
+  // 提前结束考试：把 validUntil 截断到当前时刻，进行中/候考的考试立即变已截止
+  onEnd(e) {
+    const id = e.currentTarget.dataset.id
+    const item = this.data.list.find(x => x._id === id)
+    if (!item) return
+    // 已截止/隐藏的不应该能点（按钮已 disabled），这里兜底
+    if (item.status === 'expired' || item.status === 'hidden') {
+      wx.showToast({ icon: 'none', title: '该考试已结束' })
+      return
+    }
+    wx.showModal({
+      title: '提前结束考试',
+      content: `确定要立即结束「${item.name}」吗？\n结束后员工将无法再进场，已交卷的成绩不受影响。`,
+      confirmText: '结束',
+      confirmColor: '#c0392b',
+      success: r => {
+        if (!r.confirm) return
+        wx.showLoading({ title: '处理中…', mask: true })
+        wx.cloud.callFunction({ name: 'hrEndAssessment', data: { _id: id } })
+          .then(res => {
+            wx.hideLoading()
+            const ret = res.result || {}
+            if (ret.ok) {
+              wx.showToast({ icon: 'success', title: '已结束' })
+              this.loadList()
+            } else if (ret.code === 'ALREADY_ENDED') {
+              wx.showToast({ icon: 'none', title: '该考试已结束过' })
+              this.loadList()
+            } else {
+              wx.showToast({ icon: 'none', title: ret.message || '操作失败' })
+            }
+          })
+          .catch(err => {
+            console.error('[onEnd]', err)
+            wx.hideLoading()
+            wx.showToast({ icon: 'none', title: '网络异常' })
+          })
+      }
+    })
+  },
+
   onPullDownRefresh() {
     this.loadList()
     wx.stopPullDownRefresh()

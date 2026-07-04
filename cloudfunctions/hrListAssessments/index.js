@@ -76,19 +76,30 @@ exports.main = async () => {
     const list = all.map(a => {
       const start = new Date(a.startTime || 0).getTime()
       const duration = (a.duration || 0) * 60 * 1000
-      const end = start + duration
+      // 有效期：有 validHours 用 validUntil；旧考试无该字段回退到 start+duration（统一截止）
+      const validHours = Number(a.validHours) || 0
+      let validUntil = validHours > 0
+        ? start + validHours * 60 * 60 * 1000
+        : start + duration
+      // HR 提前结束：endedAt 截断 validUntil
+      if (a.endedAt) {
+        const endedMs = new Date(a.endedAt).getTime()
+        if (Number.isFinite(endedMs) && endedMs < validUntil) validUntil = endedMs
+      }
       let status
       if (a.visible === false) status = 'hidden'
       else if (now < start) status = 'pending'
-      else if (now <= end) status = 'ongoing'
+      else if (now <= validUntil) status = 'ongoing'
       else status = 'expired'
       const counts = enrollmentsByAssessment[a._id] || { enrolled: 0, submitted: 0 }
       const { totalQuestions, fullScore } = deriveCounts(a)
       return {
         ...a,
         startMs: start,
-        endMs: end,
-        deadline: end,
+        endMs: validUntil,
+        validUntilMs: validUntil,
+        validHours: validHours || 0,
+        deadline: validUntil,
         status,
         totalQuestions,
         fullScore,

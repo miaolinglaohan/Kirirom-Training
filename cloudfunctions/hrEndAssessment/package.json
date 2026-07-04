@@ -1,0 +1,9 @@
+{
+  "name": "hrEndAssessment",
+  "version": "1.0.0",
+  "description": "HR 提前结束考试：把 validUntil 截断到当前时刻，进行中/候考的考试立即变为已截止",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

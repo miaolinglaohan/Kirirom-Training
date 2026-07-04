@@ -79,9 +79,14 @@ exports.main = async (event) => {
       const duration = (a.duration || 0) * 60 * 1000
       // 有效期：有 validHours 用 validUntil；旧考试无该字段回退到 start+duration（统一截止）
       const validHours = Number(a.validHours) || 0
-      const validUntil = validHours > 0
+      let validUntil = validHours > 0
         ? start + validHours * 60 * 60 * 1000
         : start + duration
+      // HR 提前结束：endedAt 截断 validUntil
+      if (a.endedAt) {
+        const endedMs = new Date(a.endedAt).getTime()
+        if (Number.isFinite(endedMs) && endedMs < validUntil) validUntil = endedMs
+      }
       let status
       if (now < start) status = 'pending'
       else if (now <= validUntil) status = 'ongoing'

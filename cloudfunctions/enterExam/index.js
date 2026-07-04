@@ -187,9 +187,14 @@ exports.main = async (event) => {
       const startMs = new Date(a.startTime).getTime()
       // 有效期：有 validHours 用 validUntil（开考后 N 小时）；旧考试无该字段回退到 startMs+duration（统一截止）
       const validHours = Number(a.validHours) || 0
-      const validUntilMs = validHours > 0
+      let validUntilMs = validHours > 0
         ? startMs + validHours * 60 * 60 * 1000
         : startMs + (a.duration || 0) * 60 * 1000  // 旧模型：到点统一结束
+      // HR 提前结束：endedAt 截断 validUntil
+      if (a.endedAt) {
+        const endedMs = new Date(a.endedAt).getTime()
+        if (Number.isFinite(endedMs) && endedMs < validUntilMs) validUntilMs = endedMs
+      }
 
       if (now < startMs) return { ok: false, code: 'NOT_STARTED', message: '考试尚未开始' }
       if (now > validUntilMs) return { ok: false, code: 'EXPIRED', message: '考试有效期已过' }

@@ -1,3 +1,40 @@
+### 20260704 · v0.4.3-end-assessment（HR 提前结束考试）
+
+> 考试管理列表每场考试加"结束"按钮，与"成绩"按钮并列对称。HR 可把进行中/候考的考试提前结束（员工立即无法进场），已截止/隐藏的考试按钮变灰不可用。已交卷成绩不受影响。
+
+**实现方式 · `endedAt` 字段截断**
+
++ 不改原 `validHours`（保留审计），新增 `endedAt` 字段 = 当前时刻
++ 所有读 validUntil 的云函数对 `endedAt` 取 min：`effectiveValidUntil = min(originalValidUntil, endedAt)`
++ endedAt 写入后，`listMyAssessments` 状态自动变 expired，`enterExam` 自动拒绝进场
+
+**新增云函数 · `hrEndAssessment`**
+
++ 入参 `{ _id }`，写 `endedAt` + `endedBy`
++ HR/admin 鉴权；已结束过返回 `ALREADY_ENDED`
++ 错误码：`NO_OPENID / FORBIDDEN / MISSING_ID / NOT_FOUND / ALREADY_ENDED / DB_ERROR`
+
+**3 个云函数同步对齐 endedAt**
+
++ `listMyAssessments`：validUntil 对 endedAt 取 min（员工端立即看到已截止）
++ `enterExam`：validUntilMs 对 endedAt 取 min（员工立即无法进场）
++ `hrListAssessments`：validUntil 对 endedAt 取 min + 状态判定接入 validUntil（HR 端列表状态正确）
+
+**小程序 · `pages/hr/assessments`**
+
++ WXML：每行 `.row-actions` 加"结束"按钮，与"成绩"并列；`status === 'expired' || 'hidden'` 时 `disabled` + `.action-disabled` 灰色
++ WXSS：`.action-end` 红色警示色（#fff0ed / #c0392b）；`.action-disabled` 灰色
++ JS：`onEnd` 二次确认弹窗（红色确认键 + 提示"已交卷成绩不受影响"）→ 调 `hrEndAssessment` → 刷新列表
+
+**部署清单**
+
++ 新增上传：`hrEndAssessment` 云函数
++ 重新上传 3 个云函数：`listMyAssessments` / `enterExam` / `hrListAssessments`
++ 小程序端 1 个页面改动（`pages/hr/assessments`）
++ 数据库：`assessments` 新增 `endedAt` / `endedBy` 字段（云函数写入时自动产生）
+
+---
+
 ### 20260704 · v0.4.2-validity-window（考试有效期 + 个人计时模型）
 
 > 原模型：全员统一截止（`deadline = startTime + duration`），进场晚=时间少，错过开考时刻就几乎没法考。新模型：HR 设有效期（如 48/72 小时），开考后窗口内随时可进场，进场后才开始个人倒计时，照常考完整时长。解决"因工作不能第一时间参考，但要在有效期内进入"的真实场景。
