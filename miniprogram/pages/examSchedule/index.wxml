@@ -27,6 +27,10 @@
           <text class="row-label">答题时长</text>
           <text class="row-value">{{item.duration}} 分钟</text>
         </view>
+        <view class="card-row" wx:if="{{item.validText}}">
+          <text class="row-label">有效期</text>
+          <text class="row-value">{{item.validText}}</text>
+        </view>
         <view class="card-row" wx:if="{{item.totalQuestions || item.questionCount}}">
           <text class="row-label">题目数量</text>
           <text class="row-value">{{item.totalQuestions || item.questionCount}} 题</text>

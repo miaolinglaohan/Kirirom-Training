@@ -47,6 +47,16 @@
 }
 .picker-text.placeholder { color: #b0b0b0; }
 
+.tz-hint {
+  font-size: 24rpx;
+  color: #07c160;
+  background: #e8f8ee;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+}
+
 .qrow {
   display: flex;
   align-items: center;

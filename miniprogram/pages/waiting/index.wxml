@@ -44,6 +44,10 @@
           <text class="info-value">{{fullScoreText}}</text>
         </view>
         <view class="info-row">
+          <text class="info-label">⏳ 有效期</text>
+          <text class="info-value">{{validHoursText}}</text>
+        </view>
+        <view class="info-row">
           <text class="info-label">👥 目标部门</text>
           <text class="info-value">{{deptText}}</text>
         </view>

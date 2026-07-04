@@ -1,3 +1,80 @@
+### 20260704 · v0.4.2-validity-window（考试有效期 + 个人计时模型）
+
+> 原模型：全员统一截止（`deadline = startTime + duration`），进场晚=时间少，错过开考时刻就几乎没法考。新模型：HR 设有效期（如 48/72 小时），开考后窗口内随时可进场，进场后才开始个人倒计时，照常考完整时长。解决"因工作不能第一时间参考，但要在有效期内进入"的真实场景。
+
+**时间模型变更**
+
+| 维度 | 旧模型 | 新模型（有 validHours）|
+|---|---|---|
+| 可进场窗口 | `[startTime, startTime+duration]` | `[startTime, startTime+validHours]` |
+| 个人 deadline | 固定 `startTime+duration`（统一截止） | `进场时刻 + duration`（个人计时） |
+| 进场晚的人 | 时间被压缩 | 照样有完整 duration |
+| 超时答完 | 不适用（统一截止） | 允许（validUntil 只管"能不能进场"，不硬截断答题） |
+
+**兼容性**：存量考试无 `validHours` 字段 → 自动回退旧逻辑（统一截止），前向后向都可读。
+
+**数据模型 · `assessments` 新增字段**
+
++ `validHours: number`（1~168）：开考后多少小时内可进场。必填，新建/编辑考试时 HR 设置。
+
+**云函数改动**
+
++ `hrSaveAssessment`：入参新增 `validHours`；校验 `>0` 且 `<=168`；写入 `docBody`
++ `enterExam`（正式考分支）：
+  - 进入校验：`now > validUntilMs` 返回 `EXPIRED`（旧逻辑 `now > endMs`）
+  - deadline：`validHours>0` 时 = `now + duration`（个人计时）；否则 = `startMs + duration`（旧统一截止）
+  - validUntilMs = `startMs + validHours×3600s`（无 validHours 回退 `startMs + duration×60s`）
++ `listMyAssessments`：
+  - 状态判定 ongoing 区间改为 `[start, validUntil]`（旧 `[start, end]`）
+  - 返回新字段 `validUntilMs` / `validHours`；`endMs` 同步指向 validUntil（前端倒计时终点自动跟随）
+
+**小程序改动**
+
++ `pages/hr/assessmentEdit`：
+  - form 新增 `validHours`（默认 48）
+  - WXML 加"有效期（小时）"输入行 + "开考后可进场"提示
+  - `onSubmit` 客户端校验 `>0` 且 `<=168`，加入 payload
+  - 编辑回填从 `a.validHours` 取（旧考试无该字段兜底 48）
++ `pages/examSchedule`：
+  - `decorate` 派生 `validText`（`有效期 48 小时` / `统一截止`）
+  - WXML 加"有效期"行
+  - 倒计时终点自动用 `endMs`（=validUntil），无需改 tick 逻辑
++ `pages/waiting` 候考页：
+  - `applyAssessment` 派生 `validHoursText`
+  - WXML 加"⏳ 有效期"信息行
+
+**部署清单**
+
++ 重新上传 2 个云函数：`hrSaveAssessment` / `enterExam` / `listMyAssessments`（共 3 个）
++ 小程序端 3 个页面改动（assessmentEdit / examSchedule / waiting）+ 时区修复（assessmentEdit）
++ 数据库 schema：`assessments` 集合新增 `validHours` 字段（无需手动建，云函数写入时自动产生；旧记录无该字段自动回退）
+
+---
+
+### 20260704 · v0.4.1-tz-fix（考试时间时区修复）
+
+> HR 新建考试选"20:00"，前端拼成 `'YYYY-MM-DD HH:mm:ss'` 无时区信息，云函数 Node.js 按 UTC 解析，实际存成 UTC 20:00。客户端 UTC+7 显示成次日 03:00，差 7 小时。修复：前端提交时转 ISO 字符串（带 Z 后缀），云函数零改动。
+
+**修复 · `pages/hr/assessmentEdit/index.js`**
+
++ 新增 `buildIsoStart(date, time)`：用 `new Date(年, 月-1, 日, 时, 分)` 数值构造（一定按本地时区）→ `.toISOString()` → 带 `Z` 后缀的 UTC 字符串
++ `onSubmit`：`startTime` 由 `'YYYY-MM-DD HH:mm:ss'` 改为 `buildIsoStart()` 产出的 ISO 字符串
++ 新增 `tzLabel()`：从客户端取时区偏移（`getTimezoneOffset` 取反），如 `UTC+7`
++ `parseStart` 注释补充：兼容 ISO 字符串 / 旧格式 / Date 三种入库形态，`new Date(s)` 都能解析
+
+**UI · 时区标签**
+
++ `index.wxml`："开始时间"行右侧加 `{{tzLabel}}` 绿底胶囊
++ `index.wxss`：`.tz-hint` 样式（绿底白字 #07c160 / #e8f8ee）
+
+**验证**
+
++ HR 选 20:00（UTC+7）→ ISO `2026-07-04T13:00:00.000Z` → 云函数存正确时间戳 → 客户端 `getHours()` 自动转回 20:00 ✓
++ 旧格式 `'YYYY-MM-DD HH:mm:ss'` 仍能被 `new Date()` 解析，回填正常 ✓
++ 云函数零改动（`new Date(isoString)` 本就支持）
+
+---
+
 ### 20260704 · v0.4.0-waiting（Phase 4 · 候考页）
 
 > Phase 2 已把首页通知卡的 ongoing/pending 两态接通 `listMyAssessments` 真实数据，但 pending（未开考）态点击只能跳考试安排页，缺一个"原地倒计时等开考"的候考页。本 tag 补齐 v2 方案中候考这一缺口，闭环员工考前流程：首页/考试安排页点未开考的考试 → 候考页倒计时 → 归零按钮亮起 → 手动进考场。

@@ -85,6 +85,7 @@ Page({
         ? ((a.totalQuestions || a.questionCount) + ' 题')
         : '',
       fullScoreText: a.fullScore ? (a.fullScore + ' 分') : '',
+      validHoursText: a.validHours > 0 ? `${a.validHours} 小时` : '统一截止',
       deptText: this.fmtDepts(a.targetDepts)
     })
     this.refreshCountdown()

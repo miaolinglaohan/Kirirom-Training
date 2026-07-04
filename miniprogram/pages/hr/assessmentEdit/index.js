@@ -6,7 +6,11 @@ function todayStr() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 function parseStart(s) {
-  // 'YYYY-MM-DD HH:mm:ss' or ISO
+  // 兼容三种入库形态：
+  //   1) ISO 字符串 '2026-07-04T13:00:00.000Z'（v0.4.1 起新数据）
+  //   2) 旧格式 'YYYY-MM-DD HH:mm:ss'（v0.4.1 前的存量数据，按云函数环境 UTC 解析入库）
+  //   3) Date 对象 / 时间戳
+  // new Date(s) 都能解析，之后用本地时区的 getHours/getDate 回填表单，HR 看到的就是"本地几点"
   if (!s) return { date: todayStr(), time: '09:00' }
   const d = new Date(s)
   if (isNaN(d.getTime())) return { date: todayStr(), time: '09:00' }
@@ -14,6 +18,24 @@ function parseStart(s) {
     date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
     time: `${pad(d.getHours())}:${pad(d.getMinutes())}`
   }
+}
+
+// 把表单里的 date + time 按"HR 所在本地时区"拼成 Date，再转 ISO 字符串。
+// 这样云函数 new Date(iso) 能拿到正确的时间戳，不再受 Node 默认 UTC 解析影响。
+function buildIsoStart(dateStr, timeStr) {
+  const [y, m, d] = String(dateStr).split('-').map(Number)
+  const [h, mi] = String(timeStr).split(':').map(Number)
+  // new Date(年, 月-1, 日, 时, 分) —— 数值构造一定按执行环境的本地时区
+  const dt = new Date(y, (m || 1) - 1, d || 1, h || 0, mi || 0, 0, 0)
+  return isNaN(dt.getTime()) ? '' : dt.toISOString()
+}
+
+// 取本地时区偏移文案，如 "UTC+7" / "UTC-5"
+// 微信小程序运行在 HR 手机/PC 上，偏移即 HR 所在时区
+function tzLabel() {
+  const off = -new Date().getTimezoneOffset() / 60  // JS 规定：getTimezoneOffset 返回的是 UTC - local，要取反
+  const sign = off >= 0 ? '+' : ''
+  return `UTC${sign}${off}`
 }
 
 Page({
@@ -30,12 +52,14 @@ Page({
       date: todayStr(),
       time: '09:00',
       duration: 60,
+      validHours: 48,            // 有效期（小时）：开考后多少小时内可进场，默认 48h
       singleCount: 5, singleScore: 10,
       multiCount: 3,  multiScore: 15,
       judgeCount: 5,  judgeScore: 5,
       targetDeptsText: '',
       visible: true
-    }
+    },
+    tzLabel: tzLabel()  // HR 所在时区，如 "UTC+7"，仅用于 UI 提示
   },
 
   onLoad(opts) {
@@ -115,6 +139,7 @@ Page({
           subjectId: a.subjectId || '',
           date: t.date, time: t.time,
           duration: a.duration || 60,
+          validHours: a.validHours || 48,
           singleCount: single.count || 0, singleScore: single.score || 0,
           multiCount: multi.count || 0,   multiScore: multi.score || 0,
           judgeCount: judge.count || 0,   judgeScore: judge.score || 0,
@@ -148,9 +173,13 @@ Page({
     const f = this.data.form
     if (!f.name || !f.name.trim()) return wx.showToast({ icon: 'none', title: '请填写考试名称' })
     if (!f.subjectId) return wx.showToast({ icon: 'none', title: '请选择题库' })
-    const startTime = `${f.date} ${f.time}:00`
+    const startTime = buildIsoStart(f.date, f.time)
+    if (!startTime) return wx.showToast({ icon: 'none', title: '开始时间格式无效' })
     const duration = Number(f.duration) || 0
     if (duration <= 0) return wx.showToast({ icon: 'none', title: '时长必须大于 0' })
+    const validHours = Number(f.validHours) || 0
+    if (!(validHours > 0)) return wx.showToast({ icon: 'none', title: '有效期必须大于 0 小时' })
+    if (validHours > 168) return wx.showToast({ icon: 'none', title: '有效期不能超过 168 小时' })
 
     const targetDepts = String(f.targetDeptsText || '')
       .split(/[,，\s]+/)
@@ -163,6 +192,7 @@ Page({
       subjectId: f.subjectId,
       startTime,
       duration,
+      validHours,
       questionConfig: {
         single: { count: Number(f.singleCount) || 0, score: Number(f.singleScore) || 0 },
         multi:  { count: Number(f.multiCount)  || 0, score: Number(f.multiScore)  || 0 },

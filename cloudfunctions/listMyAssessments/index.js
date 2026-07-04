@@ -77,10 +77,14 @@ exports.main = async (event) => {
 
       const start = new Date(a.startTime || 0).getTime()
       const duration = (a.duration || 0) * 60 * 1000
-      const end = start + duration
+      // 有效期：有 validHours 用 validUntil；旧考试无该字段回退到 start+duration（统一截止）
+      const validHours = Number(a.validHours) || 0
+      const validUntil = validHours > 0
+        ? start + validHours * 60 * 60 * 1000
+        : start + duration
       let status
       if (now < start) status = 'pending'
-      else if (now <= end) status = 'ongoing'
+      else if (now <= validUntil) status = 'ongoing'
       else status = 'expired'
 
       if (onlyActive && status === 'expired') continue
@@ -90,8 +94,10 @@ exports.main = async (event) => {
       list.push({
         ...a,
         startMs: start,
-        endMs: end,
-        deadline: end,
+        endMs: validUntil,          // 兼容现有前端字段名（examSchedule 用 endMs 做倒计时终点）
+        validUntilMs: validUntil,    // 新字段，语义更清晰
+        validHours: validHours || 0,
+        deadline: validUntil,
         status,
         totalQuestions,
         fullScore

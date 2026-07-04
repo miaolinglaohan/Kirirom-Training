@@ -9,6 +9,7 @@
 //     subjectId: string,      // 对应 exam 集合的 _id
 //     startTime: string,      // 'YYYY-MM-DD HH:mm:ss' 或 ISO 字符串
 //     duration: number,       // 分钟
+//     validHours: number,     // 有效期（小时）：开考后多少小时内可进场，1~168
 //     questionConfig: {
 //       single: { count, score },
 //       multi:  { count, score },
@@ -68,6 +69,7 @@ exports.main = async (event) => {
   const subjectId = String(event.subjectId || '').trim()
   const startTime = String(event.startTime || '').trim()
   const duration = Number(event.duration) || 0
+  const validHours = Number(event.validHours) || 0
   const questionConfig = normalizeConfig(event.questionConfig)
   const targetDepts = Array.isArray(event.targetDepts) ? event.targetDepts.map(String).filter(Boolean) : []
   const visible = event.visible !== false  // 默认 true
@@ -81,6 +83,8 @@ exports.main = async (event) => {
     return { ok: false, code: 'INVALID_START', message: '开始时间格式无效' }
   }
   if (!(duration > 0)) return { ok: false, code: 'INVALID_DURATION', message: '时长必须大于 0 分钟' }
+  if (!(validHours > 0)) return { ok: false, code: 'INVALID_VALID_HOURS', message: '有效期必须大于 0 小时' }
+  if (validHours > 168) return { ok: false, code: 'INVALID_VALID_HOURS', message: '有效期不能超过 168 小时（7 天）' }
 
   // ── questionConfig 校验
   const totalNeed =
@@ -157,6 +161,7 @@ exports.main = async (event) => {
     subjectName,                 // 冗余存一份，列表展示用
     startTime,
     duration,
+    validHours,                  // 有效期（小时）：开考后 validHours 内可进场，个人计时
     questionConfig,
     targetDepts,
     visible,

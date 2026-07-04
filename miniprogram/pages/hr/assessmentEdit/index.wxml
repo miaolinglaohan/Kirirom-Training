@@ -31,11 +31,18 @@
       <picker mode="time" value="{{form.time}}" bindchange="onTimeChange">
         <view class="picker-text">{{form.time}}</view>
       </picker>
+      <text class="tz-hint">{{tzLabel}}</text>
     </view>
 
     <view class="row">
       <view class="label">时长（分钟）</view>
       <input class="input" type="number" value="{{form.duration}}" data-field="duration" bindinput="onInput" />
+    </view>
+
+    <view class="row">
+      <view class="label">有效期（小时）</view>
+      <input class="input" type="number" value="{{form.validHours}}" data-field="validHours" bindinput="onInput" />
+      <text class="tz-hint">开考后可进场</text>
     </view>
   </view>
 

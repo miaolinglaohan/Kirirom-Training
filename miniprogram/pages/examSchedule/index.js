@@ -64,11 +64,16 @@ Page({
       else if (status === 'ongoing') { statusText = '进行中'; canEnter = true }
       else statusText = '已截止'
 
+      // 有效期文案：有 validHours 显示"有效期 48 小时"，旧考试显示"统一截止"
+      const validHours = Number(item.validHours) || 0
+      const validText = validHours > 0 ? `有效期 ${validHours} 小时` : '统一截止'
+
       return {
         ...item,
         startTimeText: start ? this.fmtTime(start) : '',
         endTimeText: end ? this.fmtTime(end) : '',
         countdownText: this.fmtCountdown(start - now),
+        validText,
         status,
         statusText,
         canEnter

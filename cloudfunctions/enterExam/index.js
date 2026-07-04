@@ -9,8 +9,10 @@
 //   ② 防重入：用 _id = "{assessmentId}_{openid}" 防止同一人重复创建多卷
 //   ③ 抽题：从 questions 集合按 subjectId + typecode 分桶随机抽题（Phase 3）
 //   ④ 剥离答案：写入 enrollment 前移除 options[].value，另存 answersOfficial
-//   ⑤ 固化 deadline：正式考 = assessment.startTime + duration（全员同一截止）
-//                      模考    = now + duration（每场独立计时）
+//   ⑤ 固化 deadline：
+//      正式考（有 validHours）= 进场时刻 + duration（个人计时，有效期窗口内随时进，照常考完整时长）
+//      正式考（无 validHours，存量旧考试）= assessment.startTime + duration（全员统一截止）
+//      模考    = now + duration（每场独立计时）
 //
 // 入参：
 //   { assessmentId: string } 正式
@@ -183,10 +185,14 @@ exports.main = async (event) => {
       }
 
       const startMs = new Date(a.startTime).getTime()
-      const endMs = startMs + (a.duration || 0) * 60 * 1000
+      // 有效期：有 validHours 用 validUntil（开考后 N 小时）；旧考试无该字段回退到 startMs+duration（统一截止）
+      const validHours = Number(a.validHours) || 0
+      const validUntilMs = validHours > 0
+        ? startMs + validHours * 60 * 60 * 1000
+        : startMs + (a.duration || 0) * 60 * 1000  // 旧模型：到点统一结束
 
       if (now < startMs) return { ok: false, code: 'NOT_STARTED', message: '考试尚未开始' }
-      if (now > endMs) return { ok: false, code: 'EXPIRED', message: '考试已截止' }
+      if (now > validUntilMs) return { ok: false, code: 'EXPIRED', message: '考试有效期已过' }
 
       const targetDepts = Array.isArray(a.targetDepts) ? a.targetDepts : []
       if (targetDepts.length > 0 && targetDepts.indexOf(emp.dept) < 0) {
@@ -200,8 +206,12 @@ exports.main = async (event) => {
         ? normalizeConfig(a.questionConfig)
         : deriveConfigFromCount(a.questionCount)
       startedAt = new Date(now)
-      // 正式考统一截止：全员从 assessment.startTime 算起，进场晚=时间少
-      deadline = new Date(endMs)
+      // deadline：
+      //   新模型（validHours>0）：个人计时 = 进场时刻 + duration，允许超时答完（不受 validUntil 硬截断）
+      //   旧模型（无 validHours）：统一截止 = startMs + duration，进场晚=时间少
+      deadline = validHours > 0
+        ? new Date(now + durationMin * 60 * 1000)
+        : new Date(startMs + durationMin * 60 * 1000)
       enrollmentId = assessmentId + '_' + OPENID
     }
 
