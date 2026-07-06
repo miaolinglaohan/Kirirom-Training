@@ -11,8 +11,10 @@ const TYPE_CLASS = { '01': 'single', '02': 'multi', '03': 'judge' }
 
 Page({
   data: {
-    examid: '',
+    examid: '',             // 空 = 全局模式（题目管理入口）；非空 = 单题库模式（从题库进入）
     subjectName: '',
+    subjects: [],           // 全局模式下的题库列表（供筛选 picker 用）
+    subjectIndex: -1,       // picker 选中索引，-1 = 全部题库
     tabs: TYPE_TABS,
     activeTab: '',
     list: [],
@@ -30,15 +32,12 @@ Page({
     this.setData({ examid, subjectName: name })
     if (name) {
       wx.setNavigationBarTitle({ title: name })
+    } else if (!examid) {
+      wx.setNavigationBarTitle({ title: '题目管理' })
     }
   },
 
   onShow() {
-    if (!this.data.examid) {
-      wx.showToast({ icon: 'none', title: '参数缺失' })
-      setTimeout(() => wx.navigateBack(), 800)
-      return
-    }
     app.guardAuth().then(emp => {
       if (!emp) return
       if (emp.role !== 'hr' && emp.role !== 'admin') {
@@ -46,8 +45,51 @@ Page({
         setTimeout(() => wx.reLaunch({ url: '/pages/home/index' }), 800)
         return
       }
+      // 全局模式下加载题库列表供筛选
+      if (!this.data.examid) {
+        this.loadSubjects()
+      }
       this.loadList(true)
     })
+  },
+
+  // 全局模式下加载题库列表（供筛选 picker）
+  loadSubjects() {
+    wx.cloud.callFunction({ name: 'hrListSubjects' })
+      .then(res => {
+        const r = res.result || {}
+        if (!r.ok) return
+        const subjects = (r.list || []).map(s => ({
+          _id: s._id,
+          name: s.name || s._id
+        }))
+        this.setData({ subjects })
+      })
+      .catch(() => {})
+  },
+
+  // 题库筛选 picker 切换
+  onSubjectChange(e) {
+    const idx = Number(e.detail.value)
+    if (idx === this.data.subjectIndex) return
+    const sub = idx >= 0 ? this.data.subjects[idx] : null
+    this.setData({
+      subjectIndex: idx,
+      examid: sub ? sub._id : '',
+      subjectName: sub ? sub.name : ''
+    })
+    this.loadList(true)
+  },
+
+  // 清除题库筛选（回到全部）
+  onClearSubject() {
+    if (this.data.subjectIndex < 0) return
+    this.setData({
+      subjectIndex: -1,
+      examid: '',
+      subjectName: ''
+    })
+    this.loadList(true)
   },
 
   onTabChange(e) {
@@ -110,6 +152,10 @@ Page({
   },
 
   onCreate() {
+    if (!this.data.examid) {
+      wx.showToast({ icon: 'none', title: '请先选择题库再新建题目' })
+      return
+    }
     wx.navigateTo({
       url: '/pages/hr/questionEdit/index?examid=' + encodeURIComponent(this.data.examid)
     })

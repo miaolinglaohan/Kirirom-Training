@@ -26,7 +26,7 @@
     <view class="card" bindtap="goQuestions">
       <view class="icon">❓</view>
       <view class="card-title">题目管理</view>
-      <view class="card-desc">通过题库进入题目维护</view>
+      <view class="card-desc">全部题目，可按题库筛选</view>
     </view>
 
     <view class="card" wx:if="{{me.role === 'admin'}}" bindtap="goSettings">
@@ -36,5 +36,5 @@
     </view>
   </view>
 
-  <view class="footer-tip">提示：题目管理需先进入对应题库，再点「查看题目」。</view>
+  <view class="footer-tip">提示：题目管理可查看全部题目，新建题目时需先选择题库。</view>
 </view>

@@ -3,9 +3,25 @@
     <view class="title-wrap">
       <view class="title">题目管理</view>
       <view class="sub" wx:if="{{subjectName}}">{{subjectName}} · #{{examid}}</view>
+      <view class="sub" wx:elif="{{!examid}}">全部题库</view>
       <view class="sub" wx:else>#{{examid}}</view>
     </view>
     <button class="add-btn" size="mini" type="primary" bindtap="onCreate">+ 新建</button>
+  </view>
+
+  <!-- 全局模式：题库筛选 picker -->
+  <view class="filter-bar" wx:if="{{!examid || subjectIndex >= 0}}">
+    <picker
+      class="filter-picker"
+      range="{{subjects}}"
+      range-key="name"
+      value="{{subjectIndex >= 0 ? subjectIndex : 0}}"
+      bindchange="onSubjectChange">
+      <view class="picker-text">
+        {{subjectIndex >= 0 ? subjects[subjectIndex].name : '按题库筛选'}}
+      </view>
+    </picker>
+    <view class="filter-clear" wx:if="{{subjectIndex >= 0}}" bindtap="onClearSubject">清除</view>
   </view>
 
   <view class="tabs">
@@ -30,6 +46,7 @@
       <view class="row1">
         <view class="type-tag {{q.typeClass}}">{{q.typeName}}</view>
         <view class="opt-count">{{q.optionCount}} 选项</view>
+        <view class="subj-tag" wx:if="{{!examid && q.subjectName}}">{{q.subjectName}}</view>
       </view>
       <view class="q-title">{{q.title}}</view>
       <view class="correct">
