@@ -1,4 +1,4 @@
-姓名,部门,role,active,备注
+﻿姓名,部门,role,active,备注
 张三,项目部,employee,true,普通员工示例
 李四,运行检修部,employee,true,普通员工示例
 王五,综合管理部,hr,true,HR 示例（可管理后台）
