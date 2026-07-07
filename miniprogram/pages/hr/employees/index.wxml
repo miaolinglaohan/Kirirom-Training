@@ -24,20 +24,19 @@
         <button
           size="mini"
           class="btn"
-          loading="{{busyId === item._id}}"
-          disabled="{{busyId === item._id || (me && item.openid === me.openid) || item.role === 'admin'}}"
           data-id="{{item._id}}"
-          bindtap="onToggleRole">
-          {{item.role === 'admin' ? '超管(锁定)' : (item.role === 'hr' ? '降为员工' : '升为 HR')}}
+          bindtap="onEdit">
+          编辑
         </button>
         <button
           size="mini"
-          class="btn {{item.active === false ? 'primary' : 'warn'}}"
+          class="btn warn"
           loading="{{busyId === item._id}}"
           disabled="{{busyId === item._id || (me && item.openid === me.openid) || item.role === 'admin'}}"
           data-id="{{item._id}}"
-          bindtap="onToggleActive">
-          {{item.active === false ? '启用' : '停用'}}
+          data-name="{{item.name}}"
+          bindtap="onDelete">
+          {{item.role === 'admin' ? '超管(锁定)' : '删除'}}
         </button>
       </view>
     </view>

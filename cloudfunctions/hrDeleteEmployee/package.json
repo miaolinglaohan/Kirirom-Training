@@ -1,0 +1,9 @@
+{
+  "name": "hrDeleteEmployee",
+  "version": "1.0.0",
+  "description": "HR 删除员工白名单记录（仅删 employees，历史数据保留）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

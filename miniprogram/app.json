@@ -25,6 +25,7 @@
     "pages/mistakes/index",
     "pages/hr/home/index",
     "pages/hr/employees/index",
+    "pages/hr/employeeEdit/index",
     "pages/hr/assessments/index",
     "pages/hr/assessmentEdit/index",
     "pages/hr/placeholder/index",

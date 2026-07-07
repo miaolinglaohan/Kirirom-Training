@@ -1,0 +1,130 @@
+/* pages/hr/employeeEdit/index.wxss */
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 48rpx;
+  background: #f5f6fa;
+  box-sizing: border-box;
+}
+
+.loading {
+  text-align: center;
+  padding: 80rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 8rpx 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+
+/* 只读信息行 */
+.info-row {
+  display: flex;
+  align-items: center;
+  min-height: 80rpx;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #eef0f4;
+  font-size: 28rpx;
+}
+.info-row:last-child { border-bottom: none; }
+.info-row .label {
+  width: 160rpx;
+  color: #888;
+  flex-shrink: 0;
+}
+.info-row .value {
+  flex: 1;
+  color: #333;
+  word-break: break-all;
+}
+.info-row .openid {
+  font-size: 22rpx;
+  color: #999;
+  font-family: monospace;
+}
+
+/* 可编辑行 */
+.row {
+  display: flex;
+  align-items: center;
+  min-height: 88rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #eef0f4;
+}
+.row:last-child { border-bottom: none; }
+.row .label {
+  width: 160rpx;
+  font-size: 28rpx;
+  color: #333;
+  flex-shrink: 0;
+}
+.picker { flex: 1; }
+.picker-text {
+  font-size: 28rpx;
+  color: #1a1a1a;
+  padding: 4rpx 0;
+}
+.picker-text.placeholder { color: #b0b0b0; }
+
+/* 角色选择 */
+.role-group {
+  flex: 1;
+  display: flex;
+  gap: 32rpx;
+}
+.role-item {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #333;
+}
+.role-item.disabled {
+  color: #999;
+}
+
+/* 状态开关 */
+.status-text {
+  font-size: 26rpx;
+  margin-left: 16rpx;
+}
+.status-on { color: #07c160; }
+.status-off { color: #e64340; }
+
+/* admin 只读提示 */
+.admin-tip {
+  background: #fffbe6;
+  border: 1rpx solid #fff4c6;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 20rpx;
+  font-size: 26rpx;
+  color: #8a6d3b;
+  line-height: 1.6;
+}
+
+/* 自锁提示 */
+.self-tip {
+  background: #fff0ed;
+  border: 1rpx solid #f5c6c0;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 20rpx;
+  font-size: 26rpx;
+  color: #c0392b;
+  line-height: 1.6;
+}
+
+/* 底部按钮 */
+.footer {
+  margin-top: 40rpx;
+  padding: 0 24rpx;
+}
+.submit {
+  width: 100%;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+}

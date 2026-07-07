@@ -46,77 +46,62 @@ Page({
       })
   },
 
-  onToggleRole(e) {
+  // 编辑员工：跳编辑页
+  onEdit(e) {
     const id = e.currentTarget.dataset.id
+    wx.navigateTo({ url: '/pages/hr/employeeEdit/index?id=' + id })
+  },
+
+  // 删除员工：二次确认 + 调云函数
+  onDelete(e) {
+    const id = e.currentTarget.dataset.id
+    const name = e.currentTarget.dataset.name || ''
     const item = this.data.list.find(x => x._id === id)
     if (!item) return
     if (item.role === 'admin') {
-      wx.showToast({ icon: 'none', title: '超管账号请在控制台调整' })
+      wx.showToast({ icon: 'none', title: '超管账号请在控制台删除' })
       return
     }
     if (this.data.me && item.openid === this.data.me.openid) {
-      wx.showToast({ icon: 'none', title: '不能修改自己的角色' })
+      wx.showToast({ icon: 'none', title: '不能删除自己' })
       return
     }
-    const nextRole = item.role === 'hr' ? 'employee' : 'hr'
     wx.showModal({
-      title: '切换角色',
-      content: `将「${item.name}」设为 ${nextRole === 'hr' ? 'HR 管理员' : '普通员工'}？`,
+      title: '删除员工',
+      content: `确定删除「${name}」吗？\n\n删除后该账号将无法登录小程序，但历史成绩和答卷记录会保留。如需恢复，需重新录入白名单。`,
+      confirmText: '删除',
+      confirmColor: '#c0392b',
       success: r => {
-        if (r.confirm) this.patch(id, { role: nextRole })
+        if (!r.confirm) return
+        this.doDelete(id, name)
       }
     })
   },
 
-  onToggleActive(e) {
-    const id = e.currentTarget.dataset.id
-    const item = this.data.list.find(x => x._id === id)
-    if (!item) return
-    if (item.role === 'admin') {
-      wx.showToast({ icon: 'none', title: '超管账号请在控制台调整' })
-      return
-    }
-    if (this.data.me && item.openid === this.data.me.openid) {
-      wx.showToast({ icon: 'none', title: '不能停用自己' })
-      return
-    }
-    const nextActive = !(item.active !== false)
-    wx.showModal({
-      title: nextActive ? '启用员工' : '停用员工',
-      content: `确定${nextActive ? '启用' : '停用'}「${item.name}」？`,
-      success: r => {
-        if (r.confirm) this.patch(id, { active: nextActive })
-      }
-    })
-  },
-
-  patch(id, patch) {
+  doDelete(id, name) {
     this.setData({ busyId: id })
-    wx.cloud.callFunction({
-      name: 'hrSetEmployee',
-      data: { id, patch }
-    }).then(res => {
-      const r = res.result || {}
-      this.setData({ busyId: '' })
-      if (!r.ok) {
-        const msgMap = {
-          FORBIDDEN: '无权操作',
-          SELF_LOCK: '不能修改自己',
-          NOT_FOUND: '员工不存在',
-          INVALID_PATCH: '参数错误',
-          PROTECTED: '超管账号请在控制台调整'
+    wx.cloud.callFunction({ name: 'hrDeleteEmployee', data: { _id: id } })
+      .then(res => {
+        this.setData({ busyId: '' })
+        const r = res.result || {}
+        if (r.ok) {
+          wx.showToast({ icon: 'success', title: '已删除' })
+          this.loadList()
+        } else {
+          const msgMap = {
+            FORBIDDEN: '无 HR 权限',
+            SELF_LOCK: '不能删除自己',
+            NOT_FOUND: '员工不存在',
+            PROTECTED: '超管账号请在控制台删除'
+          }
+          wx.showToast({ icon: 'none', title: msgMap[r.code] || r.message || '删除失败' })
         }
-        wx.showToast({ icon: 'none', title: msgMap[r.code] || r.msg || '操作失败' })
-        return
-      }
-      const list = this.data.list.map(x => x._id === id ? Object.assign({}, x, r.updated) : x)
-      this.setData({ list })
-      wx.showToast({ icon: 'success', title: '已更新' })
-    }).catch(err => {
-      console.error(err)
-      this.setData({ busyId: '' })
-      wx.showToast({ icon: 'none', title: '网络异常' })
-    })
+      })
+      .catch(err => {
+        console.error('[delete]', err)
+        this.setData({ busyId: '' })
+        wx.showToast({ icon: 'none', title: '网络异常' })
+      })
   },
 
   // 批量导入员工白名单
@@ -129,7 +114,6 @@ Page({
       success: res => {
         const file = res.tempFiles[0]
         if (!file) return
-        // 限制文件大小（10MB）
         if (file.size > 10 * 1024 * 1024) {
           wx.showToast({ icon: 'none', title: '文件过大（>10MB）' })
           return
@@ -162,7 +146,6 @@ Page({
         wx.showModal({ title: '导入失败', content: r.message || '未知错误', showCancel: false })
         return
       }
-      // 结果统计
       let content = `成功：${r.inserted} 条\n跳过：${r.skipped} 条（已存在）`
       if (r.errors && r.errors.length > 0) {
         const errLines = r.errors.slice(0, 10).map(e => `第 ${e.row} 行：${e.msg}`).join('\n')
