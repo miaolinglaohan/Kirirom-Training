@@ -1,17 +1,33 @@
 <wxs src="./../tools.wxs" module="JSON" />
 <view class="page-simple">
-    <view class="sortnumber"> 
-    <text class="current">{{idx+1}}</text>/<text class="total">{{total}}</text>
+    <!-- 题型筛选 tab -->
+    <view class="type-tabs" wx:if="{{total > 0 || allQuestions.length > 0}}">
+      <view
+        class="tab {{activeTab === item.key ? 'active' : ''}}"
+        wx:for="{{tabs}}" wx:key="key"
+        data-key="{{item.key}}" bindtap="onTabChange">
+        {{item.label}}
+      </view>
+    </view>
+
+    <!-- 空题库提示 -->
+    <view class="empty" wx:if="{{total === 0 && allQuestions.length === 0}}">
+      <text>该题库下暂无题目</text>
+    </view>
+
+    <block wx:if="{{total > 0}}">
+    <view class="sortnumber">
+    <text class="current">{{idx + 1 > total ? total : idx + 1}}</text>/<text class="total">{{total}}</text>
     </view>
     <view class="question">
-        <view class="title"><text>{{idx+1}}、{{question.title}}</text></view>
+        <view class="title"><text>{{idx + 1 > total ? total : idx + 1}}、{{question.title}}</text></view>
         <view class="type">{{question.typename}}</view>
         <view class="options">
             <!-- 单选 / 判断 -->
             <radio-group wx:if="{{question.typecode !== '02'}}" class="radio-group" bindchange="radioChange">
             <label class="radio" wx:for="{{options}}" wx:key="code">
                 <view class="option-content">
-                    <radio value="{{item.code}}" checked="{{item.checked}}"></radio>
+                    <radio value="{{item.code}}" checked="{{item.checked}}" disabled="{{finished}}"></radio>
                     <text class="content">{{item.code}}，{{item.content}}</text>
                 </view>
             </label>
@@ -20,7 +36,7 @@
             <checkbox-group wx:if="{{question.typecode === '02'}}" class="radio-group" bindchange="checkboxChange">
             <label class="radio" wx:for="{{options}}" wx:key="code">
                 <view class="option-content">
-                    <checkbox value="{{item.code}}" checked="{{item.checked}}"></checkbox>
+                    <checkbox value="{{item.code}}" checked="{{item.checked}}" disabled="{{finished}}"></checkbox>
                     <text class="content">{{item.code}}，{{item.content}}</text>
             </view>
             </label>
@@ -28,9 +44,34 @@
         </view>
     </view>
     <view class="btn-area">
-        <view class="btn" bindtap="onNextTap">
+        <view class="btn {{finished ? 'btn-finished' : ''}}" bindtap="onNextTap">
             {{buttontext}}
         </view>
+    </view>
+    </block>
 
+    <!-- 回顾栏（刷题结束后显示） -->
+    <view class="review-bar" wx:if="{{finished}}">
+      <view class="review-stats">
+        <text class="stat-right">✔ {{rightNum}}</text>
+        <text class="stat-wrong">❌ {{errNum}}</text>
+        <text class="stat-total">/ {{total}}</text>
+      </view>
+      <view class="review-btn" bindtap="onToggleReview">
+        {{showReview ? '收起' : '回顾'}}
+      </view>
+    </view>
+
+    <!-- 题号网格（点"回顾"展开） -->
+    <view class="review-grid" wx:if="{{finished && showReview}}">
+      <view class="grid-title">点击题号回顾</view>
+      <view class="grid-cells">
+        <view
+          class="cell {{score_arr[index] === 1 ? 'cell-right' : 'cell-wrong'}}"
+          wx:for="{{arr}}" wx:key="*this" wx:for-index="index"
+          data-idx="{{index}}" bindtap="onReviewJump">
+          {{index + 1}}
+        </view>
+      </view>
     </view>
 </view>

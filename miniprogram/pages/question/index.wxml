@@ -1,8 +1,22 @@
 <wxs src="./../tools.wxs" module="JSON" />
 <view class="page-question">
-    <view class="questions">
+    <!-- 题型筛选 tab -->
+    <view class="type-tabs">
+      <view
+        class="tab {{activeTab === item.key ? 'active' : ''}}"
+        wx:for="{{tabs}}" wx:key="key"
+        data-key="{{item.key}}" bindtap="onTabChange">
+        {{item.label}}
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{total === 0}}">
+      <text>该题型暂无题目</text>
+    </view>
+
+    <view class="questions" wx:if="{{total > 0}}">
     <block wx:for="{{questions}}" wx:key="_id" wx:for-index="idx" wx:for-item="question">
-    <view class="question-container">
+    <view class="question-container q-item-{{idx}}">
         <view class="question">
             <view class="title">{{idx+1}}，{{question.title}}</view>
         </view>
@@ -10,13 +24,13 @@
             <!-- 单选 / 判断 -->
             <radio-group wx:if="{{question.typecode !== '02'}}" class="radio-group" bindchange="radioChange" data-idx="{{idx}}" data-question="{{question}}">
             <label class="radio" wx:for="{{question.options}}" wx:key="code" wx:for-item="opt">
-                <radio value="{{opt.code}}"/>{{opt.code}}，{{opt.content}}
+                <radio value="{{opt.code}}" disabled="{{finished}}"/>{{opt.code}}，{{opt.content}}
             </label>
             </radio-group>
             <!-- 多选 -->
             <checkbox-group wx:if="{{question.typecode === '02'}}" class="radio-group" bindchange="checkboxChange" data-idx="{{idx}}" data-question="{{question}}">
             <label class="radio" wx:for="{{question.options}}" wx:key="code" wx:for-item="opt">
-                <checkbox value="{{opt.code}}"/>{{opt.code}}，{{opt.content}}
+                <checkbox value="{{opt.code}}" disabled="{{finished}}"/>{{opt.code}}，{{opt.content}}
             </label>
             </checkbox-group>
         </view>
@@ -24,7 +38,32 @@
     </block>
     </view>
 
-    <view class="btn-area">
+    <view class="btn-area" wx:if="{{total > 0 && !finished}}">
         <button type="primary" bindtap="bindSubmitTap">确认提交</button>
-    </view>                                  
+    </view>
+
+    <!-- 回顾栏（提交后显示） -->
+    <view class="review-bar" wx:if="{{finished}}">
+      <view class="review-stats">
+        <text class="stat-right">✔ {{rightNum}}</text>
+        <text class="stat-wrong">❌ {{errNum}}</text>
+        <text class="stat-total">/ {{total}}</text>
+      </view>
+      <view class="review-btn" bindtap="onToggleReview">
+        {{showReview ? '收起' : '回顾'}}
+      </view>
+    </view>
+
+    <!-- 题号网格（点"回顾"展开） -->
+    <view class="review-grid" wx:if="{{finished && showReview}}">
+      <view class="grid-title">点击题号回顾</view>
+      <view class="grid-cells">
+        <view
+          class="cell {{score_arr[index] === 1 ? 'cell-right' : (code_arr[index] === 'M' ? 'cell-skip' : 'cell-wrong')}}"
+          wx:for="{{questions}}" wx:key="_id" wx:for-index="index"
+          data-idx="{{index}}" bindtap="onReviewJump">
+          {{index + 1}}
+        </view>
+      </view>
+    </view>
 </view>

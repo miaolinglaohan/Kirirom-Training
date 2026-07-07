@@ -1,182 +1,196 @@
 // pages/question/index.js
+const util = require('../../utils/util.js')
 const app = getApp()
-Page({
 
-  /**
-   * 页面的初始数据
-   */
+const TYPE_TABS = [
+  { key: '',   label: '全部' },
+  { key: '01', label: '单选' },
+  { key: '02', label: '多选' },
+  { key: '03', label: '判断' }
+]
+
+Page({
   data: {
     idx: 0,
     score: 0,
     score_arr: [],
     code_arr: [],
     total: 0,
-    sortcode: '01'
+    // 题型筛选
+    tabs: TYPE_TABS,
+    activeTab: '',
+    allQuestions: [],
+    // 回顾栏
+    finished: false,
+    showReview: false,
+    rightNum: 0,
+    errNum: 0
   },
+
+  onLoad: function (options) {
+    let id = options.id
+    if (!id) {
+      wx.showToast({ icon: 'none', title: '缺少参数' })
+      return
+    }
+    this.setData({ id })
+    this.getQuestions(id)
+  },
+
+  getQuestions: function(id) {
+    const db = wx.cloud.database()
+    db.collection('questions').where({ examid: id }).get({
+      success: res => {
+        let questions = res.data
+        this.setData({ allQuestions: questions })
+        this.applyFilter()
+      },
+      fail: err => {
+        wx.showToast({ icon: 'none', title: '查询记录失败' })
+        console.error('[question] 查询失败: ', err)
+      }
+    })
+  },
+
+  // 题型筛选
+  onTabChange(e) {
+    const key = e.currentTarget.dataset.key || ''
+    if (key === this.data.activeTab) return
+    this.setData({ activeTab: key, finished: false, showReview: false })
+    this.applyFilter()
+  },
+
+  applyFilter() {
+    const tab = this.data.activeTab
+    let questions = this.data.allQuestions
+    if (tab) {
+      questions = questions.filter(q => q.typecode === tab)
+    }
+    let total = questions.length
+    let arr = questions.map(q => q._id)
+    let score_arr = new Array(total).fill(0)
+    let code_arr = new Array(total).fill('M')
+    this.setData({
+      questions, total, arr, score_arr, code_arr,
+      idx: 0, score: 0, finished: false, showReview: false
+    })
+  },
+
   radioChange: function(e) {
-    let idx = e.currentTarget.dataset.idx;
-    let code = e.detail.value;
-    let score_arr = this.data.score_arr;
-    let code_arr = this.data.code_arr;
-    // 单选题：选对得 1 分
-    let question = e.currentTarget.dataset.question;
-    let opt = (question.options || []).find(o => o.code === code);
-    let point = (opt && parseInt(opt.value) === 1) ? 1 : 0;
-    score_arr[idx] = point;
-    code_arr[idx] = code;
-    let sum = score_arr.reduce((x,y) => x + y, 0);
-    wx.setStorageSync('score_arr', score_arr);
-    wx.setStorageSync('code_arr', code_arr);
-    this.setData({ score_arr, code_arr, score: sum });
+    if (this.data.finished) return
+    let idx = e.currentTarget.dataset.idx
+    let code = e.detail.value
+    let score_arr = this.data.score_arr
+    let code_arr = this.data.code_arr
+    let question = e.currentTarget.dataset.question
+    let opt = (question.options || []).find(o => o.code === code)
+    let point = (opt && parseInt(opt.value) === 1) ? 1 : 0
+    score_arr[idx] = point
+    code_arr[idx] = code
+    let sum = score_arr.reduce((x,y) => x + y, 0)
+    this.setData({ score_arr, code_arr, score: sum })
   },
 
   checkboxChange: function(e) {
-    let idx = e.currentTarget.dataset.idx;
-    let codes = e.detail.value || [];
-    let question = e.currentTarget.dataset.question;
-    // 多选：完全选对才得 1 分
+    if (this.data.finished) return
+    let idx = e.currentTarget.dataset.idx
+    let codes = e.detail.value || []
+    let question = e.currentTarget.dataset.question
     let correctCodes = (question.options || [])
       .filter(o => parseInt(o.value) === 1)
-      .map(o => o.code)
-      .sort();
-    let userSorted = codes.slice().sort();
+      .map(o => o.code).sort()
+    let userSorted = codes.slice().sort()
     let right = correctCodes.length === userSorted.length
-      && correctCodes.every((c, i) => c === userSorted[i]);
-    let score_arr = this.data.score_arr;
-    let code_arr = this.data.code_arr;
-    score_arr[idx] = right ? 1 : 0;
-    code_arr[idx] = codes.join('');
-    let sum = score_arr.reduce((x,y) => x + y, 0);
-    wx.setStorageSync('score_arr', score_arr);
-    wx.setStorageSync('code_arr', code_arr);
-    this.setData({ score_arr, code_arr, score: sum });
+      && correctCodes.every((c, i) => c === userSorted[i])
+    let score_arr = this.data.score_arr
+    let code_arr = this.data.code_arr
+    score_arr[idx] = right ? 1 : 0
+    code_arr[idx] = codes.join('')
+    let sum = score_arr.reduce((x,y) => x + y, 0)
+    this.setData({ score_arr, code_arr, score: sum })
   },
-  bindSubmitTap: function(){
-    let { total, score_arr } = this.data;
-    let rightNum = score_arr.filter(v => v === 1).length;
-    let errNum = total - rightNum;
-    let _this = this;
-    wx.showModal({
-      showCancel: false,
-      title: '温馨提醒',
-      content: '您当前得分为：'+ rightNum + ' / ' + total,
-      success (res) {
-        if (res.confirm) {
-          _this.bindgoscore(rightNum, total, errNum);
-        }
-      }
-    })
-  },
-  bindgoscore: function(rightNum, total, errNum){
-    app.globalData.lastExamResult = {
-      isMock: true,
-      total, rightNum, errNum,
-      score: rightNum, fullScore: total,
-      reviewList: []
-    };
-    let url = '/pages/examresult/examresult?length=' + total
-      + '&rightNum=' + rightNum + '&errNum=' + errNum
-      + '&ordernum=list&isMock=1';
-    wx.redirectTo({ url: url })
-  },
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-    console.log(options);
-    let id = options.id;
-    this.setData({
-      id
-    });
-    this.getQuestions(id);
-  },
-  getQuestions: function(id){
 
-    
+  // 提交：不跳成绩页，显示回顾栏
+  bindSubmitTap: function() {
+    let { total, score_arr } = this.data
+    let rightNum = score_arr.filter(v => v === 1).length
+    let errNum = total - rightNum
+    // 检查是否有未答的题
+    let unanswered = score_arr.filter((v, i) => this.data.code_arr[i] === 'M').length
+    let content = `✔ ${rightNum}  ❌ ${errNum}  /  共 ${total} 题`
+    if (unanswered > 0) {
+      content += `\n（其中 ${unanswered} 题未作答）`
+    }
+    this.setData({ finished: true, showReview: false, rightNum, errNum })
+    // 错题写入 historys
+    this._saveErrorsToHistory()
+    wx.showToast({ icon: 'success', title: '已完成' })
+  },
+
+  // 错题批量写入 historys
+  _saveErrorsToHistory: function() {
+    const { questions, score_arr, code_arr, id, total, rightNum } = this.data
+    const openid = app.globalData.openid || ''
+    if (!openid) return
+
+    const errors = []
+    for (let i = 0; i < questions.length; i++) {
+      if (score_arr[i] === 0 && code_arr[i] !== 'M') {
+        const q = questions[i]
+        let userAnswers = {}
+        String(code_arr[i]).split('').forEach(c => { userAnswers[c] = true })
+        let answersOfficial = {}
+        ;(q.options || []).forEach(o => {
+          if (parseInt(o.value) === 1) answersOfficial[o.code] = true
+        })
+        errors.push({
+          qid: q._id,
+          title: q.title,
+          typecode: q.typecode,
+          options: q.options,
+          userAnswers,
+          answersOfficial,
+          comments: q.comments
+        })
+      }
+    }
+
+    if (errors.length === 0) return
+
     const db = wx.cloud.database()
-    db.collection('questions').where({
-      examid: id
-    }).get({
-      success: res => {
-        console.log('[数据库] [查询记录] 成功: ', res)
-        let arrayObject = res.data;
-        let total = arrayObject.length;
-        let arr = [];
-        arrayObject.forEach(element => {
-          arr.push(element._id);
-        });
-        let score_arr = new Array(total).fill(0);
-        let code_arr = new Array(total).fill('M');
-        this.setData({
-          questions: arrayObject,
-          total,
-          score_arr,
-          code_arr
-        },function(){
-          wx.setStorageSync('questions', arrayObject);
-          wx.setStorageSync('arr', arr);
-        })
-      },
-      fail: err => {
-        wx.showToast({
-          icon: 'none',
-          title: '查询记录失败'
-        })
-        console.error('[数据库] [查询记录] 失败：', err)
+    const time = util.formatTime(new Date(Date.now()))
+    db.collection('historys').add({
+      data: {
+        _openid: openid,
+        exam: '练习刷题',
+        subject: '顺序练习',
+        question: JSON.stringify({ id: id, type: 'question' }),
+        createTime: time,
+        isMock: true,
+        isPractice: true,
+        total: total,
+        rightNum: rightNum,
+        score: rightNum,
+        fullScore: total,
+        errors
       }
+    }).then(() => {
+      console.log('[question] 错题已写入 historys')
+    }).catch(err => {
+      console.error('[question] 写入错题失败', err)
     })
   },
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-    const pages = getCurrentPages();
-    const prevPage = pages[pages.length - 1];
-    console.log('开始输出');
-    console.log(pages);
-    console.log(prevPage);
+
+  // 回顾栏
+  onToggleReview: function() {
+    this.setData({ showReview: !this.data.showReview })
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
+  // 回顾：滚动到指定题
+  onReviewJump: function(e) {
+    const idx = Number(e.currentTarget.dataset.idx)
+    this.setData({ showReview: false })
+    // 滚动到对应题目（用 id 定位）
+    wx.pageScrollTo({ selector: `.q-item-${idx}`, duration: 300 })
   }
-
 })
