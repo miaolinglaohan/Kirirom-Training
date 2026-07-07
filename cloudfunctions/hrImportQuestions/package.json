@@ -1,0 +1,9 @@
+{
+  "name": "hrImportQuestions",
+  "version": "1.0.0",
+  "description": "HR 批量导入题目（CSV 文本），导入到指定题库",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

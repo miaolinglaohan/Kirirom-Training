@@ -6,7 +6,10 @@
       <view class="sub" wx:elif="{{!examid}}">全部题库</view>
       <view class="sub" wx:else>#{{examid}}</view>
     </view>
-    <button class="add-btn" size="mini" type="primary" bindtap="onCreate">+ 新建</button>
+    <view class="header-btns">
+      <button class="import-btn" size="mini" bindtap="onImport" loading="{{importing}}">📥 导入</button>
+      <button class="add-btn" size="mini" type="primary" bindtap="onCreate">+ 新建</button>
+    </view>
   </view>
 
   <!-- 全局模式：题库筛选 picker -->

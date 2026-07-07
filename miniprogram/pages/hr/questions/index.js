@@ -23,7 +23,8 @@ Page({
     total: 0,
     loading: true,
     loadingMore: false,
-    hasMore: false
+    hasMore: false,
+    importing: false
   },
 
   onLoad(opts) {
@@ -158,6 +159,84 @@ Page({
     }
     wx.navigateTo({
       url: '/pages/hr/questionEdit/index?examid=' + encodeURIComponent(this.data.examid)
+    })
+  },
+
+  // 批量导入题目到当前筛选的题库
+  onImport() {
+    if (this.data.importing) return
+    if (!this.data.examid) {
+      wx.showToast({ icon: 'none', title: '请先选择题库再导入' })
+      return
+    }
+    const subjectName = this.data.subjectName || this.data.examid
+    wx.showModal({
+      title: '导入题目',
+      content: `将导入到题库「${subjectName}」\nCSV 中的题库ID 列会被忽略\n确定继续？`,
+      success: r => {
+        if (!r.confirm) return
+        this.chooseAndImport()
+      }
+    })
+  },
+
+  chooseAndImport() {
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      extension: ['csv'],
+      success: res => {
+        const file = res.tempFiles[0]
+        if (!file) return
+        if (file.size > 10 * 1024 * 1024) {
+          wx.showToast({ icon: 'none', title: '文件过大（>10MB）' })
+          return
+        }
+        wx.getFileSystemManager().readFile({
+          filePath: file.path,
+          encoding: 'utf8',
+          success: r => {
+            this.doImport(r.data)
+          },
+          fail: () => {
+            wx.showToast({ icon: 'none', title: '文件读取失败' })
+          }
+        })
+      }
+    })
+  },
+
+  doImport(csv) {
+    this.setData({ importing: true })
+    wx.showLoading({ title: '导入中…', mask: true })
+    wx.cloud.callFunction({
+      name: 'hrImportQuestions',
+      data: { csv, subjectId: this.data.examid }
+    }).then(res => {
+      wx.hideLoading()
+      this.setData({ importing: false })
+      const r = res.result || {}
+      if (!r.ok) {
+        wx.showModal({ title: '导入失败', content: r.message || '未知错误', showCancel: false })
+        return
+      }
+      let content = `成功：${r.inserted} 条`
+      if (r.errors && r.errors.length > 0) {
+        const errLines = r.errors.slice(0, 10).map(e => `第 ${e.row} 行：${e.msg}`).join('\n')
+        content += `\n失败：${r.errors.length} 条\n${errLines}`
+        if (r.errors.length > 10) content += `\n... 等 ${r.errors.length - 10} 条`
+      }
+      wx.showModal({
+        title: '导入完成',
+        content,
+        showCancel: false,
+        success: () => this.loadList(true)
+      })
+    }).catch(err => {
+      console.error('[import]', err)
+      wx.hideLoading()
+      this.setData({ importing: false })
+      wx.showToast({ icon: 'none', title: '网络异常' })
     })
   },
 

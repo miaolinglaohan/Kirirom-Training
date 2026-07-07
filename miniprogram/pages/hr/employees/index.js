@@ -6,7 +6,8 @@ Page({
     list: [],
     total: 0,
     me: null,
-    busyId: ''
+    busyId: '',
+    importing: false
   },
 
   onShow() {
@@ -114,6 +115,70 @@ Page({
     }).catch(err => {
       console.error(err)
       this.setData({ busyId: '' })
+      wx.showToast({ icon: 'none', title: '网络异常' })
+    })
+  },
+
+  // 批量导入员工白名单
+  onImport() {
+    if (this.data.importing) return
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      extension: ['csv'],
+      success: res => {
+        const file = res.tempFiles[0]
+        if (!file) return
+        // 限制文件大小（10MB）
+        if (file.size > 10 * 1024 * 1024) {
+          wx.showToast({ icon: 'none', title: '文件过大（>10MB）' })
+          return
+        }
+        wx.getFileSystemManager().readFile({
+          filePath: file.path,
+          encoding: 'utf8',
+          success: r => {
+            this.doImport(r.data)
+          },
+          fail: () => {
+            wx.showToast({ icon: 'none', title: '文件读取失败' })
+          }
+        })
+      }
+    })
+  },
+
+  doImport(csv) {
+    this.setData({ importing: true })
+    wx.showLoading({ title: '导入中…', mask: true })
+    wx.cloud.callFunction({
+      name: 'hrImportEmployees',
+      data: { csv }
+    }).then(res => {
+      wx.hideLoading()
+      this.setData({ importing: false })
+      const r = res.result || {}
+      if (!r.ok) {
+        wx.showModal({ title: '导入失败', content: r.message || '未知错误', showCancel: false })
+        return
+      }
+      // 结果统计
+      let content = `成功：${r.inserted} 条\n跳过：${r.skipped} 条（已存在）`
+      if (r.errors && r.errors.length > 0) {
+        const errLines = r.errors.slice(0, 10).map(e => `第 ${e.row} 行：${e.msg}`).join('\n')
+        content += `\n失败：${r.errors.length} 条\n${errLines}`
+        if (r.errors.length > 10) content += `\n... 等 ${r.errors.length - 10} 条`
+      }
+      wx.showModal({
+        title: '导入完成',
+        content,
+        showCancel: false,
+        success: () => this.loadList()
+      })
+    }).catch(err => {
+      console.error('[import]', err)
+      wx.hideLoading()
+      this.setData({ importing: false })
       wx.showToast({ icon: 'none', title: '网络异常' })
     })
   },

@@ -1,0 +1,9 @@
+{
+  "name": "hrImportEmployees",
+  "version": "1.0.0",
+  "description": "HR 批量导入员工白名单（CSV 文本）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

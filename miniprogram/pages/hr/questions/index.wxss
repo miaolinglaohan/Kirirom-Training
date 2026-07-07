@@ -21,6 +21,8 @@
   text-overflow: ellipsis;
 }
 .add-btn { margin: 0; font-size: 24rpx; flex-shrink: 0; }
+.header-btns { display: flex; gap: 12rpx; flex-shrink: 0; }
+.import-btn { margin: 0; font-size: 24rpx; }
 
 /* 题库筛选栏（全局模式） */
 .filter-bar {

@@ -4,9 +4,10 @@
   background: #f5f6fa;
   box-sizing: border-box;
 }
-.header { padding: 12rpx 12rpx 20rpx; }
+.header { padding: 12rpx 12rpx 20rpx; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
 .title { font-size: 40rpx; font-weight: 600; color: #1a1a1a; }
 .subtitle { margin-top: 6rpx; font-size: 24rpx; color: #888; }
+.import-btn { margin: 0; font-size: 24rpx; flex-shrink: 0; }
 
 .loading, .empty { text-align: center; padding: 60rpx 0; color: #999; font-size: 28rpx; }
 
