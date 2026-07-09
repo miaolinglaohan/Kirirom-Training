@@ -1,14 +1,102 @@
-<view class="page-rule">
-    <view class="title">
-    <text>使用说明：</text>
-    </view>
-    <view class="content">
-        <view class="item">
-        <text>1、考试模式有两种：单题模式、列表模式</text>
-        </view>
-        <view class="item">
-        <text>2、每次考试总共有10个题目，每题1分，满分为10分</text>
-        </view>
-    </view>
-</view>
+<view class="page-guide">
+  <view class="header">
+    <view class="title">使用说明</view>
+    <view class="subtitle">基里隆项目部培训考试系统</view>
+  </view>
 
+  <view class="section">
+    <view class="sec-title">一、首次激活</view>
+    <view class="sec-body">
+      <text>1. 打开小程序，在激活页输入您的真实姓名并选择部门</text>
+      <text>2. 点击「提交」完成激活，之后打开小程序自动登录</text>
+      <text>3. 如提示"未找到匹配的员工"，请联系 HR 确认您的姓名和部门是否已录入白名单</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="sec-title">二、首页</view>
+    <view class="sec-body">
+      <text>• 考试通知卡片：显示当前最该关注的考试，点击可进入候考或考场</text>
+      <text>• 模拟考试：选择题库进行模拟考试，成绩不进入正式成绩单，错题会进入错题本</text>
+      <text>• 考试安排：查看全部 HR 发布的考试列表，含有效期和倒计时</text>
+      <text>• 入口网格：顺序练习、随机刷题、我的收藏、错题本、我的成绩、个人信息</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="sec-title">三、顺序练习与随机刷题</view>
+    <view class="sec-body">
+      <text>1. 选择题库进入刷题页面</text>
+      <text>2. 顶部可切换题型：全部 / 单选 / 多选 / 判断</text>
+      <text>3. 单题模式：逐题作答，点「下一个」继续，最后一题提交后显示回顾栏</text>
+      <text>4. 列表模式：全部题目一页展示，作答后点「确认提交」</text>
+      <text>5. 收藏功能：点击题目旁的 ☆ 收藏当前题（橙色 ★ 表示已收藏），可在「我的收藏」查看</text>
+      <text>6. 回顾栏：刷题完成后底部显示 ✔答对数 / ❌答错数 / 总题数，点「回顾」展开题号网格</text>
+      <text>7. 题号颜色：绿色=答对、红色=答错、灰色=未答，点击可跳转回顾，只读不可修改</text>
+      <text>8. 错题自动进入错题本，可在首页「错题本」入口查看</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="sec-title">四、正式考试</view>
+    <view class="sec-body">
+      <text>1. 首页考试卡片或考试安排页点击考试进入</text>
+      <text>2. 未开考时进入候考页，显示倒计时，归零后按钮变绿可进考场</text>
+      <text>3. 进入考场后开始个人计时（与有效期无关，进场后才倒计时）</text>
+      <text>4. 答题过程中切勿切出小程序（系统会记录切屏次数）</text>
+      <text>5. 30 秒自动暂存作答，意外退出可续考</text>
+      <text>6. 点击交卷或倒计时归零自动交卷，立即显示成绩</text>
+      <text>7. 考试结束后可在「我的成绩」查看历史记录和复盘</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="sec-title">五、我的成绩</view>
+    <view class="sec-body">
+      <text>点击底部「📊 成绩」Tab 查看历次考试记录</text>
+      <text>点击任意记录可进入复盘：逐题查看题干、你的答案、正确答案、解析</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="sec-title">六、错题本</view>
+    <view class="sec-body">
+      <text>聚合最近 20 次考试和刷题中的错题</text>
+      <text>每条显示来源、时间、你的答案、正确答案</text>
+      <text>点击可跳转到对应题目的复盘</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="sec-title">七、我的收藏</view>
+    <view class="sec-body">
+      <text>刷题过程中点击 ☆ 收藏的题目会出现在这里</text>
+      <text>可逐题浏览复习，点击「下一个」翻题</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="sec-title">八、个人信息</view>
+    <view class="sec-body">
+      <text>点击底部「👤 我的」Tab 查看个人信息</text>
+      <text>显示姓名、部门、角色、OpenID</text>
+      <text>HR / admin 可看到「管理后台」入口</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="sec-title">九、管理后台（HR / 管理员）</view>
+    <view class="sec-body">
+      <text>首页显示「🔑 管理后台」入口即可进入，包含以下功能：</text>
+      <text>• 员工管理：查看/编辑/删除员工，批量导入白名单</text>
+      <text>• 考试管理：新建/编辑/提前结束考试，查看成绩</text>
+      <text>• 题库管理：新建/编辑/删除题库</text>
+      <text>• 题目管理：按题库筛选查看全部题目，新建/编辑/删除，批量导入</text>
+      <text>• 系统设置：配置 PDF 水印文字和单位名称（仅 admin）</text>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text>by 柬埔寨基里隆Ⅰ&Ⅲ水电站运维项目部</text>
+  </view>
+</view>
