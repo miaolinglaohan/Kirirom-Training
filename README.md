@@ -112,7 +112,7 @@ exam-mini-master/
 
 4. **创建集合**：在云控制台手动新建以下集合（详细 schema 见 `docs/数据库设计.md`）：
 
-   `employees` / `subjects` / `questions` / `assessments` / `enrollments` / `historys` / `notes` / `profiles` / `sysConfig`
+   `employees` / `subjects` / `questions` / `assessments` / `examEnrollments` / `historys` / `notes` / `profiles` / `sysConfig`
 
 5. **导入种子数据**（可选）：`data/` 目录下提供了 `subjects.json`、`questions.json`、`assessments.sample.json` 等，云控制台 → 集合 → 「导入」即可。
 
