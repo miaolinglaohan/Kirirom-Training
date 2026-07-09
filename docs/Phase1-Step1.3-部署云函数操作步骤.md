@@ -13,12 +13,8 @@
 ```
 cloudfunctions/
 ├── activate    ← 新增（蓝色或灰色文件夹图标）
-├── callback
-├── echo
 ├── initDB
 ├── login
-├── openapi
-├── sum
 └── whoAmI      ← 新增
 ```
 

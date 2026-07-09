@@ -1,3 +1,39 @@
+### 20260709 · workspace-cleanup-history-display（残留清理 + 我的成绩显示修复）
+
+> 清理确认无业务引用的模板/开发期残留，并修复员工端「我的成绩」排序和记录名显示问题。
+
+**残留清理**
+
++ 删除云开发 demo 云函数：`echo` / `sum` / `callback` / `openapi`
++ 删除开发期造数云函数：`hrFakeScores`
++ 删除未使用组件：`miniprogram/components/chatroom`
++ 删除空壳页面：`pages/result/result`
++ 删除过期 HR 占位页：`pages/hr/placeholder`
++ 删除 0 字节残留：`pages/home/home.wxss`
++ 删除未引用的小程序示例图片，仅保留当前页面实际引用的 `radio.png` / `radio-selected.png`
++ 同步更新 README 和部署/阶段文档中的云函数清单
+
+**我的成绩页**
+
++ `history/index`：不再按 `createTime` 字符串排序，改为解析 `createTimeMs/submittedAt/createTime` 后按真实时间倒序展示最近 5 条
++ `submitExam`：正式考试写入 `historys` 时补 `createTimeMs`、`displayName`、`assessmentName`，记录名优先使用 HR 创建考试时设置的考试名
++ `history/index`：旧正式考试记录若有 `assessmentId`，会反查 `assessments` 兜底显示考试名
++ `question/index` / `simple/index`：刷题记录补 `practiceSubjectId`、`practiceSubjectName`、`displayName`，显示为「题库名刷题」
++ `review/review`：复盘标题优先显示 `displayName/assessmentName`
+
+**验证**
+
+- [x] `node --check` 全量 JS 通过（69 files）
+- [x] `app.json` 页面四件套检查通过（34 pages）
+- [x] 历史记录按真实时间倒序，正式考试显示考试名，刷题显示「题库名刷题」
+
+**部署提示**
+
++ 需重新上传云函数：`submitExam`
++ 若云端曾部署已删除的 demo/dev 云函数，可在云开发控制台手动删除对应远端函数
+
+---
+
 ### 20260706 · v1.0-release（Phase 5 · 文档交付 + 正式发布）
 
 > Phase 0~5 全部完成，项目从"开发态"推进到"可上线态"。本 tag 交付完整文档包 + Excel 模板 + 待确认事项归档，不涉及代码功能变更。

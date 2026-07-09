@@ -40,16 +40,12 @@ cloudfunctions/
 
 ```
 activate
-callback         （demo 原有）
-echo             （demo 原有）
 enterExam        ← 新
 getServerTime    ← 新
 initDB           （原有）
 login            （原有）
-openapi          （demo 原有）
 saveDraft        ← 新
 submitExam       ← 新
-sum              （demo 原有）
 whoAmI
 ```
 

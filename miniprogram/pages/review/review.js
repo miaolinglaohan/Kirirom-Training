@@ -60,7 +60,7 @@ Page({
         return
       }
       const total = items.length
-      const subjectName = (h.subject && h.subject.name) || '考试'
+      const subjectName = h.displayName || h.assessmentName || (h.subject && h.subject.name) || '考试'
       // 构造 qid → correctCodes 映射
       const officialMap = {}
       ;(h.answersOfficial || []).forEach(a => {

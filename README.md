@@ -51,13 +51,13 @@ exam-mini-master/
 │   ├── hrListEmployees / hrSetEmployee
 │   ├── hrListSubjects / hrSaveSubject / hrDeleteSubject
 │   ├── hrListQuestions / hrSaveQuestion / hrDeleteQuestion
-│   ├── hrListAssessments / hrSaveAssessment
+│   ├── hrImportEmployees / hrImportQuestions
+│   ├── hrListAssessments / hrSaveAssessment / hrEndAssessment
 │   ├── hrListAssessmentScores              # 成绩列表（HR）
+│   ├── hrDeleteEmployee                    # 员工删除
 │   ├── hrGetApplicantReview                # 单人批阅详情
-│   ├── hrFakeScores                        # 仅开发期：造测试分数
 │   ├── hrSysConfig                         # 系统设置 KV（admin 可写）
-│   ├── initDB / getServerTime / echo / sum # 工具
-│   └── callback / openapi
+│   └── initDB / getServerTime              # 工具
 │
 ├── data/                     # 初始种子数据 / 示例 JSON
 ├── docs/                     # 阶段性落地文档（Phase1 / Phase2 / Phase3）

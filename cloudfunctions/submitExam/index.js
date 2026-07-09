@@ -137,6 +137,7 @@ exports.main = async (event) => {
     {
       // 取关联科目名，便于历史页/错题本展示
       let subject = { _id: '', name: r.isMock ? '模拟考试' : '正式考试' }
+      let assessmentName = ''
       try {
         // 通过任一题目反查 subjectId
         const firstQ = (r.questions && r.questions[0]) || null
@@ -149,6 +150,16 @@ exports.main = async (event) => {
         }
       } catch (e) {
         console.warn('[submitExam] 取 subject 失败，使用默认', e)
+      }
+      if (r.assessmentId) {
+        try {
+          const aRes = await db.collection('assessments').doc(r.assessmentId).get().catch(() => null)
+          if (aRes && aRes.data) {
+            assessmentName = aRes.data.name || aRes.data.title || ''
+          }
+        } catch (e) {
+          console.warn('[submitExam] 取 assessment 失败，使用题库名兜底', e)
+        }
       }
 
       const histDoc = {
@@ -165,6 +176,9 @@ exports.main = async (event) => {
         score_arr: perQuestion.map(p => p.right ? 1 : 0),
         rightNum,
         createTime: formatTime(submittedAt),
+        createTimeMs: submittedAt.getTime(),
+        displayName: assessmentName || subject.name,
+        assessmentName,
         // 新增追加字段，标识来自考试系统
         enrollmentId,
         assessmentId: r.assessmentId,

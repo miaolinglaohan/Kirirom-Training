@@ -7,23 +7,6 @@ Page({
   data: {
 
   },
-  bindWeixin: function() {
-    wx.navigateTo({
-      url: '/pages/weixin/index',
-      success: function(res) {
-
-      }
-    })
-  },
-  bindPay: function() {
-    wx.navigateTo({
-      url: '/pages/pay/index',
-      success: function(res) {
-          // 打印返回日志
-          console.log(res)
-      }
-    })
-  },
   /**
    * 生命周期函数--监听页面加载
    */

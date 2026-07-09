@@ -1,9 +1,0 @@
-{
-  "name": "hrFakeScores",
-  "version": "1.0.0",
-  "description": "[dev only] 给某场考试 seed / clean 假成绩数据，便于测试成绩中心 UI",
-  "main": "index.js",
-  "dependencies": {
-    "wx-server-sdk": "~2.4.0"
-  }
-}

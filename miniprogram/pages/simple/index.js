@@ -48,6 +48,7 @@ Page({
     db.collection('questions').where({ examid: id }).get().then(res => {
       let questions = res.data
       if (questions && questions.length > 0) {
+        this.loadSubjectMeta(id)
         this._storeAndFilter(questions)
         return
       }
@@ -60,6 +61,7 @@ Page({
         wx.showToast({ icon: 'none', title: '该题库下暂无题目' })
         return
       }
+      this.loadSubjectMeta(subjects[0]._id)
       return db.collection('questions').where({ examid: subjects[0]._id }).get()
     }).then(res => {
       if (!res) return
@@ -72,6 +74,19 @@ Page({
     }).catch(err => {
       wx.showToast({ icon: 'none', title: '加载题目失败' })
       console.error('[simple] 查询失败: ', err)
+    })
+  },
+
+  loadSubjectMeta(id) {
+    const db = wx.cloud.database()
+    db.collection('subjects').doc(id).get({
+      success: res => {
+        const s = res.data || {}
+        this.setData({ subjectName: s.name || '', subjectId: s._id || id })
+      },
+      fail: () => {
+        this.setData({ subjectName: '', subjectId: id })
+      }
     })
   },
 
@@ -255,9 +270,13 @@ Page({
       data: {
         _openid: openid,
         exam: '练习刷题',
-        subject: '随机刷题',
+        subject: { _id: this.data.subjectId || id, name: this.data.subjectName || '随机刷题' },
         question: JSON.stringify({ id: id, type: 'simple' }),
         createTime: time,
+        createTimeMs: Date.now(),
+        displayName: (this.data.subjectName || '题库') + '刷题',
+        practiceSubjectId: this.data.subjectId || id,
+        practiceSubjectName: this.data.subjectName || '',
         isMock: true,
         isPractice: true,          // 标记为练习记录
         total: arr.length,

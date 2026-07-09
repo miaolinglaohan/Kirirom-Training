@@ -36,7 +36,21 @@ Page({
       return
     }
     this.setData({ id })
+    this.loadSubjectMeta(id)
     this.getQuestions(id)
+  },
+
+  loadSubjectMeta(id) {
+    const db = wx.cloud.database()
+    db.collection('subjects').doc(id).get({
+      success: res => {
+        const s = res.data || {}
+        this.setData({ subjectName: s.name || '', subjectId: s._id || id })
+      },
+      fail: () => {
+        this.setData({ subjectName: '', subjectId: id })
+      }
+    })
   },
 
   getQuestions: function(id) {
@@ -259,9 +273,13 @@ Page({
       data: {
         _openid: openid,
         exam: '练习刷题',
-        subject: '顺序练习',
+        subject: { _id: this.data.subjectId || id, name: this.data.subjectName || '顺序练习' },
         question: JSON.stringify({ id: id, type: 'question' }),
         createTime: time,
+        createTimeMs: Date.now(),
+        displayName: (this.data.subjectName || '题库') + '刷题',
+        practiceSubjectId: this.data.subjectId || id,
+        practiceSubjectName: this.data.subjectName || '',
         isMock: true,
         isPractice: true,
         total: total,
