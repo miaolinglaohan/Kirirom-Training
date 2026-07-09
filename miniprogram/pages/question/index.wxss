@@ -26,6 +26,16 @@
 .page-question .question-container .question .title{
     padding-left: 10px;
 }
+.page-question .question-container .question .fav-btn {
+    margin-left: auto;
+    padding-right: 16px;
+    font-size: 22px;
+    color: #ccc;
+    line-height: 1;
+}
+.page-question .question-container .question .fav-on {
+    color: #f5a623;
+}
 .page-question .question-container .options{
     padding-bottom:5px;
 }

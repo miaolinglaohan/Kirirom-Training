@@ -24,7 +24,9 @@ Page({
     finished: false,
     showReview: false,
     rightNum: 0,
-    errNum: 0
+    errNum: 0,
+    // 收藏状态：{ qid: true }
+    favMap: {}
   },
 
   onLoad: function (options) {
@@ -74,6 +76,100 @@ Page({
       questions, total, arr, score_arr, code_arr,
       idx: 0, score: 0, finished: false, showReview: false
     })
+    // 批量检查收藏状态
+    this._checkFavorites(arr)
+  },
+
+  // 批量查询哪些题已收藏
+  _checkFavorites(qids) {
+    const openid = app.globalData.openid || ''
+    if (!openid || qids.length === 0) {
+      this.setData({ favMap: {} })
+      return
+    }
+    const db = wx.cloud.database()
+    const _ = db.command
+    db.collection('notes')
+      .where({ _openid: openid, qid: _.in(qids) })
+      .field({ qid: true })
+      .limit(200)
+      .get()
+      .then(res => {
+        const favMap = {}
+        ;(res.data || []).forEach(n => { favMap[n.qid] = true })
+        this.setData({ favMap })
+      })
+      .catch(() => {
+        this.setData({ favMap: {} })
+      })
+  },
+
+  // 收藏/取消收藏
+  onToggleFavorite(e) {
+    const qid = e.currentTarget.dataset.qid
+    if (!qid) return
+    const question = this.data.questions.find(q => q._id === qid)
+    if (!question) return
+    const isFav = this.data.favMap[qid]
+    if (isFav) {
+      this._removeFavorite(qid)
+    } else {
+      this._addFavorite(question)
+    }
+  },
+
+  _addFavorite(question) {
+    const openid = app.globalData.openid || ''
+    if (!openid) {
+      wx.showToast({ icon: 'none', title: '请先登录' })
+      return
+    }
+    const db = wx.cloud.database()
+    const time = util.formatTime(new Date(Date.now()))
+    db.collection('notes').add({
+      data: {
+        _openid: openid,
+        qid: question._id,
+        title: question.title,
+        typecode: question.typecode,
+        typename: question.typename,
+        options: question.options,
+        comments: question.comments,
+        examid: question.examid,
+        createTime: time
+      }
+    }).then(() => {
+      this.setData({ ['favMap.' + question._id]: true })
+      wx.showToast({ icon: 'success', title: '已收藏' })
+    }).catch(err => {
+      console.error('[favorite] add', err)
+      wx.showToast({ icon: 'none', title: '收藏失败' })
+    })
+  },
+
+  _removeFavorite(qid) {
+    const openid = app.globalData.openid || ''
+    const db = wx.cloud.database()
+    db.collection('notes')
+      .where({ _openid: openid, qid: qid })
+      .get()
+      .then(res => {
+        if (!res.data || res.data.length === 0) {
+          this.setData({ ['favMap.' + qid]: false })
+          return null
+        }
+        return db.collection('notes').doc(res.data[0]._id).remove()
+      })
+      .then(r => {
+        if (r) {
+          this.setData({ ['favMap.' + qid]: false })
+          wx.showToast({ icon: 'success', title: '已取消' })
+        }
+      })
+      .catch(err => {
+        console.error('[favorite] remove', err)
+        wx.showToast({ icon: 'none', title: '取消失败' })
+      })
   },
 
   radioChange: function(e) {

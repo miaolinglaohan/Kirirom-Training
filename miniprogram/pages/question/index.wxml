@@ -19,6 +19,9 @@
     <view class="question-container q-item-{{idx}}">
         <view class="question">
             <view class="title">{{idx+1}}，{{question.title}}</view>
+            <view class="fav-btn {{favMap[question._id] ? 'fav-on' : ''}}" data-qid="{{question._id}}" catchtap="onToggleFavorite">
+                {{favMap[question._id] ? '★' : '☆'}}
+            </view>
         </view>
         <view class="options">
             <!-- 单选 / 判断 -->

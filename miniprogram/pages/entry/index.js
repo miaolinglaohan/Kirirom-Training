@@ -95,13 +95,13 @@ Page({
 
   },
   goExam: function () {
-    // 模拟考试：默认 10 题 / 15 分钟（云函数兜底；HR 后台后续可改）
+    // 单题模式：跳 simple 页（逐题刷题，支持题型筛选 + 回顾 + 收藏）
     const id = this.data.id
     if (!id) {
       wx.showToast({ icon: 'none', title: '缺少题库参数' })
       return
     }
-    const url = '/pages/exam/exam?mock=1&subjectId=' + encodeURIComponent(id)
+    const url = '/pages/simple/index?id=' + encodeURIComponent(id)
     wx.navigateTo({ url })
   },
   goQuesList: function () {

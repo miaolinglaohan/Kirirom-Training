@@ -27,7 +27,9 @@ Page({
     finished: false,        // 是否已结束（显示回顾栏）
     showReview: false,      // 是否展开题号网格
     rightNum: 0,
-    errNum: 0
+    errNum: 0,
+    // 收藏
+    favorited: false        // 当前题是否已收藏
   },
 
   onLoad: function (options) {
@@ -300,11 +302,97 @@ Page({
           question: question,
           options: question.options
         })
+        // 检查当前题是否已收藏
+        this.checkFavorite(_id)
       },
       fail: err => {
         wx.showToast({ icon: 'none', title: '查询记录失败' })
         console.error('[simple] 查询失败: ', err)
       }
     })
+  },
+
+  // —— 收藏功能 ——
+  checkFavorite(qid) {
+    const openid = app.globalData.openid || ''
+    if (!openid) { this.setData({ favorited: false }); return }
+    const db = wx.cloud.database()
+    db.collection('notes')
+      .where({ _openid: openid, qid: qid })
+      .count({
+        success: res => {
+          this.setData({ favorited: res.total > 0 })
+        },
+        fail: () => {
+          this.setData({ favorited: false })
+        }
+      })
+  },
+
+  onToggleFavorite() {
+    const q = this.data.question
+    if (!q || !q._id) return
+    if (this.data.favorited) {
+      // 取消收藏
+      this._removeFavorite(q._id)
+    } else {
+      // 加入收藏
+      this._addFavorite(q)
+    }
+  },
+
+  _addFavorite(question) {
+    const openid = app.globalData.openid || ''
+    if (!openid) {
+      wx.showToast({ icon: 'none', title: '请先登录' })
+      return
+    }
+    const db = wx.cloud.database()
+    const time = util.formatTime(new Date(Date.now()))
+    db.collection('notes').add({
+      data: {
+        _openid: openid,
+        qid: question._id,
+        title: question.title,
+        typecode: question.typecode,
+        typename: question.typename,
+        options: question.options,
+        comments: question.comments,
+        examid: question.examid,
+        createTime: time
+      }
+    }).then(() => {
+      this.setData({ favorited: true })
+      wx.showToast({ icon: 'success', title: '已收藏' })
+    }).catch(err => {
+      console.error('[favorite] add', err)
+      wx.showToast({ icon: 'none', title: '收藏失败' })
+    })
+  },
+
+  _removeFavorite(qid) {
+    const openid = app.globalData.openid || ''
+    const db = wx.cloud.database()
+    db.collection('notes')
+      .where({ _openid: openid, qid: qid })
+      .get()
+      .then(res => {
+        if (!res.data || res.data.length === 0) {
+          this.setData({ favorited: false })
+          return null
+        }
+        // 删除第一条（去重情况下应该只有一条）
+        return db.collection('notes').doc(res.data[0]._id).remove()
+      })
+      .then(r => {
+        if (r) {
+          this.setData({ favorited: false })
+          wx.showToast({ icon: 'success', title: '已取消' })
+        }
+      })
+      .catch(err => {
+        console.error('[favorite] remove', err)
+        wx.showToast({ icon: 'none', title: '取消失败' })
+      })
   }
 })

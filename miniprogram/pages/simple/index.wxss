@@ -38,6 +38,15 @@ page{
         justify-content: center;
         font-size: 14px;
 }
+.page-simple .sortnumber .fav-btn {
+    margin-left: 8px;
+    font-size: 22px;
+    color: #ccc;
+    line-height: 1;
+}
+.page-simple .sortnumber .fav-on {
+    color: #f5a623;
+}
 .page-simple .question{
     
 }
