@@ -14,7 +14,7 @@
 
     <view class="row">
       <view class="label">题库名称</view>
-      <input class="input" placeholder="例如：微信测评二" value="{{form.name}}" data-field="name" bindinput="onInput" />
+      <input class="input" placeholder="例如：安规考试题库" value="{{form.name}}" data-field="name" bindinput="onInput" />
     </view>
 
     <view class="row">

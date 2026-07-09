@@ -56,7 +56,7 @@
   <!-- 入口图标网格 -->
   <view class="entry-grid">
     <view class="entry-item" bindtap="goExamList">
-      <view class="entry-icon icon-1">🎯</view>
+      <view class="entry-icon icon-1">✏️</view>
       <text class="entry-label">顺序练习</text>
     </view>
     <view class="entry-item" bindtap="goRandom">
@@ -64,7 +64,7 @@
       <text class="entry-label">随机刷题</text>
     </view>
     <view class="entry-item" bindtap="goNote">
-      <view class="entry-icon icon-3">📝</view>
+      <view class="entry-icon icon-3">🏷️</view>
       <text class="entry-label">我的收藏</text>
     </view>
     <view class="entry-item" bindtap="goReview">
@@ -80,7 +80,7 @@
       <text class="entry-label">个人信息</text>
     </view>
     <view class="entry-item" wx:if="{{isHr}}" bindtap="goHrHome">
-      <view class="entry-icon icon-hr">🛠</view>
+      <view class="entry-icon icon-hr">🔑</view>
       <text class="entry-label">管理后台</text>
     </view>
   </view>

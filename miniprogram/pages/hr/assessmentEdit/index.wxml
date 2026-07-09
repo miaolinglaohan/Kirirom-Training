@@ -2,7 +2,7 @@
   <view class="section">
     <view class="row">
       <view class="label">考试名称</view>
-      <input class="input" placeholder="例如：2025 Q2 通用考核" value="{{form.name}}" data-field="name" bindinput="onInput" />
+      <input class="input" placeholder="例如：2026年安全知识考试" value="{{form.name}}" data-field="name" bindinput="onInput" />
     </view>
 
     <view class="row">

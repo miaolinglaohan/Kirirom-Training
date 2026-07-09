@@ -21,7 +21,7 @@
       bindtap="toReview"
     >
       <view class="mk-card-head">
-        <view class="mk-card-num">#{{index + 1}}</view>
+        <view class="mk-card-num">{{index + 1}}</view>
         <view class="mk-card-source">{{item.source}} · {{item.dateText}}</view>
       </view>
       <view class="mk-card-q">{{item.qtitle}}</view>

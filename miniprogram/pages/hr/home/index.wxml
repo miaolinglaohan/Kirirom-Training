@@ -6,7 +6,7 @@
 
   <view class="grid">
     <view class="card" bindtap="goEmployees">
-      <view class="icon">🛠</view>
+      <view class="icon">👥</view>
       <view class="card-title">员工管理</view>
       <view class="card-desc">查看 / 切换角色 / 启停</view>
     </view>
@@ -24,7 +24,7 @@
     </view>
 
     <view class="card" bindtap="goQuestions">
-      <view class="icon">❓</view>
+      <view class="icon">📘</view>
       <view class="card-title">题目管理</view>
       <view class="card-desc">全部题目，可按题库筛选</view>
     </view>
