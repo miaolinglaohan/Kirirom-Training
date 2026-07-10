@@ -156,9 +156,20 @@ Page({
       .filter(o => parseInt(o.value) === 1)
       .map(o => o.code).sort()
     let userSorted = codes.slice().sort()
-    let right = correctCodes.length === userSorted.length
+    let perfect = correctCodes.length === userSorted.length
       && correctCodes.every((c, i) => c === userSorted[i])
-    score_arr[idx] = right ? 1 : 0
+
+    // 多选题分级判分（v0.4.5）
+    let point = 0
+    if (perfect) {
+      point = 1
+    } else if (userSorted.length === 1) {
+      point = 0  // 只选1个 = 0分
+    } else if (userSorted.length > 1 && userSorted.every(c => correctCodes.includes(c))) {
+      point = 0.5  // 少选但全对 = 半分
+    }
+
+    score_arr[idx] = point
     code_arr[idx] = codes.join('')
     let sum = score_arr.reduce((x,y) => x + y, 0)
     this.setData({ score_arr, code_arr, score: sum })

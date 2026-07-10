@@ -18,7 +18,11 @@
 //
 // 判分规则（Phase 3 严格判分）：
 //   - 用户答案集合 ≡ 官方答案集合（顺序无关）才算正确，得该题满分
-//   - 任何错选 / 漏选 / 多选均 0 分
+//   - 多选题分级判分（v0.4.5）：
+//       - 仅选 1 个选项 → 0 分
+//       - 选 2+ 个，含任何错误选项 → 0 分
+//       - 选 2+ 个，全对但不完整（少选）→ 半数分（floor(full/2)）
+//       - 完全匹配 → 满分
 //   - 题目按 typecode 取分值：
 //       '01' 单选 → questionConfig.single.score
 //       '02' 多选 → questionConfig.multi.score
@@ -104,7 +108,13 @@ exports.main = async (event) => {
       const right = (u !== '' && u === o)
       if (right) rightNum++
       const full = scoreOfType(q.typecode, questionConfig)
-      const earned = right ? full : 0
+      let earned = right ? full : 0
+
+      // 多选题新判分（v0.4.5）：选1个=0分；少选但全对=半数分；含错=0分
+      if (q.typecode === '02' && !right && u.length > 0 && u.length > 1) {
+        const allInOfficial = [...u].every(c => o.includes(c))
+        if (allInOfficial) earned = Math.floor(full / 2)
+      }
       score += earned
       fullScore += full
       perQuestion.push({ qid: q._id, userCodes: u, correctCodes: o, right })
