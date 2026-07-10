@@ -1,16 +1,65 @@
 <view class="page">
   <view class="loading" wx:if="{{loading}}">加载中…</view>
 
+  <!-- 新建模式 -->
+  <block wx:elif="{{isCreate}}">
+    <view class="section">
+      <view class="row">
+        <view class="label">姓名</view>
+        <input class="input" placeholder="员工真实姓名" value="{{name}}" bindinput="onInputName" />
+      </view>
+      <view class="row">
+        <view class="label">所属部门</view>
+        <picker
+          class="picker"
+          range="{{['项目部','运行检修部','综合管理部','枢纽管理部','安全技术部','财务资金部']}}"
+          value="{{deptIndex >= 0 ? deptIndex : 0}}"
+          bindchange="onDeptChange">
+          <view class="picker-text {{deptIndex < 0 ? 'placeholder' : ''}}">
+            {{deptIndex >= 0 ? ['项目部','运行检修部','综合管理部','枢纽管理部','安全技术部','财务资金部'][deptIndex] : '请选择部门'}}
+          </view>
+        </picker>
+      </view>
+      <view class="row">
+        <view class="label">角色</view>
+        <radio-group bindchange="onRoleChange" class="role-group">
+          <label class="role-item">
+            <radio value="employee" checked="{{role === 'employee'}}" />
+            <text>普通员工</text>
+          </label>
+          <label class="role-item">
+            <radio value="hr" checked="{{role === 'hr'}}" />
+            <text>HR 管理员</text>
+          </label>
+        </radio-group>
+      </view>
+      <view class="row">
+        <view class="label">用户码</view>
+        <input class="input" placeholder="粘贴员工用户码" value="{{openid}}" bindinput="onInputOpenid" />
+      </view>
+      <view class="row">
+        <view class="label">账号状态</view>
+        <switch checked="{{active}}" bindchange="onActiveChange" />
+        <text class="status-text {{active ? 'status-on' : 'status-off'}}">{{active ? '正常' : '已停用'}}</text>
+      </view>
+    </view>
+    <view class="footer">
+      <button class="submit" type="primary" loading="{{saving}}" disabled="{{saving}}" bindtap="onSave">
+        创建员工
+      </button>
+    </view>
+  </block>
+
+  <!-- 编辑模式 -->
   <block wx:elif="{{emp}}">
-    <!-- 员工信息卡（只读展示） -->
     <view class="section">
       <view class="info-row">
         <text class="label">姓名</text>
         <text class="value">{{name}}</text>
       </view>
-      <view class="info-row" wx:if="{{emp.openid}}">
-        <text class="label">OpenID</text>
-        <text class="value openid">{{emp.openid}}</text>
+      <view class="info-row" wx:if="{{openid}}">
+        <text class="label">用户码</text>
+        <text class="value openid">{{openid}}</text>
       </view>
       <view class="info-row" wx:if="{{emp.activatedAt}}">
         <text class="label">激活时间</text>
@@ -18,12 +67,10 @@
       </view>
     </view>
 
-    <!-- admin 只读提示 -->
     <view class="admin-tip" wx:if="{{isAdmin}}">
       <text>⚠ 该账号为管理员（admin），所有字段只读。如需修改，请在云开发控制台 → employees 集合直接操作。</text>
     </view>
 
-    <!-- 可编辑字段（admin 时 disabled） -->
     <view class="section">
       <view class="row">
         <view class="label">所属部门</view>
@@ -64,12 +111,10 @@
       </view>
     </view>
 
-    <!-- 自锁提示 -->
     <view class="self-tip" wx:if="{{isSelf && !isAdmin}}">
       <text>⚠ 这是您自己的账号，不能取消管理权限或停用自己。</text>
     </view>
 
-    <!-- 保存按钮 -->
     <view class="footer">
       <button class="submit" type="primary" loading="{{saving}}" disabled="{{saving || isAdmin}}" bindtap="onSave">
         {{isAdmin ? '只读（超管）' : '保存修改'}}

@@ -1,13 +1,13 @@
 // cloudfunctions/whoAmI/index.js
 //
-// 用途：根据当前微信用户的 openid 查询员工白名单，返回身份状态。
-//      App 启动时 / 我的页刷新时调用，决定是否跳激活页、是否显示管理后台入口。
+// 用途：根据当前微信用户的 openid 查询员工表，返回身份状态。
+//      App 启动时调用，决定是正常登录还是跳未注册提示页。
 //
 // 入参：无（云函数从 wxContext 自动拿 OPENID）
 // 返回：
-//   { status: 'active',       employee: {...} }   已激活且启用
-//   { status: 'unactivated'                    }   该 openid 不在白名单
-//   { status: 'disabled',     employee: {...} }   已激活但被 HR 停用
+//   { status: 'active',       employee: {...} }   已注册且启用
+//   { status: 'not_registered'                    }   该 openid 未在员工表中（新用户）
+//   { status: 'disabled',     employee: {...} }   已注册但被 HR 停用
 //   { status: 'error',        message: '...'   }   异常
 //
 // 注意：返回 employee 对象时**故意不带 openid**，前端不需要也降低暴露面。
@@ -32,7 +32,7 @@ exports.main = async (event, context) => {
       .get()
 
     if (res.data.length === 0) {
-      return { status: 'unactivated', openid: OPENID }
+      return { status: 'not_registered', openid: OPENID }
     }
 
     const emp = res.data[0]

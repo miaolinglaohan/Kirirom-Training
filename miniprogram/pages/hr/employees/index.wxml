@@ -3,6 +3,7 @@
     <view class="title">员工管理</view>
     <view class="subtitle">共 {{total}} 人</view>
     <button class="import-btn" size="mini" bindtap="onImport" loading="{{importing}}">📥 导入</button>
+    <button class="import-btn new-btn" size="mini" bindtap="onCreate">+ 新建</button>
   </view>
 
   <view class="empty" wx:if="{{!loading && list.length === 0}}">暂无员工</view>

@@ -4,15 +4,15 @@
 //   1. 初始化云开发
 //   2. 调用 whoAmI 拿到当前微信号的身份状态，存入 globalData
 //   3. 提供 guardAuth() 供 tabBar 页面在 onShow 调用做身份门禁
-//   4. 提供 refreshAuth() 供激活成功后强制重新拉取身份
+//   4. 提供 refreshAuth() 供 HR 创建员工后强制重新拉取身份
 
 App({
-  globalData: {
-    openid: '',
-    employee: null,          // 激活后填入 { _id, name, dept, role, ... }
-    userStatus: 'pending',   // pending | active | unactivated | disabled | error
-    authReadyPromise: null   // 内部使用，每次重新校验时被覆盖
-  },
+    globalData: {
+      openid: '',
+      employee: null,
+      userStatus: 'pending',
+      authReadyPromise: null
+    },
 
   onLaunch() {
     if (!wx.cloud) {
@@ -50,9 +50,8 @@ App({
   },
 
   // tabBar 页面 onShow 时调用：返回一个 Promise<employee | null>
-  //   - 已激活且启用 → resolve(employee)
-  //   - 未激活 → 自动 reLaunch 到激活页，并 resolve(null)
-  //   - 已停用 → 自动 reLaunch 到激活页（带 reason=disabled），并 resolve(null)
+  //   - 已注册且启用 → resolve(employee)
+  //   - 未注册 / 已停用 → 自动 reLaunch 到未注册提示页，并 resolve(null)
   //   - 网络异常 → 显示 toast，resolve(null)
   guardAuth() {
     return this.globalData.authReadyPromise.then(r => {
@@ -60,12 +59,12 @@ App({
       if (status === 'active') {
         return r.employee || this.globalData.employee
       }
-      if (status === 'unactivated') {
-        wx.reLaunch({ url: '/pages/activate/index' })
+      if (status === 'not_registered') {
+        wx.reLaunch({ url: '/pages/pending/index?status=not_registered' })
         return null
       }
       if (status === 'disabled') {
-        wx.reLaunch({ url: '/pages/activate/index?reason=disabled' })
+        wx.reLaunch({ url: '/pages/pending/index?status=disabled' })
         return null
       }
       // error 或其它兜底
@@ -74,7 +73,7 @@ App({
     })
   },
 
-  // 激活成功后调用，强制重新拉一次 whoAmI
+  // HR 创建员工后调用，强制重新拉一次 whoAmI
   refreshAuth() {
     this.globalData.authReadyPromise = this._fetchAuth()
     return this.globalData.authReadyPromise

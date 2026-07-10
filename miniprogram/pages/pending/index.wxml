@@ -1,0 +1,45 @@
+<view class="page-pending">
+  <view class="card">
+    <view class="icon">🔒</view>
+    <view class="title" wx:if="{{status === 'disabled'}}">账号已停用</view>
+    <view class="title" wx:else>您尚未注册</view>
+    <view class="desc" wx:if="{{status === 'disabled'}}">
+      您的账号已被管理员停用，如需恢复请联系管理员。
+    </view>
+    <view class="desc" wx:else>
+      您尚未注册为本系统用户，请联系管理员完成注册。
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{status !== 'disabled'}}">
+    <view class="label">您的用户码</view>
+    <view class="openid-box">
+      <text class="openid-text" selectable="true">{{openid}}</text>
+    </view>
+    <view class="copy-btn" bindtap="onCopyOpenid">📋 复制用户码</view>
+  </view>
+
+  <view class="card">
+    <view class="tips-title">操作说明</view>
+    <view class="tips-item" wx:if="{{status !== 'disabled'}}">
+      1. 点击上方「复制用户码」按钮
+    </view>
+    <view class="tips-item" wx:if="{{status !== 'disabled'}}">
+      2. 将用户码发送给管理员
+    </view>
+    <view class="tips-item">
+      3. 等待管理员在后台为您创建账号
+    </view>
+    <view class="tips-item">
+      4. 账号创建后，点击下方按钮刷新即可登录
+    </view>
+  </view>
+
+  <view class="btn-area">
+    <button class="refresh-btn" bindtap="onRefresh">
+      {{status === 'disabled' ? '刷新状态' : '刷新状态（已创建账号后点此）'}}
+    </button>
+  </view>
+
+  <view class="footer-tip">基里隆项目部培训考试系统</view>
+</view>

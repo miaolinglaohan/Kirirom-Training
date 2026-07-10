@@ -52,6 +52,11 @@ Page({
     wx.navigateTo({ url: '/pages/hr/employeeEdit/index?id=' + id })
   },
 
+  // 新建员工
+  onCreate() {
+    wx.navigateTo({ url: '/pages/hr/employeeEdit/index?create=1' })
+  },
+
   // 删除员工：二次确认 + 调云函数
   onDelete(e) {
     const id = e.currentTarget.dataset.id
