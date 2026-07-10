@@ -180,6 +180,12 @@ Page({
       active: this.data.active,
       dept: this.data.dept
     }
+    // openid 有变动时也提交
+    const newOpenid = this.data.openid || ''
+    const oldOpenid = (this.data.emp && this.data.emp.openid) || ''
+    if (newOpenid !== oldOpenid) {
+      patch.openid = newOpenid
+    }
     this.setData({ saving: true })
     wx.cloud.callFunction({
       name: 'hrSetEmployee',

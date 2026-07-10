@@ -57,10 +57,6 @@
         <text class="label">姓名</text>
         <text class="value">{{name}}</text>
       </view>
-      <view class="info-row" wx:if="{{openid}}">
-        <text class="label">用户码</text>
-        <text class="value openid">{{openid}}</text>
-      </view>
       <view class="info-row" wx:if="{{emp.activatedAt}}">
         <text class="label">激活时间</text>
         <text class="value">{{emp.activatedAt}}</text>
@@ -72,6 +68,10 @@
     </view>
 
     <view class="section">
+      <view class="row">
+        <view class="label">用户码</view>
+        <input class="input" placeholder="粘贴员工用户码进行绑定" value="{{openid}}" bindinput="onInputOpenid" disabled="{{isAdmin}}" />
+      </view>
       <view class="row">
         <view class="label">所属部门</view>
         <picker
