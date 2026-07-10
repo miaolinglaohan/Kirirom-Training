@@ -87,9 +87,22 @@
   </view>
 
   <view class="section">
-    <view class="row">
+    <view class="row row-depts" bindtap="onToggleDeptPicker">
       <view class="label">目标部门</view>
-      <input class="input" placeholder="留空 = 全员；多个用逗号" value="{{form.targetDeptsText}}" data-field="targetDeptsText" bindinput="onInput" />
+      <view class="dept-display">
+        <text>{{deptDisplayText}}</text>
+        <text class="dept-arrow {{showDeptPicker ? 'dept-arrow-up' : ''}}">▼</text>
+      </view>
+    </view>
+    <view class="dept-list" wx:if="{{showDeptPicker}}">
+      <view class="dept-all" bindtap="onSelectAllDepts">
+        <text class="dept-all-icon">{{isAllDepts ? '☑' : '☐'}}</text>
+        <text>全选 / 取消全选</text>
+      </view>
+      <view class="dept-item" wx:for="{{allDepts}}" wx:key="*this" data-dept="{{item}}" bindtap="onDeptCheckChange">
+        <text class="dept-check-icon">{{targetDepts.length === 0 || targetDepts.indexOf(item) >= 0 ? '☑' : '☐'}}</text>
+        <text>{{item}}</text>
+      </view>
     </view>
     <view class="row">
       <view class="label">列表可见</view>

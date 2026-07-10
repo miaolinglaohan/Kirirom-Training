@@ -45,6 +45,9 @@ Page({
     loadingSubjects: true,
     subjects: [],        // [{_id,name}]
     subjectIndex: -1,
+    // 部门选择
+    allDepts: ['项目部', '运行检修部', '综合管理部', '枢纽管理部', '安全技术部', '财务资金部'],
+    showDeptPicker: false,
     form: {
       _id: '',
       name: '',
@@ -52,14 +55,16 @@ Page({
       date: todayStr(),
       time: '09:00',
       duration: 60,
-      validHours: 48,            // 有效期（小时）：开考后多少小时内可进场，默认 48h
+      validHours: 48,
       singleCount: 5, singleScore: 10,
       multiCount: 3,  multiScore: 15,
       judgeCount: 5,  judgeScore: 5,
-      targetDeptsText: '',
+      targetDepts: [],     // [] = 全员，非空 = 指定部门
       visible: true
     },
-    tzLabel: tzLabel()  // HR 所在时区，如 "UTC+7"，仅用于 UI 提示
+    tzLabel: tzLabel(),
+    deptDisplayText: '全部部门',  // 部门选择显示文案
+    isAllDepts: true,             // 是否全选
   },
 
   onLoad(opts) {
@@ -143,11 +148,13 @@ Page({
           singleCount: single.count || 0, singleScore: single.score || 0,
           multiCount: multi.count || 0,   multiScore: multi.score || 0,
           judgeCount: judge.count || 0,   judgeScore: judge.score || 0,
-          targetDeptsText: Array.isArray(a.targetDepts) ? a.targetDepts.join(',') : '',
+          targetDepts: Array.isArray(a.targetDepts) ? [...a.targetDepts] : [],
           visible: a.visible !== false
         }
         let idx = this.data.subjects.findIndex(s => s._id === newForm.subjectId)
-        this.setData({ form: newForm, subjectIndex: idx })
+        this.setData({ form: newForm, subjectIndex: idx }, () => {
+          this.refreshDeptDisplay()
+        })
       })
   },
 
@@ -168,6 +175,72 @@ Page({
   onTimeChange(e) { this.setData({ 'form.time': e.detail.value }) },
   onVisibleChange(e) { this.setData({ 'form.visible': e.detail.value }) },
 
+  // ── 部门选择器 ──
+
+  // 刷新部门显示文案和全选状态
+  refreshDeptDisplay() {
+    const depts = this.data.form.targetDepts || []
+    const all = this.data.allDepts
+    const isAll = depts.length === 0 || depts.length === all.length
+    let text = '全部部门'
+    if (depts.length > 0 && depts.length < all.length) {
+      text = `已选 ${depts.length} 个部门`
+    }
+    this.setData({ deptDisplayText: text, isAllDepts: isAll })
+  },
+
+  onToggleDeptPicker() {
+    this.setData({ showDeptPicker: !this.data.showDeptPicker })
+  },
+
+  onDeptCheckChange(e) {
+    const dept = e.currentTarget.dataset.dept
+    let depts = this.data.form.targetDepts || []
+    const all = this.data.allDepts
+    // 当前全选状态：depts 为空或长度=6
+    const wasAll = depts.length === 0 || depts.length === all.length
+    if (wasAll) {
+      depts = [...all]  // 把隐式全选展开为显式数组
+    }
+    const idx = depts.indexOf(dept)
+    if (idx >= 0) {
+      depts.splice(idx, 1)
+    } else {
+      depts.push(dept)
+    }
+    // 最少 1 个
+    if (depts.length === 0) {
+      wx.showToast({ icon: 'none', title: '至少保留 1 个部门' })
+      depts = [dept]  // 恢复
+      return
+    }
+    // 如果又全选了，归一化为空数组
+    if (depts.length === all.length) {
+      depts = []
+    }
+    this.setData({ 'form.targetDepts': depts }, () => {
+      this.refreshDeptDisplay()
+    })
+  },
+
+  onSelectAllDepts() {
+    const all = this.data.allDepts
+    const depts = this.data.form.targetDepts || []
+    const wasAll = depts.length === 0 || depts.length === all.length
+    if (wasAll) {
+      // 取消全选 → 默认保留第 1 个（最小要求）
+      this.setData({ 'form.targetDepts': [all[0]] }, () => {
+        this.refreshDeptDisplay()
+      })
+    } else {
+      // 全选 → 空数组
+      this.setData({ 'form.targetDepts': [] }, () => {
+        this.refreshDeptDisplay()
+      })
+    }
+  },
+
+  // ── 提交 ──
   onSubmit() {
     if (this.data.saving) return
     const f = this.data.form
@@ -181,10 +254,7 @@ Page({
     if (!(validHours > 0)) return wx.showToast({ icon: 'none', title: '有效期必须大于 0 小时' })
     if (validHours > 168) return wx.showToast({ icon: 'none', title: '有效期不能超过 168 小时' })
 
-    const targetDepts = String(f.targetDeptsText || '')
-      .split(/[,，\s]+/)
-      .map(s => s.trim())
-      .filter(Boolean)
+    const targetDepts = f.targetDepts || []   // 空数组 = 全员，已由部门选择器维护
 
     const payload = {
       _id: f._id || undefined,
