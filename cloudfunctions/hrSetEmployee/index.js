@@ -62,15 +62,17 @@ exports.main = async (event) => {
 
     if (!name) return { ok: false, code: 'MISSING_NAME', message: '请填写姓名' }
     if (!dept) return { ok: false, code: 'MISSING_DEPT', message: '请选择部门' }
-    if (!openid) return { ok: false, code: 'MISSING_OPENID', message: '请填写用户码' }
-    if (role && role !== 'hr' && role !== 'employee') {
-      return { ok: false, code: 'INVALID_ROLE', message: 'role 只允许 hr / employee' }
+    // openid 可选：留空时后续通过编辑绑定
+    if (openid) {
+      // openid 去重
+      const dup = await checkOpenidDup(openid)
+      if (dup) {
+        return { ok: false, code: 'DUPLICATE_OPENID', message: `该用户码已被「${dup.name}」绑定` }
+      }
     }
 
-    // openid 去重
-    const dup = await checkOpenidDup(openid)
-    if (dup) {
-      return { ok: false, code: 'DUPLICATE_OPENID', message: `该用户码已被「${dup.name}」绑定` }
+    if (role && role !== 'hr' && role !== 'employee') {
+      return { ok: false, code: 'INVALID_ROLE', message: 'role 只允许 hr / employee' }
     }
 
     try {
@@ -78,10 +80,10 @@ exports.main = async (event) => {
         name,
         dept,
         role: role || 'employee',
-        openid,
         active,
         activatedAt: new Date()
       }
+      if (openid) doc.openid = openid
       const addRes = await db.collection('employees').add({ data: doc })
       return {
         ok: true,

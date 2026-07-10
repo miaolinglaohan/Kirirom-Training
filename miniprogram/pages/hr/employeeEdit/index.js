@@ -128,11 +128,6 @@ Page({
     }
 
     if (this.data.isCreate) {
-      // 新建模式：调 hrSetEmployee 创建
-      if (!this.data.openid.trim()) {
-        wx.showToast({ icon: 'none', title: '请填写用户码（openid）' })
-        return
-      }
       this._doCreate()
     } else {
       // 编辑模式：自锁保护
