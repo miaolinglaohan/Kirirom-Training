@@ -61,7 +61,7 @@ exports.main = async (event) => {
     // 用云函数身份取所有 visible 的考试（绕过 _openid 默认过滤）
     const asRes = await db.collection('assessments')
       .where({ visible: true })
-      .orderBy('startTime', 'asc')
+      .orderBy('startTime', 'desc')
       .limit(200)
       .get()
 
