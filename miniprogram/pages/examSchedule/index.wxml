@@ -1,6 +1,6 @@
 <view class="schedule-page">
   <view class="hint-bar">
-    <text class="hint-text">📋 显示由 HR 发布的月度摸底考试</text>
+    <text class="hint-text">📋 显示当前进行中的考试及已完成的考试记录</text>
   </view>
 
   <view class="loading" wx:if="{{loading}}">加载中...</view>

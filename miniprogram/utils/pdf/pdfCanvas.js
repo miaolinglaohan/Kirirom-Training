@@ -88,7 +88,7 @@ function drawWhiteBg(ctx, widthPx, heightPx) {
 function drawWatermark(ctx, text, widthPx, heightPx, opts) {
   if (!text) return;
   const o = opts || {};
-  const fontPx  = o.fontPx || 48;
+  const fontPx  = o.fontPx || 30;
   const alpha   = (typeof o.alpha === 'number') ? o.alpha : 0.05;
   const gapX    = (typeof o.gapX === 'number') ? o.gapX : 160;
   const lineMul = o.lineMul || 5;
