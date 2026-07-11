@@ -125,6 +125,46 @@ Page({
     })
   },
 
+  // 删除考试：仅已结束后可用，级联删除答卷和历史成绩
+  onDelete(e) {
+    const id = e.currentTarget.dataset.id
+    const name = e.currentTarget.dataset.name || ''
+    const item = this.data.list.find(x => x._id === id)
+    if (!item) return
+    if (item.status !== 'expired' && !item.endedAt) {
+      wx.showToast({ icon: 'none', title: '只能删除已结束的考试' })
+      return
+    }
+    const enrolled = item.enrolled || 0
+    const submitted = item.submitted || 0
+    wx.showModal({
+      title: '删除考试',
+      content: `确定删除「${name}」吗？\n\n将连带删除 ${enrolled} 人的答卷记录和 ${submitted} 条历史成绩，此操作不可恢复。`,
+      confirmText: '删除',
+      confirmColor: '#c0392b',
+      success: r => {
+        if (!r.confirm) return
+        wx.showLoading({ title: '删除中…', mask: true })
+        wx.cloud.callFunction({ name: 'hrDeleteAssessment', data: { _id: id } })
+          .then(res => {
+            wx.hideLoading()
+            const ret = res.result || {}
+            if (ret.ok) {
+              wx.showToast({ icon: 'success', title: '已删除' })
+              this.loadList()
+            } else {
+              wx.showToast({ icon: 'none', title: ret.message || '删除失败' })
+            }
+          })
+          .catch(err => {
+            console.error('[onDelete]', err)
+            wx.hideLoading()
+            wx.showToast({ icon: 'none', title: '网络异常' })
+          })
+      }
+    })
+  },
+
   onPullDownRefresh() {
     this.loadList()
     wx.stopPullDownRefresh()

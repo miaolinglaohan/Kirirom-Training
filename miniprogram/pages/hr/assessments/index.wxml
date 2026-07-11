@@ -36,6 +36,14 @@
           data-id="{{item._id}}"
           catchtap="onEnd"
         >结束</button>
+        <button
+          class="action-btn action-del {{item.status !== 'expired' && !item.endedAt ? 'action-disabled' : ''}}"
+          size="mini"
+          disabled="{{item.status !== 'expired' && !item.endedAt}}"
+          data-id="{{item._id}}"
+          data-name="{{item.name}}"
+          catchtap="onDelete"
+        >删除</button>
       </view>
     </view>
   </view>

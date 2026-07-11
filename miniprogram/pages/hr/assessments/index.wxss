@@ -76,3 +76,15 @@
   color: #bbb;
   border: 1rpx solid #e8e8e8;
 }
+
+/* 删除按钮：深红色删除色 */
+.action-btn.action-del {
+  background: #fde8e8;
+  color: #c0392b;
+  border: 1rpx solid #f5c6c0;
+}
+.action-btn.action-del.action-disabled {
+  background: #f5f5f5;
+  color: #bbb;
+  border: 1rpx solid #e8e8e8;
+}

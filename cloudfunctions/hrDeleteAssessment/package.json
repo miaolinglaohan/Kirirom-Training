@@ -1,0 +1,9 @@
+{
+  "name": "hrDeleteAssessment",
+  "version": "1.0.0",
+  "description": "HR 删除考试及其关联的答卷和历史成绩",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}
