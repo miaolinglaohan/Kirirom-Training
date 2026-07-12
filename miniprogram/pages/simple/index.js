@@ -29,7 +29,9 @@ Page({
     rightNum: 0,
     errNum: 0,
     // 收藏
-    favorited: false        // 当前题是否已收藏
+    favorited: false,       // 当前题是否已收藏
+    // 答题反馈
+    answerState: null       // null | { correct:[], selected:[], isRight }
   },
 
   onLoad: function (options) {
@@ -144,30 +146,32 @@ Page({
   },
 
   radioChange: function(e) {
-    if (this.data.finished) return
+    if (this.data.finished || this.data.answerState) return
     let code = e.detail.value
     let { score_arr, code_arr, idx, question, total } = this.data
     let opt = (question.options || []).find(o => o.code === code)
     let point = (opt && parseInt(opt.value) === 1) ? 1 : 0
     score_arr[idx] = point
     code_arr[idx] = code
-    let sum = score_arr.reduce((x,y) => x + y, 0)
-    this.setData({ score_arr, code_arr, score: sum })
-    // 答对自动跳转下一题（300ms 延迟让用户看到反馈）
+    // 找正确答案
+    let correctCode = ''
+    ;(question.options || []).forEach(o => { if (parseInt(o.value) === 1) correctCode = o.code })
+    this.setData({
+      score_arr, code_arr,
+      score: score_arr.reduce((x,y) => x + y, 0),
+      answerState: { correct: [correctCode], selected: [code], isRight: point === 1 }
+    })
+    // 答对自动跳转（800ms 让用户看到绿色反馈）
     if (point === 1 && idx < total - 1) {
-      this._autoNextTimer = setTimeout(() => {
-        this._gotoNext()
-      }, 300)
+      this._autoNextTimer = setTimeout(() => this._gotoNext(), 800)
     }
     if (point === 1 && idx >= total - 1) {
-      this._autoNextTimer = setTimeout(() => {
-        this._finish()
-      }, 300)
+      this._autoNextTimer = setTimeout(() => this._finish(), 800)
     }
   },
 
   checkboxChange: function(e) {
-    if (this.data.finished) return  // 回顾模式不可改
+    if (this.data.finished || this.data.answerState) return
     let codes = e.detail.value || []
     let { score_arr, code_arr, idx, question } = this.data
     let correctCodes = (question.options || [])
@@ -177,20 +181,22 @@ Page({
     let perfect = correctCodes.length === userSorted.length
       && correctCodes.every((c, i) => c === userSorted[i])
 
-    // 多选题分级判分（v0.4.5）
     let point = 0
     if (perfect) {
       point = 1
     } else if (userSorted.length === 1) {
-      point = 0  // 只选1个 = 0分
+      point = 0
     } else if (userSorted.length > 1 && userSorted.every(c => correctCodes.includes(c))) {
-      point = 0.5  // 少选但全对 = 半分
+      point = 0.5
     }
 
     score_arr[idx] = point
     code_arr[idx] = codes.join('')
-    let sum = score_arr.reduce((x,y) => x + y, 0)
-    this.setData({ score_arr, code_arr, score: sum })
+    this.setData({
+      score_arr, code_arr,
+      score: score_arr.reduce((x,y) => x + y, 0),
+      answerState: { correct: correctCodes, selected: codes, isRight: point === 1 }
+    })
   },
 
   onNextTap: function() {
@@ -233,7 +239,7 @@ Page({
       this._finish()
       return
     }
-    this.setData({ idx, buttontext })
+    this.setData({ idx, buttontext, answerState: null })
     this.getQuestion(arr[idx])
   },
 
@@ -242,7 +248,7 @@ Page({
     let { arr, idx } = this.data
     if (idx <= 0) return
     idx--
-    this.setData({ idx, buttontext: '下一个' })
+    this.setData({ idx, buttontext: '下一个', answerState: null })
     this.getQuestion(arr[idx])
   },
 

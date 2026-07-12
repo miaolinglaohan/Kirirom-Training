@@ -96,6 +96,21 @@ page{
 .page-simple .radio .option-content .content{
     display: inline;
 }
+
+/* 答题反馈 */
+.page-simple .radio.opt-correct {
+    background: #e8f8ee;
+}
+.page-simple .radio.opt-wrong {
+    background: #fff0ed;
+}
+.mark {
+    margin-left: 8px;
+    font-size: 18px;
+    font-weight: bold;
+}
+.mark-ok { color: #07c160; }
+.mark-err { color: #e64340; }
 .page-simple .btn-area{
     margin-top: 10px;
     padding: 10px 0;

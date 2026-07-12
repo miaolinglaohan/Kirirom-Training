@@ -28,19 +28,23 @@
         <view class="options">
             <!-- 单选 / 判断 -->
             <radio-group wx:if="{{question.typecode !== '02'}}" class="radio-group" bindchange="radioChange">
-            <label class="radio" wx:for="{{options}}" wx:key="code">
+            <label class="radio {{answerState && answerState.correct.indexOf(item.code)>=0 ? 'opt-correct' : ''}} {{answerState && !answerState.isRight && answerState.selected.indexOf(item.code)>=0 ? 'opt-wrong' : ''}}" wx:for="{{options}}" wx:key="code">
                 <view class="option-content">
-                    <radio value="{{item.code}}" checked="{{item.checked}}" disabled="{{finished}}"></radio>
+                    <radio value="{{item.code}}" checked="{{item.checked}}" disabled="{{answerState || finished}}"></radio>
                     <text class="content">{{item.code}}，{{item.content}}</text>
+                    <text wx:if="{{answerState && answerState.correct.indexOf(item.code)>=0}}" class="mark mark-ok">✓</text>
+                    <text wx:if="{{answerState && !answerState.isRight && answerState.selected.indexOf(item.code)>=0}}" class="mark mark-err">✗</text>
                 </view>
             </label>
             </radio-group>
             <!-- 多选 -->
             <checkbox-group wx:if="{{question.typecode === '02'}}" class="radio-group" bindchange="checkboxChange">
-            <label class="radio" wx:for="{{options}}" wx:key="code">
+            <label class="radio {{answerState && answerState.correct.indexOf(item.code)>=0 ? 'opt-correct' : ''}} {{answerState && !answerState.isRight && answerState.selected.indexOf(item.code)>=0 ? 'opt-wrong' : ''}}" wx:for="{{options}}" wx:key="code">
                 <view class="option-content">
-                    <checkbox value="{{item.code}}" checked="{{item.checked}}" disabled="{{finished}}"></checkbox>
+                    <checkbox value="{{item.code}}" checked="{{item.checked}}" disabled="{{answerState || finished}}"></checkbox>
                     <text class="content">{{item.code}}，{{item.content}}</text>
+                    <text wx:if="{{answerState && answerState.correct.indexOf(item.code)>=0}}" class="mark mark-ok">✓</text>
+                    <text wx:if="{{answerState && !answerState.isRight && answerState.selected.indexOf(item.code)>=0}}" class="mark mark-err">✗</text>
             </view>
             </label>
             </checkbox-group>
