@@ -36,6 +36,9 @@ Page({
       return
     }
     this.setData({ id })
+    // 读取上次刷题进度
+    const lastPos = wx.getStorageSync('practice_pos_' + id) || 0
+    this.lastSavedPos = Number(lastPos)
     this.loadSubjectMeta(id)
     this.getQuestions(id)
   },
@@ -92,6 +95,12 @@ Page({
     })
     // 批量检查收藏状态
     this._checkFavorites(arr)
+    // 恢复上次进度：滚动到之前的位置
+    if (this.lastSavedPos > 0 && this.lastSavedPos < total) {
+      setTimeout(() => {
+        wx.pageScrollTo({ selector: '.q-item-' + this.lastSavedPos, duration: 300 })
+      }, 200)
+    }
   },
 
   // 批量查询哪些题已收藏
@@ -199,6 +208,7 @@ Page({
     code_arr[idx] = code
     let sum = score_arr.reduce((x,y) => x + y, 0)
     this.setData({ score_arr, code_arr, score: sum })
+    this._checkComplete()
   },
 
   checkboxChange: function(e) {
@@ -229,23 +239,35 @@ Page({
     code_arr[idx] = codes.join('')
     let sum = score_arr.reduce((x,y) => x + y, 0)
     this.setData({ score_arr, code_arr, score: sum })
+    this._checkComplete()
   },
 
-  // 提交：不跳成绩页，显示回顾栏
-  bindSubmitTap: function() {
-    let { total, score_arr } = this.data
+  // 检测是否全部答完 + 保存进度
+  _checkComplete() {
+    const { code_arr, id, finished } = this.data
+    if (finished) return
+    // 保存当前进度
+    let lastIdx = -1
+    for (let i = code_arr.length - 1; i >= 0; i--) {
+      if (code_arr[i] !== 'M') { lastIdx = i; break }
+    }
+    if (lastIdx >= 0) {
+      wx.setStorageSync('practice_pos_' + id, lastIdx)
+    }
+    // 全部非 M → 自动结束
+    if (code_arr.every(c => c !== 'M')) {
+      this._finishNow()
+    }
+  },
+
+  _finishNow() {
+    let { total, score_arr, code_arr, questions, id } = this.data
     let rightNum = score_arr.filter(v => v === 1).length
     let errNum = total - rightNum
-    // 检查是否有未答的题
-    let unanswered = score_arr.filter((v, i) => this.data.code_arr[i] === 'M').length
-    let content = `✔ ${rightNum}  ❌ ${errNum}  /  共 ${total} 题`
-    if (unanswered > 0) {
-      content += `\n（其中 ${unanswered} 题未作答）`
-    }
     this.setData({ finished: true, showReview: false, rightNum, errNum })
-    // 错题写入 historys
     this._saveErrorsToHistory()
-    wx.showToast({ icon: 'success', title: '已完成' })
+    wx.setStorageSync('practice_pos_' + id, -1)  // 刷完清进度
+    wx.showToast({ icon: 'success', title: '全部完成' })
   },
 
   // 错题批量写入 historys

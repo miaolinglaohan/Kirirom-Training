@@ -42,6 +42,13 @@ Page({
     this.loadQuestions(id)
   },
 
+  onUnload() {
+    if (this._autoNextTimer) {
+      clearTimeout(this._autoNextTimer)
+      this._autoNextTimer = null
+    }
+  },
+
   // 加载题目
   loadQuestions: function(id) {
     const db = wx.cloud.database()
@@ -137,15 +144,26 @@ Page({
   },
 
   radioChange: function(e) {
-    if (this.data.finished) return  // 回顾模式不可改
+    if (this.data.finished) return
     let code = e.detail.value
-    let { score_arr, code_arr, idx, question } = this.data
+    let { score_arr, code_arr, idx, question, total } = this.data
     let opt = (question.options || []).find(o => o.code === code)
     let point = (opt && parseInt(opt.value) === 1) ? 1 : 0
     score_arr[idx] = point
     code_arr[idx] = code
     let sum = score_arr.reduce((x,y) => x + y, 0)
     this.setData({ score_arr, code_arr, score: sum })
+    // 答对自动跳转下一题（300ms 延迟让用户看到反馈）
+    if (point === 1 && idx < total - 1) {
+      this._autoNextTimer = setTimeout(() => {
+        this._gotoNext()
+      }, 300)
+    }
+    if (point === 1 && idx >= total - 1) {
+      this._autoNextTimer = setTimeout(() => {
+        this._finish()
+      }, 300)
+    }
   },
 
   checkboxChange: function(e) {
@@ -217,6 +235,40 @@ Page({
     }
     this.setData({ idx, buttontext })
     this.getQuestion(arr[idx])
+  },
+
+  // 翻到上一题
+  _gotoPrev() {
+    let { arr, idx } = this.data
+    if (idx <= 0) return
+    idx--
+    this.setData({ idx, buttontext: '下一个' })
+    this.getQuestion(arr[idx])
+  },
+
+  // ── 左右滑动切题 ──
+  onTouchStart(e) {
+    const t = e.touches[0]
+    this._touchX = t.clientX
+    this._touchY = t.clientY
+    // 用户手动滑动时取消 auto-advance
+    if (this._autoNextTimer) {
+      clearTimeout(this._autoNextTimer)
+      this._autoNextTimer = null
+    }
+  },
+
+  onTouchEnd(e) {
+    if (this._touchX == null) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - this._touchX
+    const dy = t.clientY - this._touchY
+    this._touchX = null
+    // 水平位移 > 50 且大于垂直位移 → 判定为滑动
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) this._gotoNext()      // 左滑 → 下一题
+      else this._gotoPrev()              // 右滑 → 上一题
+    }
   },
 
   // 刷题结束

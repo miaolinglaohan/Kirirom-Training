@@ -22,7 +22,7 @@
       {{favorited ? '★' : '☆'}}
     </view>
     </view>
-    <view class="question">
+    <view class="question" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
         <view class="title"><text>{{idx + 1 > total ? total : idx + 1}}、{{question.title}}</text></view>
         <view class="type">{{question.typename}}</view>
         <view class="options">

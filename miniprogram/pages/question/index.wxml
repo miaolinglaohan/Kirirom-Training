@@ -41,11 +41,7 @@
     </block>
     </view>
 
-    <view class="btn-area" wx:if="{{total > 0 && !finished}}">
-        <button type="primary" bindtap="bindSubmitTap">确认提交</button>
-    </view>
-
-    <!-- 回顾栏（提交后显示） -->
+    <!-- 回顾栏（自动出现） -->
     <view class="review-bar" wx:if="{{finished}}">
       <view class="review-stats">
         <text class="stat-right">✔ {{rightNum}}</text>
