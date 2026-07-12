@@ -171,7 +171,7 @@ Page({
   },
 
   checkboxChange: function(e) {
-    if (this.data.finished || this.data.answerState) return
+    if (this.data.finished) return
     let codes = e.detail.value || []
     let { score_arr, code_arr, idx, question } = this.data
     let correctCodes = (question.options || [])
@@ -192,10 +192,10 @@ Page({
 
     score_arr[idx] = point
     code_arr[idx] = codes.join('')
+    // 多选题不在这里设answerState（会锁死后续勾选），点下一题时才显示反馈
     this.setData({
       score_arr, code_arr,
-      score: score_arr.reduce((x,y) => x + y, 0),
-      answerState: { correct: correctCodes, selected: codes, isRight: point === 1 }
+      score: score_arr.reduce((x,y) => x + y, 0)
     })
   },
 
@@ -206,6 +206,22 @@ Page({
     // 已结束（回顾模式）：下一个按钮变成翻页
     if (this.data.finished) {
       this._gotoNext()
+      return
+    }
+
+    // 多选题：先显示反馈再跳转（反馈在checkboxChange里被跳过）
+    if (question && question.typecode === '02' && code_arr[idx] !== 'M') {
+      if (!this.data.answerState) {
+        let correctCodes = (question.options || [])
+          .filter(o => parseInt(o.value) === 1).map(o => o.code)
+        let selCodes = String(code_arr[idx]).split('').filter(Boolean)
+        this.setData({
+          answerState: { correct: correctCodes, selected: selCodes, isRight: score_arr[idx] === 1 }
+        })
+        setTimeout(() => _this._gotoNext(), 600)
+        return
+      }
+      _this._gotoNext()
       return
     }
 
