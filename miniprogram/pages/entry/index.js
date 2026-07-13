@@ -101,7 +101,7 @@ Page({
       wx.showToast({ icon: 'none', title: '缺少题库参数' })
       return
     }
-    const url = '/pages/simple/index?id=' + encodeURIComponent(id)
+    const url = '/pages/simple/index?id=' + encodeURIComponent(id) + '&mode=order'
     wx.navigateTo({ url })
   },
   goQuesList: function () {

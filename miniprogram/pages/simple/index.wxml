@@ -28,41 +28,45 @@
         <view class="options">
             <!-- 单选 / 判断 -->
             <radio-group wx:if="{{question.typecode !== '02'}}" class="radio-group" bindchange="radioChange">
-            <label class="radio {{answerState && answerState.correct.indexOf(item.code)>=0 ? 'opt-correct' : ''}} {{answerState && !answerState.isRight && answerState.selected.indexOf(item.code)>=0 ? 'opt-wrong' : ''}}" wx:for="{{options}}" wx:key="code">
+            <label class="radio {{item.mark === 'ok' ? 'opt-correct' : ''}} {{item.mark === 'err' ? 'opt-wrong' : ''}}" wx:for="{{options}}" wx:key="code">
                 <view class="option-content">
                     <radio value="{{item.code}}" checked="{{item.checked}}" disabled="{{answerState || finished}}"></radio>
                     <text class="content">{{item.code}}，{{item.content}}</text>
-                    <text wx:if="{{answerState && answerState.correct.indexOf(item.code)>=0}}" class="mark mark-ok">✓</text>
-                    <text wx:if="{{answerState && !answerState.isRight && answerState.selected.indexOf(item.code)>=0}}" class="mark mark-err">✗</text>
+                    <text wx:if="{{item.mark === 'ok'}}" class="mark mark-ok">✓</text>
+                    <text wx:if="{{item.mark === 'err'}}" class="mark mark-err">✗</text>
                 </view>
             </label>
             </radio-group>
             <!-- 多选 -->
             <checkbox-group wx:if="{{question.typecode === '02'}}" class="radio-group" bindchange="checkboxChange">
-            <label class="radio {{answerState && answerState.correct.indexOf(item.code)>=0 ? 'opt-correct' : ''}} {{answerState && !answerState.isRight && answerState.selected.indexOf(item.code)>=0 ? 'opt-wrong' : ''}}" wx:for="{{options}}" wx:key="code">
+            <label class="radio {{item.mark === 'ok' ? 'opt-correct' : ''}} {{item.mark === 'err' ? 'opt-wrong' : ''}} {{item.mark === 'miss' ? 'opt-miss' : ''}}" wx:for="{{options}}" wx:key="code">
                 <view class="option-content">
                     <checkbox value="{{item.code}}" checked="{{item.checked}}" disabled="{{answerState || finished}}"></checkbox>
                     <text class="content">{{item.code}}，{{item.content}}</text>
-                    <text wx:if="{{answerState && answerState.correct.indexOf(item.code)>=0}}" class="mark mark-ok">✓</text>
-                    <text wx:if="{{answerState && !answerState.isRight && answerState.selected.indexOf(item.code)>=0}}" class="mark mark-err">✗</text>
-            </view>
+                    <text wx:if="{{item.mark === 'ok'}}" class="mark mark-ok">✓</text>
+                    <text wx:if="{{item.mark === 'miss'}}" class="mark mark-miss">✓</text>
+                    <text wx:if="{{item.mark === 'err'}}" class="mark mark-err">✗</text>
+                </view>
             </label>
             </checkbox-group>
         </view>
+        <!-- 正确答案文字 -->
+        <view class="correct-answer" wx:if="{{answerState}}">正确答案：{{correctText}}</view>
     </view>
     <view class="btn-area">
-        <view class="btn {{finished ? 'btn-finished' : ''}}" bindtap="onNextTap">
+        <view class="btn btn-prev {{idx <= 0 ? 'btn-disabled' : ''}}" bindtap="onPrevTap">上一题</view>
+        <view class="btn {{(finished && idx >= total - 1) ? 'btn-finished' : ''}}" bindtap="onNextTap">
             {{buttontext}}
         </view>
     </view>
     </block>
 
-    <!-- 回顾栏（刷题结束后显示） -->
-    <view class="review-bar" wx:if="{{finished}}">
+    <!-- 统计栏（常驻显示，实时更新） -->
+    <view class="review-bar" wx:if="{{total > 0}}">
       <view class="review-stats">
+        <text class="stat-answered">已答 {{answeredNum}}/{{total}}</text>
         <text class="stat-right">✔ {{rightNum}}</text>
         <text class="stat-wrong">❌ {{errNum}}</text>
-        <text class="stat-total">/ {{total}}</text>
       </view>
       <view class="review-btn" bindtap="onToggleReview">
         {{showReview ? '收起' : '回顾'}}
@@ -70,11 +74,11 @@
     </view>
 
     <!-- 题号网格（点"回顾"展开） -->
-    <view class="review-grid" wx:if="{{finished && showReview}}">
+    <view class="review-grid" wx:if="{{showReview}}">
       <view class="grid-title">点击题号回顾</view>
       <view class="grid-cells">
         <view
-          class="cell {{score_arr[index] === 1 ? 'cell-right' : 'cell-wrong'}}"
+          class="cell {{score_arr[index] === 1 ? 'cell-right' : (code_arr[index] === 'M' ? 'cell-skip' : 'cell-wrong')}}"
           wx:for="{{arr}}" wx:key="*this" wx:for-index="index"
           data-idx="{{index}}" bindtap="onReviewJump">
           {{index + 1}}
