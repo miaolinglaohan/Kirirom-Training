@@ -1,0 +1,12 @@
+{
+  "name": "exam-mini-migrate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "一次性迁移脚本：把旧云开发环境数据库搬到新环境",
+  "scripts": {
+    "migrate": "node migrate-cloudbase.js"
+  },
+  "dependencies": {
+    "@cloudbase/manager": "^2.0.0"
+  }
+}
