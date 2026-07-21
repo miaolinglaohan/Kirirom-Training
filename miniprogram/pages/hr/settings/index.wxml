@@ -48,6 +48,45 @@
       </view>
     </view>
 
+    <!-- PDF 水印样式 -->
+    <view class="section">
+      <view class="section-title">PDF 水印样式</view>
+      <view class="section-desc">
+        调整水印的字号、透明度、间距、角度等。数值仅影响样式，不影响水印文字内容。
+        修改后点「保存」生效；未保存时导出 PDF 仍用旧值。
+      </view>
+
+      <view class="wm-field">
+        <view class="wm-label">字号 <text class="wm-val">{{wmFontPx}}</text> px</view>
+        <slider min="10" max="80" value="{{wmFontPx}}" step="1" show-value="{{false}}" bindchange="onInputWmFontPx" />
+      </view>
+
+      <view class="wm-field">
+        <view class="wm-label">透明度 <text class="wm-val">{{wmAlpha}}</text>（越小越淡）</view>
+        <slider min="0.01" max="0.5" value="{{wmAlpha}}" step="0.01" show-value="{{false}}" bindchange="onInputWmAlpha" />
+      </view>
+
+      <view class="wm-field">
+        <view class="wm-label">横向间隙 <text class="wm-val">{{wmGapX}}</text> px</view>
+        <slider min="0" max="500" value="{{wmGapX}}" step="10" show-value="{{false}}" bindchange="onInputWmGapX" />
+      </view>
+
+      <view class="wm-field">
+        <view class="wm-label">行距倍数 <text class="wm-val">{{wmLineMul}}</text></view>
+        <slider min="2" max="15" value="{{wmLineMul}}" step="1" show-value="{{false}}" bindchange="onInputWmLineMul" />
+      </view>
+
+      <view class="wm-field">
+        <view class="wm-label">旋转角度 <text class="wm-val">{{wmAngle}}</text>°（负=逆时针）</view>
+        <slider min="-90" max="90" value="{{wmAngle}}" step="5" show-value="{{false}}" bindchange="onInputWmAngle" />
+      </view>
+
+      <view class="actions">
+        <button class="btn-ghost" size="mini" bindtap="onResetWmStyle">恢复默认</button>
+        <button class="btn-primary" size="mini" loading="{{wmStyleSaving}}" bindtap="onSaveWmStyle">保存</button>
+      </view>
+    </view>
+
     <view class="tip">
       ⚠ 仅 admin 可修改本页设置。HR 与普通员工仅在导出 PDF 时读取该值，看不到本页入口。
     </view>

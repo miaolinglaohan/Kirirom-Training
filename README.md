@@ -31,7 +31,7 @@ exam-mini-master/
 │   │       ├── assessments/ + assessmentEdit/
 │   │       ├── assessmentScores/    # 单场成绩 + PDF 导出
 │   │       ├── applicantReview/     # 单人答卷批阅 + PDF 导出
-│   │       └── settings/            # 系统设置（水印 / 单位名称）
+│   │       └── settings/            # 系统设置（水印文字 / 水印样式 / 单位名称）
 │   ├── utils/
 │   │   ├── pdf/
 │   │   │   ├── miniPdf.js           # 手写 PDF 1.3 容器
@@ -80,7 +80,7 @@ exam-mini-master/
 |------|------|------|
 | `employee` | 小程序首页 | 报名、答题、看自己的成绩与错题 |
 | `hr` | HR 后台 | 员工管理、题库、考试场次、批阅、导出 |
-| `admin` | HR 后台 + 系统设置 | HR 全部权限 + 写 `sysConfig`（水印 / 单位名称） |
+| `admin` | HR 后台 + 系统设置 | HR 全部权限 + 写 `sysConfig`（水印文字 / 水印样式 / 单位名称） |
 
 所有云函数都做双保险：**前端隐藏入口 + 云函数侧再次校验调用方 role**。
 
@@ -98,7 +98,7 @@ exam-mini-master/
   - `buildBatchAnswerSheetPages(canvas, batchData)` — 全员答卷批量导出，**换人强制翻页 + 全局连续页码 + 末页一份落款**
 - `pdfExport.js`：写临时文件 → `wx.openDocument` 预览 / 转发
 
-入口：HR 后台 → 单场成绩页（导出总分单 / 导出全员答卷）、单人批阅页（导出本人答卷）；水印 / 单位名称在「系统设置」配置。
+入口：HR 后台 → 单场成绩页（导出总分单 / 导出全员答卷）、单人批阅页（导出本人答卷）；水印文字 / 水印样式 / 单位名称在「系统设置」配置。
 
 ---
 

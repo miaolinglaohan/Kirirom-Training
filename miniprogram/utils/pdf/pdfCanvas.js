@@ -77,10 +77,11 @@ function drawWhiteBg(ctx, widthPx, heightPx) {
  * @param {number} widthPx 画布像素宽
  * @param {number} heightPx 画布像素高
  * @param {object} [opts]
- * @param {number} [opts.fontPx=32]   字号（像素）
- * @param {number} [opts.alpha=0.08]  透明度
- * @param {number} [opts.gapX=120]    横向单个水印之间的额外像素间隙
- * @param {number} [opts.lineMul=4]   纵向行距 = fontPx × lineMul
+ * @param {number} [opts.fontPx=30]   字号（像素）
+ * @param {number} [opts.alpha=0.05]  透明度 0~1
+ * @param {number} [opts.gapX=160]    横向单个水印之间的额外像素间隙
+ * @param {number} [opts.lineMul=5]   纵向行距 = fontPx × lineMul
+ * @param {number} [opts.angle=-45]   旋转角度（度，负=逆时针，正=顺时针，0=水平）
  * @param {number} [opts.stepX]       直接指定横向步进（覆盖 measureText 自适应）
  * @param {number} [opts.stepY]       直接指定纵向步进
  * @param {boolean} [opts.brick=true] 是否砖砌错位（true=隔行偏移半步距）
@@ -93,6 +94,7 @@ function drawWatermark(ctx, text, widthPx, heightPx, opts) {
   const gapX    = (typeof o.gapX === 'number') ? o.gapX : 160;
   const lineMul = o.lineMul || 5;
   const brick   = (o.brick !== false);
+  const angle   = (typeof o.angle === 'number') ? o.angle : -45;  // 度
 
   ctx.save();
   ctx.fillStyle    = 'rgba(0,0,0,' + alpha + ')';
@@ -108,7 +110,7 @@ function drawWatermark(ctx, text, widthPx, heightPx, opts) {
   const cx = widthPx  / 2;
   const cy = heightPx / 2;
   ctx.translate(cx, cy);
-  ctx.rotate(-Math.PI / 4);
+  ctx.rotate(angle * Math.PI / 180);  // 度 -> 弧度（angle=-45 即原 -PI/4 逆时针 45°）
   ctx.translate(-cx, -cy);
 
   // 旋转后要覆盖原矩形所有角，最稳的范围 = ±对角线长度

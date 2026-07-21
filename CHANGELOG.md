@@ -1,3 +1,40 @@
+### 20260721 · v0.5.0（PDF 水印样式参数后台化）
+
+> 水印的字号/透明度/间距/角度等样式参数从代码写死改为后台可配。
+
+**背景**：此前水印样式参数（`fontPx/alpha/gapX/lineMul`）写死在 `pdfCanvas.js` 的 `drawWatermark` 函数里，admin 想微调只能改代码重新发版（v0.3.5-pdf-core 留的"水印参数调节口子"）。本次将其提到 `sysConfig` 后台可配。
+
+**新增配置项 `pdfWatermarkStyle`**
+
++ `hrSysConfig` 白名单加 `pdfWatermarkStyle: { maxLength: 200, isJson: true }`
++ 存储为 JSON 字符串：`{"fontPx":30,"alpha":0.05,"gapX":160,"lineMul":5,"angle":-45}`
++ 云函数 `set` 分支加 JSON 校验：空串放行（表示用默认值），非空必须可 `JSON.parse`，失败返回 `INVALID_FORMAT`，成功规整成紧凑 JSON 存储
++ 新增 `angle`（旋转角度，度）参数，范围 -90~90（负=逆时针、正=顺时针、0=水平）；颜色保持黑色写死
+
+**drawWatermark 改造**
+
++ `pdfCanvas.js`：`drawWatermark(ctx, text, w, h, opts)` 支持 `opts.angle`（度，默认 -45，转换 `rotate(angle * Math.PI / 180)`，angle=-45 等价于原 `rotate(-Math.PI/4)`，行为不变）；同步修正过时 JSDoc 默认值
++ 3 个渲染器调用点传 `wmStyle`：`pdfAnswerSheet.js`（单人/批量两处）、`pdfScoreSheet.js`（总分单一处）
+
+**设置页 + 导出页接线**
+
++ `pages/hr/settings`：新增「PDF 水印样式」卡片，5 个滑块（字号/透明度/横向间隙/行距倍数/角度），实时显示数值 + 恢复默认 + 保存
++ 2 个 PDF 导出页（`applicantReview` / `assessmentScores`，共 3 个导出点）`_loadSysConfig` 多读 `pdfWatermarkStyle`，`JSON.parse` 后传 `wmStyle` 给渲染器
+
+**兼容性**
+
++ 未配置时（DB 无值）导出 PDF 用默认值，与改造前视觉完全一致
++ 旧的 `pdfWatermark`（文字）/ `unitName` 不动
++ ⚠ 需重新上传部署 `hrSysConfig` 云函数
+
+**文档更新**
+
++ `docs/HR-SOP操作手册.md` 2.2 配置项清单加水印样式第三项 + 参数表
++ `docs/员工端使用说明.md` 6.1~6.3 同步刷题反馈完善（蓝勾/正确答案文字/统计栏常驻/上一题按钮/随机 50 题上限）
++ `README.md` / `docs/部署运维清单.md` 措辞同步
+
+---
+
 ### 20260713 · v0.4.9（刷题反馈完善 + 回顾回显 + 统计常驻）
 
 > 顺序刷题单题模式全面改造：真顺序、红叉修复、回顾可见答案、上下题按钮、底部统计常驻实时更新。

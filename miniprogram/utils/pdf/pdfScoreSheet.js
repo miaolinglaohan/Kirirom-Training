@@ -233,6 +233,7 @@ async function buildScoreSheetPages(canvas, data) {
   const assessment   = data.assessment || {};
   const applicants   = data.applicants || [];
   const watermark    = data.watermark || '';
+  const wmStyle      = data.wmStyle || null;   // 水印样式参数（透明度/字号/角度等）
   const unitName     = data.unitName || '';
   const examDateText = data.examDateText || '';
   const generatedBy  = data.generatedBy || '';
@@ -356,7 +357,7 @@ async function buildScoreSheetPages(canvas, data) {
     }
 
     drawFooter(ctx, PAD_X, widthPx, heightPx, p + 1, pageCount, generatedBy, assessment.name);
-    pdfCanvas.drawWatermark(ctx, watermark, widthPx, heightPx);
+    pdfCanvas.drawWatermark(ctx, watermark, widthPx, heightPx, wmStyle);
 
     const jpeg = await pdfCanvas.canvasToJpegBytes(canvas, { quality: 0.85 });
     pages.push({

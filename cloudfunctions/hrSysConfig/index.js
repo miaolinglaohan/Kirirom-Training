@@ -25,7 +25,8 @@ const db = cloud.database()
 
 const ALLOWED_KEYS = {
   pdfWatermark: { maxLength: 60 },
-  unitName:     { maxLength: 40 }   // 单位名称：会印在 PDF 总分单右下角
+  unitName:     { maxLength: 40 },   // 单位名称：会印在 PDF 总分单右下角
+  pdfWatermarkStyle: { maxLength: 200, isJson: true }  // 水印样式 JSON：{fontPx,alpha,gapX,lineMul,angle}
 }
 
 async function requireActive(OPENID) {
@@ -67,8 +68,18 @@ exports.main = async (event) => {
       return { ok: false, code: 'FORBIDDEN_SET', message: '仅 admin 可修改系统设置' }
     }
     const raw = event && typeof event.value === 'string' ? event.value : ''
-    const value = raw.trim()
-    const limit = ALLOWED_KEYS[key].maxLength
+    let value = raw.trim()
+    const meta = ALLOWED_KEYS[key]
+    const limit = meta.maxLength
+    // JSON 类型配置：空串允许（表示用默认值）；非空则必须可解析，并规整成紧凑 JSON 存储
+    if (meta.isJson && value !== '') {
+      try {
+        const parsed = JSON.parse(value)
+        value = JSON.stringify(parsed)
+      } catch (e) {
+        return { ok: false, code: 'INVALID_FORMAT', message: '内容不是合法的 JSON' }
+      }
+    }
     if (value.length > limit) {
       return { ok: false, code: 'TOO_LONG', message: `内容超出 ${limit} 字符限制` }
     }

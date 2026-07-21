@@ -479,6 +479,7 @@ async function buildAnswerSheetPages(canvas, data) {
   const officialMap  = data.officialMap || {};
   const rightFlags   = data.rightFlags || [];
   const watermark    = data.watermark || '';
+  const wmStyle      = data.wmStyle || null;   // 水印样式参数（透明度/字号/角度等）
   const unitName     = data.unitName || '';
   const examDateText = data.examDateText || '';
   const hasIssuer    = !!(unitName || examDateText);
@@ -537,7 +538,7 @@ async function buildAnswerSheetPages(canvas, data) {
     }
 
     drawFooter(ctx, p + 1, pages.length, data);
-    pdfCanvas.drawWatermark(ctx, watermark, widthPx, heightPx);
+    pdfCanvas.drawWatermark(ctx, watermark, widthPx, heightPx, wmStyle);
 
     const jpeg = await pdfCanvas.canvasToJpegBytes(canvas, { quality: 0.85 });
     results.push({
@@ -590,6 +591,7 @@ async function buildBatchAnswerSheetPages(canvas, batchData) {
   const persons          = batchData.persons || [];
   const sharedAssessment = batchData.assessment || {};
   const watermark        = batchData.watermark || '';
+  const wmStyle          = batchData.wmStyle || null;   // 水印样式参数（透明度/字号/角度等）
   const unitName         = batchData.unitName || '';
   const examDateText     = batchData.examDateText || '';
   const generatedBy      = batchData.generatedBy || '';
@@ -706,7 +708,7 @@ async function buildBatchAnswerSheetPages(canvas, batchData) {
     }
 
     drawFooter(ctx, p + 1, pageCount, personData);
-    pdfCanvas.drawWatermark(ctx, watermark, widthPx, heightPx);
+    pdfCanvas.drawWatermark(ctx, watermark, widthPx, heightPx, wmStyle);
 
     const jpeg = await pdfCanvas.canvasToJpegBytes(canvas, { quality: 0.85 });
     results.push({

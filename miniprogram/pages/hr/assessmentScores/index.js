@@ -200,15 +200,21 @@ Page({
     this.setData({ exporting: true })
     wx.showLoading({ title: '生成 PDF…', mask: true })
     try {
-      const [watermark, unitName] = await Promise.all([
+      const [watermark, unitName, wmStyleRaw] = await Promise.all([
         this._loadSysConfig('pdfWatermark'),
-        this._loadSysConfig('unitName')
+        this._loadSysConfig('unitName'),
+        this._loadSysConfig('pdfWatermarkStyle')
       ])
+      // 水印样式 JSON -> 对象；解析失败或为空则用 null（走 drawWatermark 默认值）
+      let wmStyle = null
+      if (wmStyleRaw) {
+        try { wmStyle = JSON.parse(wmStyleRaw) } catch (e) { wmStyle = null }
+      }
       const canvas = await this._getPdfCanvasNode()
 
       const a = this.data.assessment || {}
 
-      // 考试日期文本（YYYY年M月D日）— 用 startTime 派生，不存库
+      // 考试日期文本（YYYY年M月D日）- 用 startTime 派生，不存库
       let examDateText = ''
       if (a.startTime) {
         const d = new Date(a.startTime)
@@ -227,6 +233,7 @@ Page({
         },
         applicants:   this.data.applicants,  // pdfScoreSheet 内部会按 status==='submitted' 过滤
         watermark:    watermark,
+        wmStyle:      wmStyle,
         unitName:     unitName,
         examDateText: examDateText,
         generatedBy:  (this.data.me && this.data.me.name) || ''
@@ -348,11 +355,17 @@ Page({
         return
       }
 
-      // 2) 共享水印、单位名、考试日期
-      const [watermark, unitName] = await Promise.all([
+      // 2) 共享水印、单位名、考试日期、水印样式
+      const [watermark, unitName, wmStyleRaw] = await Promise.all([
         this._loadSysConfig('pdfWatermark'),
-        this._loadSysConfig('unitName')
+        this._loadSysConfig('unitName'),
+        this._loadSysConfig('pdfWatermarkStyle')
       ])
+      // 水印样式 JSON -> 对象；解析失败或为空则用 null（走 drawWatermark 默认值）
+      let wmStyle = null
+      if (wmStyleRaw) {
+        try { wmStyle = JSON.parse(wmStyleRaw) } catch (e) { wmStyle = null }
+      }
       const a = this.data.assessment || {}
       let examDateText = ''
       if (a.startTime) {
@@ -369,6 +382,7 @@ Page({
         assessment:   { name: a.name || '' },
         persons:      persons,
         watermark:    watermark,
+        wmStyle:      wmStyle,
         unitName:     unitName,
         examDateText: examDateText,
         generatedBy:  (this.data.me && this.data.me.name) || '',

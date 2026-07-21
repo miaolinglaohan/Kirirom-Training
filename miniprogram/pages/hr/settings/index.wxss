@@ -52,6 +52,21 @@
   color: #b0b0b0;
 }
 
+/* 水印样式字段 */
+.wm-field {
+  margin: 18rpx 0;
+}
+.wm-field .wm-label {
+  font-size: 26rpx;
+  color: #444;
+  margin-bottom: 6rpx;
+}
+.wm-field .wm-val {
+  color: #1bcfad;
+  font-weight: 600;
+  margin: 0 4rpx;
+}
+
 .actions {
   margin-top: 20rpx;
   display: flex;

@@ -279,10 +279,16 @@ Page({
     this.setData({ exporting: true })
     wx.showLoading({ title: '生成 PDF…', mask: true })
     try {
-      const [watermark, unitName] = await Promise.all([
+      const [watermark, unitName, wmStyleRaw] = await Promise.all([
         this._loadSysConfig('pdfWatermark'),
-        this._loadSysConfig('unitName')
+        this._loadSysConfig('unitName'),
+        this._loadSysConfig('pdfWatermarkStyle')
       ])
+      // 水印样式 JSON -> 对象；解析失败或为空则用 null（走 drawWatermark 默认值）
+      let wmStyle = null
+      if (wmStyleRaw) {
+        try { wmStyle = JSON.parse(wmStyleRaw) } catch (e) { wmStyle = null }
+      }
       const canvas = await this._getPdfCanvasNode()
 
       const d = this.data
@@ -308,6 +314,7 @@ Page({
         officialMap:  this._officialMap || {},
         rightFlags:   this._rightFlags || [],
         watermark:    watermark,
+        wmStyle:      wmStyle,
         unitName:     unitName,
         examDateText: this._examDateText || '',
         generatedBy:  (d.me && d.me.name) || ''

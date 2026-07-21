@@ -14,6 +14,23 @@ const DEFAULT_UNIT = '基里隆Ⅰ&Ⅲ水电站运维项目部'
 const MAX_WM = 60
 const MAX_UN = 40
 
+// 水印样式默认值（与 pdfCanvas.js drawWatermark 写死值保持一致）
+const DEFAULT_WM_STYLE = {
+  fontPx: 30,    // 字号 10~80
+  alpha: 0.05,   // 透明度 0.01~0.5
+  gapX: 160,     // 横向间隙 0~500
+  lineMul: 5,    // 行距倍数 2~15
+  angle: -45     // 旋转角度(度) -90~90
+}
+// 各参数允许范围（保存时 clamp）
+const WM_STYLE_RANGE = {
+  fontPx:  { min: 10, max: 80 },
+  alpha:   { min: 0.01, max: 0.5, step: 0.01 },
+  gapX:    { min: 0, max: 500 },
+  lineMul: { min: 2, max: 15 },
+  angle:   { min: -90, max: 90 }
+}
+
 Page({
   data: {
     loading: true,
@@ -29,7 +46,16 @@ Page({
     unitName: '',
     unitNameInitial: '',
     unCounter: '0 / 40',
-    unSaving: false
+    unSaving: false,
+
+    // 水印样式
+    wmFontPx: DEFAULT_WM_STYLE.fontPx,
+    wmAlpha: DEFAULT_WM_STYLE.alpha,
+    wmGapX: DEFAULT_WM_STYLE.gapX,
+    wmLineMul: DEFAULT_WM_STYLE.lineMul,
+    wmAngle: DEFAULT_WM_STYLE.angle,
+    wmStyleInitial: '',   // DB 原始 JSON 串，用于判断"没变化"
+    wmStyleSaving: false
   },
 
   onShow() {
@@ -45,18 +71,29 @@ Page({
     })
   },
 
-  // 并行拉取两项配置，任一失败都仅 fallback default，不阻断另一项
+  // 并行拉取配置，任一失败都仅 fallback default，不阻断另一项
   loadConfig() {
     this.setData({ loading: true })
     Promise.all([
       this._callGet('pdfWatermark'),
-      this._callGet('unitName')
-    ]).then(([wm, un]) => {
+      this._callGet('unitName'),
+      this._callGet('pdfWatermarkStyle')
+    ]).then(([wm, un, wmStyleRaw]) => {
       // 显示值：DB 有就用 DB 的，DB 空就兜底默认（让用户看到合理初值）
       // 初始值（用于判断"没有变化"）：只认 DB 真实值（可能为空字符串）
       //   这样从未保存过的字段，用户点保存能把兜底默认写入 DB，而不是被"没变化"卡住
       const wmVal = wm.length > 0 ? wm : DEFAULT_WATERMARK
       const unVal = un.length > 0 ? un : DEFAULT_UNIT
+      // 水印样式：DB 有则解析，无/解析失败则用默认值
+      let styleObj = Object.assign({}, DEFAULT_WM_STYLE)
+      if (wmStyleRaw) {
+        try {
+          const parsed = JSON.parse(wmStyleRaw)
+          if (parsed && typeof parsed === 'object') {
+            styleObj = Object.assign({}, DEFAULT_WM_STYLE, parsed)
+          }
+        } catch (e) { /* 用默认 */ }
+      }
       this.setData({
         loading: false,
         watermark: wmVal,
@@ -64,7 +101,13 @@ Page({
         wmCounter: wmVal.length + ' / ' + MAX_WM,
         unitName: unVal,
         unitNameInitial: un,
-        unCounter: unVal.length + ' / ' + MAX_UN
+        unCounter: unVal.length + ' / ' + MAX_UN,
+        wmFontPx: styleObj.fontPx,
+        wmAlpha: styleObj.alpha,
+        wmGapX: styleObj.gapX,
+        wmLineMul: styleObj.lineMul,
+        wmAngle: styleObj.angle,
+        wmStyleInitial: wmStyleRaw || ''
       })
     }).catch(err => {
       console.error('[hr.settings] load error', err)
@@ -153,6 +196,75 @@ Page({
       wx.showToast({ icon: 'success', title: '已保存' })
     }).catch(msg => {
       this.setData({ unSaving: false })
+      this._showSaveError(msg)
+    })
+  },
+
+  // ---------- 水印样式 ----------
+  // 5 个参数滑块/输入：改值即更新 data（不立即保存）
+  onInputWmFontPx(e) {
+    this.setData({ wmFontPx: this._clampNum(Number(e.detail.value), 'fontPx') })
+  },
+  onInputWmAlpha(e) {
+    this.setData({ wmAlpha: this._clampNum(Number(e.detail.value), 'alpha') })
+  },
+  onInputWmGapX(e) {
+    this.setData({ wmGapX: this._clampNum(Number(e.detail.value), 'gapX') })
+  },
+  onInputWmLineMul(e) {
+    this.setData({ wmLineMul: this._clampNum(Number(e.detail.value), 'lineMul') })
+  },
+  onInputWmAngle(e) {
+    this.setData({ wmAngle: this._clampNum(Number(e.detail.value), 'angle') })
+  },
+
+  // 数值 clamp 到允许范围
+  _clampNum(v, key) {
+    const r = WM_STYLE_RANGE[key]
+    if (isNaN(v)) v = DEFAULT_WM_STYLE[key]
+    v = Math.max(r.min, Math.min(r.max, v))
+    return v
+  },
+
+  onResetWmStyle() {
+    wx.showModal({
+      title: '恢复默认',
+      content: '水印样式参数重置为默认值（字号30 / 透明度0.05 / 间隙160 / 行距5 / 角度-45°）',
+      success: r => {
+        if (r.confirm) {
+          this.setData({
+            wmFontPx: DEFAULT_WM_STYLE.fontPx,
+            wmAlpha: DEFAULT_WM_STYLE.alpha,
+            wmGapX: DEFAULT_WM_STYLE.gapX,
+            wmLineMul: DEFAULT_WM_STYLE.lineMul,
+            wmAngle: DEFAULT_WM_STYLE.angle
+          })
+        }
+      }
+    })
+  },
+
+  onSaveWmStyle() {
+    if (this.data.wmStyleSaving) return
+    // 组装 JSON（用 clamp 后的值，确保落库合法）
+    const style = {
+      fontPx: this._clampNum(this.data.wmFontPx, 'fontPx'),
+      alpha: this._clampNum(this.data.wmAlpha, 'alpha'),
+      gapX: this._clampNum(this.data.wmGapX, 'gapX'),
+      lineMul: this._clampNum(this.data.wmLineMul, 'lineMul'),
+      angle: this._clampNum(this.data.wmAngle, 'angle')
+    }
+    const json = JSON.stringify(style)
+    if (json === this.data.wmStyleInitial) {
+      wx.showToast({ icon: 'none', title: '没有变化' })
+      return
+    }
+    this.setData({ wmStyleSaving: true })
+    this._callSet('pdfWatermarkStyle', json).then(() => {
+      this.setData({ wmStyleInitial: json, wmStyleSaving: false })
+      wx.showToast({ icon: 'success', title: '已保存' })
+    }).catch(msg => {
+      this.setData({ wmStyleSaving: false })
       this._showSaveError(msg)
     })
   },
